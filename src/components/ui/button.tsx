@@ -2,7 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-const buttonVariants = cva("p-3 bg-black text-white rounded-md m-4", {
+const buttonVariants = cva("p-3 bg-main-2 text-white rounded-md m-4", {
   variants: {
     variant: {
       default: "",

@@ -1,3 +1,54 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+:root {
+  --default-font-family: "Inter", -apple-system, BlinkMacSystemFont, system-ui,
+    Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR",
+    "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    sans-serif;
+
+  --background: #ffffff;
+
+  --main-1: #203f63;
+  --main-2: #a0b0c0;
+
+  --gray-1: #f3f3f3;
+  --gray-2: #eaeaea;
+  --gray-3: #e0e0e0;
+  --gray-4: #dadada;
+  --gray-5: #b4b4b4;
+  --gray-6: #828282;
+  --gray-7: #3c3c3c;
+
+  --blue-1: #35a6ca;
+  --blue-2: #615ef0;
+
+  --red: #ff4747;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-main-1: var(--main-1);
+  --color-main-2: var(--main-2);
+
+  --color-gray-1: var(--gray-1);
+  --color-gray-2: var(--gray-2);
+  --color-gray-3: var(--gray-3);
+  --color-gray-4: var(--gray-4);
+  --color-gray-5: var(--gray-5);
+  --color-gray-6: var(--gray-6);
+  --color-gray-7: var(--gray-7);
+
+  --color-blue-1: var(--blue-1);
+  --color-blue-2: var(--blue-2);
+
+  --color-red: var(--red);
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+  }
+}
