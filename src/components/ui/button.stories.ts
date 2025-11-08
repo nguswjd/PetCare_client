@@ -25,10 +25,3 @@ export const Injective: Story = {
     label: "Injective",
   },
 };
-
-export const NoIcon: Story = {
-  args: {
-    label: "NoIcon",
-    icon: undefined,
-  },
-};
