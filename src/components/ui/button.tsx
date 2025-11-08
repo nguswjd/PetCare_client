@@ -1,33 +1,44 @@
-import "./button.css";
+import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
-export interface ButtonProps {
-  primary?: boolean;
-  backgroundColor?: string;
-  size?: "small" | "medium" | "large";
+const buttonVariants = cva("p-3 bg-black text-white rounded-md m-4", {
+  variants: {
+    variant: {
+      default: "",
+      active: "",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
+
+interface ButtonProps
+  extends Omit<React.ComponentProps<"button">, "children">,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+  icon?: React.ElementType;
   label: string;
-  onClick?: () => void;
 }
 
-export const Button = ({
-  primary = false,
-  size = "medium",
-  backgroundColor,
+function Button({
+  className,
   label,
+  icon: Icon,
+  variant,
+  asChild = false,
   ...props
-}: ButtonProps) => {
-  const mode = primary
-    ? "storybook-button--primary"
-    : "storybook-button--secondary";
+}: ButtonProps) {
   return (
     <button
-      type="button"
-      className={["storybook-button", `storybook-button--${size}`, mode].join(
-        " "
-      )}
-      style={{ backgroundColor }}
+      className={cn("group", buttonVariants({ variant, className }))}
       {...props}
     >
+      {Icon && <Icon className="w-4 h-4" />}
       {label}
     </button>
   );
-};
+}
+
+export { Button, buttonVariants };

@@ -1,7 +1,11 @@
 import { Button } from "./components/ui/button";
 
 function App() {
-  return <></>;
+  return (
+    <>
+      <Button label="button" />
+    </>
+  );
 }
 
 export default App;
