@@ -1,11 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Button } from "./button";
+import Button from "./button";
 
 const meta: Meta<typeof Button> = {
   title: "Example/Button",
   component: Button,
   parameters: { layout: "centered" },
-  tags: ["autodocs"],
   argTypes: {
     disabled: { control: "boolean" },
     icon: { control: false },
@@ -20,8 +19,31 @@ const meta: Meta<typeof Button> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Injective: Story = {
+export const primary: Story = {
   args: {
-    label: "Injective",
+    label: "primary",
+    variant: "primary",
+  },
+};
+
+export const secondary: Story = {
+  args: {
+    label: "11:11",
+    variant: "secondary",
+    active: true,
+  },
+};
+
+export const outline: Story = {
+  args: {
+    label: "outline",
+    variant: "outline",
+  },
+};
+
+export const user: Story = {
+  args: {
+    label: "user",
+    variant: "user",
   },
 };
