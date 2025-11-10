@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import Button from "./button";
+import { SearchIcon } from "lucide-react";
 
 const meta: Meta<typeof Button> = {
   title: "Example/Button",
@@ -45,5 +46,12 @@ export const user: Story = {
   args: {
     label: "user",
     variant: "user",
+  },
+};
+
+export const icon: Story = {
+  args: {
+    variant: "icon",
+    icon: SearchIcon,
   },
 };
