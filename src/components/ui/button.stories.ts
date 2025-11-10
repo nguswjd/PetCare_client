@@ -3,7 +3,7 @@ import Button from "./button";
 import { SearchIcon } from "lucide-react";
 
 const meta: Meta<typeof Button> = {
-  title: "Example/Button",
+  title: "Ui/Button",
   component: Button,
   parameters: { layout: "centered" },
   argTypes: {
