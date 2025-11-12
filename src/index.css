@@ -51,4 +51,8 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  [data-placeholder] {
+    color: var(--gray-6);
+  }
 }
