@@ -1,13 +1,18 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
+
 import TermsSection from "./terms-section";
 import UserForm from "./user-form";
+
 import Button from "@/components/ui/button";
 
 function Join() {
   const [step, setStep] = useState(1);
   const [canProceed, setCanProceed] = useState(false);
+  const navigate = useNavigate();
 
   const handleNext = () => setStep((prev) => prev + 1);
+  const handleGoLogin = () => navigate("/login");
 
   return (
     <div className="bg-white max-w-120 mx-auto flex flex-col h-dvh">
@@ -20,25 +25,22 @@ function Join() {
       </main>
       <footer className="flex flex-col gap-2 px-6 mb-6">
         {step === 1 && (
-          <>
-            <Button
-              className="w-full"
-              label="다음"
-              disabled={!canProceed}
-              onClick={handleNext}
-            />
-          </>
+          <Button
+            className="w-full"
+            label="다음"
+            disabled={!canProceed}
+            onClick={handleNext}
+          />
         )}
         {step === 2 && (
-          <>
-            <Button
-              className="w-full"
-              label="회원가입"
-              disabled={!canProceed}
-            />
-          </>
+          <Button className="w-full" label="회원가입" disabled={!canProceed} />
         )}
-        <Button className="w-full" label="로그인" variant="outline" />
+        <Button
+          className="w-full"
+          label="로그인"
+          variant="outline"
+          onClick={handleGoLogin}
+        />
       </footer>
     </div>
   );
