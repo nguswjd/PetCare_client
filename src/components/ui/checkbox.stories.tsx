@@ -22,3 +22,12 @@ export const Primary: Story = {
 export const Secondary: Story = {
   args: { variant: "secondary", label: "있음" },
 };
+
+export const PrimaryExpandable: Story = {
+  args: {
+    variant: "primary",
+    label: "(필수) 개인정보 수집 및 이용동의",
+    expandable: true,
+    children: <div>{"상세내용 ".repeat(50)}</div>,
+  },
+};
