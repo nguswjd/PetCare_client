@@ -33,6 +33,8 @@ interface CheckboxProps
   checked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
   expandable?: boolean;
+  expanded?: boolean; // 부모가 관리하는 상태
+  onExpandChange?: () => void; // 부모 호출
   children?: React.ReactNode;
 }
 
@@ -45,6 +47,8 @@ const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
       checked: controlledChecked,
       onCheckedChange,
       expandable,
+      expanded,
+      onExpandChange,
       children,
       ...props
     },
@@ -53,7 +57,6 @@ const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
     const [internalChecked, setInternalChecked] = React.useState(
       controlledChecked ?? props.defaultChecked ?? false
     );
-    const [expanded, setExpanded] = React.useState(false);
 
     const isControlled = controlledChecked !== undefined;
     const checked = isControlled ? controlledChecked : internalChecked;
@@ -115,7 +118,7 @@ const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
               type="button"
               onClick={(e) => {
                 e.preventDefault();
-                setExpanded((prev) => !prev);
+                onExpandChange?.();
               }}
               className="ml-2 flex items-center justify-center"
             >
