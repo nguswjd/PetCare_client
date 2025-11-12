@@ -1,8 +1,16 @@
 import { Routes, Route } from "react-router";
+
 import Login from "./pages/login";
 
+import Footer from "./components/footer";
+
 function MainPage() {
-  return <div>Main Page</div>;
+  return (
+    <div>
+      Main Page
+      <Footer />
+    </div>
+  );
 }
 
 function App() {
