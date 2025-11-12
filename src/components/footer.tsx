@@ -15,7 +15,7 @@ function Footer() {
   };
 
   return (
-    <footer className="bg-main-1 px-8 pt-4 pb-8 flex w-full items-center justify-between">
+    <footer className="bg-main-1 px-8 py-4 flex w-full items-center justify-between">
       <Button
         variant="icon"
         icon={UserRound}
