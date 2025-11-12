@@ -4,13 +4,13 @@ import Input from "@/components/ui/input";
 
 function Login() {
   return (
-    <div className="max-w-120 mx-auto flex flex-col h-dvh">
-      <header className="mt-26 w-full flex justify-center">
+    <div className="bg-white max-w-120 mx-auto flex flex-col h-dvh">
+      <header className="mt-[15vh] w-full flex justify-center">
         <h1>
           <img src="/PetCare_logo.svg" className="w-30 h-30" alt="설명" />
         </h1>
       </header>
-      <main className="flex flex-col items-center justify-center flex-1 gap-4 px-6 -mt-20">
+      <main className="flex flex-col items-center justify-center flex-1 gap-4 px-6 -mt-[10vh]">
         <div className="flex w-full mb-7">
           <Button className="w-full" variant="user" label="사용자" />
           <Button

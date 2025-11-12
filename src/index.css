@@ -49,7 +49,7 @@
 
 @layer base {
   body {
-    @apply bg-background text-foreground;
+    @apply bg-main-1 text-foreground;
   }
 
   [data-placeholder] {

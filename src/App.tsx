@@ -4,7 +4,7 @@ import Footer from "./components/footer";
 
 function MainPage() {
   return (
-    <div className="flex flex-col h-dvh">
+    <div className="bg-white flex flex-col h-dvh">
       <main className="flex-1 overflow-auto">Main Page</main>
       <Footer />
     </div>
