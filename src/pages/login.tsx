@@ -4,8 +4,8 @@ import Input from "@/components/ui/input";
 
 function Login() {
   return (
-    <div className="max-w-120 w-full mx-auto flex flex-col min-h-screen">
-      <header className="mt-26 flex justify-center">
+    <div className="max-w-120 mx-auto flex flex-col min-h-screen">
+      <header className="mt-26 w-full flex justify-center">
         <h1>
           <img src="/PetCare_logo.svg" className="w-30 h-30" alt="설명" />
         </h1>
