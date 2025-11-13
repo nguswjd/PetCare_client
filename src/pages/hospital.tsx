@@ -46,7 +46,11 @@ function Hospital() {
     <div className="flex flex-col min-h-screen">
       <div className="sticky top-0 z-10 bg-white">
         <header className="relative flex w-full h-14 items-center px-4">
-          <Button variant="icon" icon={ChevronLeft} />
+          <Button
+            variant="icon"
+            icon={ChevronLeft}
+            onClick={() => window.history.back()}
+          />
           <h2 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-medium text-base text-black">
             {hospitalInfo.name}
           </h2>
