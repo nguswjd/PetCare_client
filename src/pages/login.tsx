@@ -10,10 +10,14 @@ function Login() {
     navigate("/join");
   };
 
+  const handleLogoClick = () => {
+    navigate("/");
+  };
+
   return (
     <div className="bg-white max-w-120 mx-auto flex flex-col h-dvh">
-      <header className="mt-[15vh] w-full flex justify-center">
-        <h1>
+      <header className="mt-[15vh] w-full flex justify-center cursor-pointer">
+        <h1 onClick={handleLogoClick}>
           <img src="/PetCare_logo.svg" className="w-30 h-30" alt="설명" />
         </h1>
       </header>

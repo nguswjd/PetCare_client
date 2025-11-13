@@ -13,16 +13,22 @@ function Join() {
 
   const handleNext = () => setStep((prev) => prev + 1);
   const handleGoLogin = () => navigate("/login");
+  const handleLogoClick = () => navigate("/");
 
   return (
     <div className="bg-white max-w-120 mx-auto flex flex-col h-dvh">
-      <header className="mt-[10vh] flex justify-center">
+      <header
+        className="mt-[10vh] flex justify-center cursor-pointer"
+        onClick={handleLogoClick}
+      >
         <img src="/PetCare_logo.svg" alt="로고" className="w-[20vw] max-w-28" />
       </header>
+
       <main className="flex-1 flex flex-col justify-center items-center px-6">
         {step === 1 && <TermsSection onCanProceedChange={setCanProceed} />}
         {step === 2 && <UserForm onFormChange={setCanProceed} />}
       </main>
+
       <footer className="flex flex-col gap-2 px-6 mb-6">
         {step === 1 && (
           <Button
