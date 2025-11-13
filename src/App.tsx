@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router";
 import Login from "./pages/login";
 import Footer from "./components/footer";
 import Join from "./pages/join/join";
-import Card from "./components/ui/card";
 
 function MainPage() {
   return (
