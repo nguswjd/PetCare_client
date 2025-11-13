@@ -1,8 +1,13 @@
 import { useNavigate } from "react-router";
 import Button from "./ui/button";
 import { UserRound, HomeIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-function Footer() {
+type FooterProps = {
+  className?: string;
+};
+
+function Footer({ className }: FooterProps) {
   const navigate = useNavigate();
   const isLoggedIn = false;
 
@@ -19,7 +24,12 @@ function Footer() {
   };
 
   return (
-    <footer className="bg-main-1 px-8 py-4 flex w-full items-center justify-between">
+    <footer
+      className={cn(
+        "bg-main-1 px-8 py-4 flex w-full items-center justify-between",
+        className
+      )}
+    >
       <Button
         variant="icon"
         icon={UserRound}
