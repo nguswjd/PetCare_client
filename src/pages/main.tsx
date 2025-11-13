@@ -140,7 +140,7 @@ function MainPage() {
             onTouchEnd={startAutoScroll}
             onMouseDown={stopAutoScroll}
             onMouseUp={startAutoScroll}
-            className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+            className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory gap-4"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {ads.map((ad) => (
