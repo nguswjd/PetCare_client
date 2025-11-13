@@ -40,17 +40,18 @@ function Hospital() {
   ];
 
   const hasReview = true;
+  // const hasReview = false;
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="relative flex w-full h-14 items-center px-4">
-        <Button variant="icon" icon={ChevronLeft} />
-        <h2 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-medium text-base text-black">
-          {hospitalInfo.name}
-        </h2>
-      </header>
+      <div className="sticky top-0 z-10 bg-white">
+        <header className="relative flex w-full h-14 items-center px-4">
+          <Button variant="icon" icon={ChevronLeft} />
+          <h2 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-medium text-base text-black">
+            {hospitalInfo.name}
+          </h2>
+        </header>
 
-      <main className="flex-1 flex flex-col justify-between">
         <div>
           <img
             src={hospitalInfo.image}
@@ -68,33 +69,38 @@ function Hospital() {
             <Button label="예약하기" />
           </section>
         </div>
+      </div>
 
-        <section className="flex justify-center items-start flex-1">
-          {hasReview ? (
-            <div className="flex flex-col items-center w-full">
-              <div className="w-full max-h-96 overflow-y-auto scrollbar-hide">
-                <Review reviews={reviews} />
-              </div>
+      <main className="flex-1 overflow-y-auto scrollbar-hide flex items-center justify-center">
+        {hasReview ? (
+          <div className="w-full">
+            <Review reviews={reviews} />
+          </div>
+        ) : (
+          <Button
+            variant="outline"
+            label="리뷰를 남겨주세요!"
+            className="text-gray-6 border-gray-6 flex gap-2 items-center w-82"
+            icon={PencilLine}
+          />
+        )}
+      </main>
 
-              <Button
-                variant="outline"
-                label="리뷰를 남겨주세요!"
-                className="text-gray-6 border-gray-6 flex gap-2 items-center w-82 m-6"
-                icon={PencilLine}
-              />
-            </div>
-          ) : (
+      <div className="sticky bottom-0 z-10 bg-white">
+        {hasReview ? (
+          <div className="flex flex-col items-center w-full">
             <Button
               variant="outline"
               label="리뷰를 남겨주세요!"
               className="text-gray-6 border-gray-6 flex gap-2 items-center w-82 m-6"
               icon={PencilLine}
             />
-          )}
-        </section>
-      </main>
-
-      <Footer />
+          </div>
+        ) : (
+          <div />
+        )}
+        <Footer />
+      </div>
     </div>
   );
 }
