@@ -1,10 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 import { cn } from "@/lib/utils";
-
 import Button from "./button";
-import { SearchIcon } from "lucide-react";
-import { ChevronLeft } from "lucide-react";
+import { SearchIcon, ChevronLeft, MapPin, type LucideIcon } from "lucide-react";
 
 const inputVariants = cva(
   "rounded-lg px-4 py-2 focus:outline-none text-sm w-full",
@@ -12,7 +10,7 @@ const inputVariants = cva(
     variants: {
       variant: {
         primary:
-          "border border-gray-3 bg-white text-black  focus:border-gray-5 placeholder-gray-6",
+          "border border-gray-3 bg-white text-black focus:border-gray-5 placeholder-gray-6",
         Search: "placeholder-gray-4 px-4 py-4 text-base",
       },
     },
@@ -24,14 +22,18 @@ const inputVariants = cva(
 
 interface InputProps
   extends Omit<React.ComponentProps<"input">, "size">,
-    VariantProps<typeof inputVariants> {}
+    VariantProps<typeof inputVariants> {
+  leftIcon?: LucideIcon;
+}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, variant, ...props }, ref) => {
+  ({ className, variant, leftIcon, ...props }, ref) => {
     if (variant === "Search") {
+      const LeftIcon = leftIcon || ChevronLeft;
+
       return (
-        <div className="flex ">
-          <Button icon={ChevronLeft} variant="icon" />
+        <div className="flex px-4">
+          <Button icon={LeftIcon} variant="icon" />
           <input
             className={cn(inputVariants({ variant }), className)}
             ref={ref}
@@ -53,5 +55,4 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 );
 
 Input.displayName = "Input";
-
 export default Input;
