@@ -49,7 +49,22 @@
 
 @layer base {
   body {
-    @apply bg-main-1 text-foreground;
+    @apply bg-background text-foreground;
+    position: relative;
+    min-height: 100vh;
+  }
+
+  body::after {
+    max-width: 480px;
+    margin: 0 auto;
+    content: "";
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20%;
+    background: var(--main-1);
+    z-index: -1;
   }
 
   [data-placeholder] {
