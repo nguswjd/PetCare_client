@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router";
+
 import Card from "../components/ui/card";
 import Input from "../components/ui/input";
 import Footer from "../components/footer";
@@ -9,6 +11,7 @@ function MainPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const autoScrollRef = useRef<NodeJS.Timeout | null>(null);
+  const navigate = useNavigate();
 
   const ads = [
     { id: 1, alt: "광고1" },
@@ -57,6 +60,26 @@ function MainPage() {
       distance: "30km",
     },
   ];
+
+  const closestHospital = {
+    id: 5,
+    image: "",
+    alt: "가까운 병원",
+    name: "C hospital",
+    address: "제주시 이도동",
+    businessStatus: "영업종료",
+    distance: "30km",
+  };
+
+  const reviewKingHospital = {
+    id: 6,
+    image: "",
+    alt: "이달의 리뷰왕",
+    name: "D hospital",
+    address: "제주시 이도동",
+    businessStatus: "영업종료",
+    distance: "30km",
+  };
 
   const scrollToIndex = (index: number) => {
     if (scrollRef.current) {
@@ -158,6 +181,8 @@ function MainPage() {
                 address={hospital.address}
                 businessStatus={hospital.businessStatus}
                 distance={hospital.distance}
+                onClick={() => navigate(`/hospital/${hospital.id}`)}
+                className="cursor-pointer"
               />
             ))}
           </div>
@@ -167,25 +192,30 @@ function MainPage() {
           <section className="flex flex-col gap-2">
             <h2 className="text-base font-bold">가까운 병원</h2>
             <Card
-              image=""
-              name="C hospital  "
-              address="제주시 이도동"
-              businessStatus="영업종료"
-              distance="30km"
               size="lg"
-              alt="가까운 병원"
+              image={closestHospital.image}
+              alt={closestHospital.alt}
+              name={closestHospital.name}
+              address={closestHospital.address}
+              businessStatus={closestHospital.businessStatus}
+              distance={closestHospital.distance}
+              onClick={() => navigate(`/hospital/${closestHospital.id}`)}
+              className="cursor-pointer"
             />
           </section>
+
           <section className="flex flex-col gap-2">
             <h2 className="text-base font-bold">이달의 리뷰왕</h2>
             <Card
-              image=""
-              name="C hospital  "
-              address="제주시 이도동"
-              businessStatus="영업종료"
-              distance="30km"
               size="lg"
-              alt="이달의 리뷰왕"
+              image={reviewKingHospital.image}
+              alt={reviewKingHospital.alt}
+              name={reviewKingHospital.name}
+              address={reviewKingHospital.address}
+              businessStatus={reviewKingHospital.businessStatus}
+              distance={reviewKingHospital.distance}
+              onClick={() => navigate(`/hospital/${reviewKingHospital.id}`)}
+              className="cursor-pointer"
             />
           </section>
         </div>

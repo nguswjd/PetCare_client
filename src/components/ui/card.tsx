@@ -36,6 +36,7 @@ interface CardProps
   content?: string;
   businessStatus?: string;
   distance?: string;
+  onClick?: () => void;
 }
 
 const Card = ({
@@ -47,9 +48,11 @@ const Card = ({
   content,
   businessStatus,
   distance,
+  onClick,
+  className,
 }: CardProps) => {
   return (
-    <div className="flex flex-col gap-2">
+    <div className={cn("flex flex-col gap-2", className)} onClick={onClick}>
       <img
         src={image}
         alt={alt || "card image"}
