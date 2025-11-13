@@ -103,7 +103,7 @@ function MainPage() {
       <header>
         <Input leftIcon={MapPin} variant="Search" className="m-4" />
       </header>
-      <main className="pt-6 flex flex-col gap-3 px-6 flex-1 overflow-auto">
+      <main className="pt-6 flex flex-col gap-8 px-6 flex-1 overflow-auto">
         <div className="relative -mx-6">
           <div
             ref={scrollRef}
@@ -175,7 +175,7 @@ function MainPage() {
             />
           </section>
           <section className="flex flex-col gap-2">
-            <h2 className="text-base font-bold">이달의 리뷰왕 병원</h2>
+            <h2 className="text-base font-bold">이달의 리뷰왕</h2>
             <Card
               image=""
               name="C hospital  "
