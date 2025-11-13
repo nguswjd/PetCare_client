@@ -108,8 +108,8 @@ function MainPage() {
           className="m-4"
         />
       </header>
-      <main className="pt-6 flex flex-col gap-8 px-6 flex-1 overflow-auto">
-        <div className="relative -mx-6">
+      <main className="pt-6 flex flex-col gap-8 flex-1 overflow-auto">
+        <div className="px-6 relative">
           <div
             ref={scrollRef}
             onScroll={handleScroll}
@@ -121,10 +121,7 @@ function MainPage() {
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {ads.map((ad) => (
-              <div
-                key={ad.id}
-                className="w-full flex-shrink-0 snap-center px-6"
-              >
+              <div key={ad.id} className="w-full flex-shrink-0 snap-center">
                 <Card size="lg" image="" alt={ad.alt} />
               </div>
             ))}
@@ -149,8 +146,8 @@ function MainPage() {
         </div>
 
         <section className="flex flex-col gap-2">
-          <h2 className="text-base font-bold">최근 검색한 병원</h2>
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6">
+          <h2 className="text-base px-6  font-bold">최근 검색한 병원</h2>
+          <div className="flex px-6 gap-2 overflow-x-auto scrollbar-hide ">
             {recentHospitals.map((hospital) => (
               <Card
                 key={hospital.id}
@@ -166,7 +163,7 @@ function MainPage() {
           </div>
         </section>
 
-        <div className="grid mb-5 gap-3 grid-cols-2">
+        <div className="grid px-6  mb-5 gap-3 grid-cols-2">
           <section className="flex flex-col gap-2">
             <h2 className="text-base font-bold">가까운 병원</h2>
             <Card
