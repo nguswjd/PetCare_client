@@ -55,7 +55,7 @@ function Hospital() {
           <img
             src={hospitalInfo.image}
             alt={hospitalInfo.alt}
-            className="w-full h-60 bg-gray-4 object-cover"
+            className="w-full min-h-40 h-[15vh] max-h-60 bg-gray-4 object-cover"
           />
           <section className="flex justify-between mt-4 mx-4 pb-4 border-b border-b-gray-2">
             <div>
