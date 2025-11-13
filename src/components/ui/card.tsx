@@ -29,10 +29,10 @@ interface CardProps
   extends VariantProps<typeof imageVariants>,
     VariantProps<typeof cardVariants> {
   className?: string;
-  image?: string;
+  image: string;
   alt?: string;
-  name: string;
-  address: string;
+  name?: string;
+  address?: string;
   content?: string;
   businessStatus?: string;
   distance?: string;
@@ -58,21 +58,32 @@ const Card = ({
           "object-cover rounded-md bg-gray-4"
         )}
       />
-      <div className="grid grid-cols-2 items-center w-42">
-        <p className="text-base font-semibold text-black">{name}</p>
-        <p className="text-sm font-normal text-gray-6">{address}</p>
-
-        {size === "sm" ? (
-          <p className="font-medium text-sm text-gray-6 col-span-2">
-            {content}
-          </p>
-        ) : (
-          <>
-            <p className="font-medium text-sm text-gray-7">{businessStatus}</p>
-            <p className="font-medium text-sm text-gray-7">{distance}</p>
-          </>
-        )}
-      </div>
+      {(name || address || content || businessStatus || distance) && (
+        <div className="grid grid-cols-2 items-center w-42">
+          {name && <p className="text-base font-semibold text-black">{name}</p>}
+          {address && (
+            <p className="text-sm font-normal text-gray-6">{address}</p>
+          )}
+          {size === "sm" ? (
+            content && (
+              <p className="font-medium text-sm text-gray-6 col-span-2">
+                {content}
+              </p>
+            )
+          ) : (
+            <>
+              {businessStatus && (
+                <p className="font-medium text-sm text-gray-7">
+                  {businessStatus}
+                </p>
+              )}
+              {distance && (
+                <p className="font-medium text-sm text-gray-7">{distance}</p>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
