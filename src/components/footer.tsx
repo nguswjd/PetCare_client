@@ -14,6 +14,10 @@ function Footer() {
     }
   };
 
+  const handleHomeClick = () => {
+    navigate("/");
+  };
+
   return (
     <footer className="bg-main-1 px-8 py-4 flex w-full items-center justify-between">
       <Button
@@ -22,7 +26,12 @@ function Footer() {
         className="text-white"
         onClick={handleUserClick}
       />
-      <Button variant="icon" icon={HomeIcon} className="text-white" />
+      <Button
+        variant="icon"
+        icon={HomeIcon}
+        className="text-white"
+        onClick={handleHomeClick}
+      />
     </footer>
   );
 }
