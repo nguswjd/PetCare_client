@@ -32,7 +32,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       const LeftIcon = leftIcon || ChevronLeft;
 
       return (
-        <div className="h-14 flex px-4">
+        <div className="h-14 items-center flex px-5 ">
           <Button icon={LeftIcon} variant="icon" />
           <input
             className={cn(inputVariants({ variant }), className)}

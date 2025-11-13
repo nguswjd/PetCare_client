@@ -101,7 +101,12 @@ function MainPage() {
   return (
     <div className="bg-white flex flex-col h-dvh">
       <header>
-        <Input leftIcon={MapPin} variant="Search" className="m-4" />
+        <Input
+          leftIcon={MapPin}
+          placeholder="검색어를 입력해주세요."
+          variant="Search"
+          className="m-4"
+        />
       </header>
       <main className="pt-6 flex flex-col gap-8 px-6 flex-1 overflow-auto">
         <div className="relative -mx-6">
