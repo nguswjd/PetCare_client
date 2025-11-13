@@ -103,7 +103,7 @@ function MainPage() {
       <header>
         <Input leftIcon={MapPin} variant="Search" className="m-4" />
       </header>
-      <main className="flex flex-col gap-3 px-6 flex-1 overflow-auto">
+      <main className="pt-6 flex flex-col gap-3 px-6 flex-1 overflow-auto">
         <div className="relative -mx-6">
           <div
             ref={scrollRef}

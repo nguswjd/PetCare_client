@@ -2,7 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import Button from "./button";
-import { SearchIcon, ChevronLeft, MapPin, type LucideIcon } from "lucide-react";
+import { SearchIcon, ChevronLeft, type LucideIcon } from "lucide-react";
 
 const inputVariants = cva(
   "rounded-lg px-4 py-2 focus:outline-none text-sm w-full",
@@ -32,7 +32,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       const LeftIcon = leftIcon || ChevronLeft;
 
       return (
-        <div className="flex px-4">
+        <div className="h-14 flex px-4">
           <Button icon={LeftIcon} variant="icon" />
           <input
             className={cn(inputVariants({ variant }), className)}
