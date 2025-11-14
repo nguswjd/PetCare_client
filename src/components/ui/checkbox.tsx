@@ -33,8 +33,8 @@ interface CheckboxProps
   checked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
   expandable?: boolean;
-  expanded?: boolean; // 부모가 관리하는 상태
-  onExpandChange?: () => void; // 부모 호출
+  expanded?: boolean;
+  onExpandChange?: () => void;
   children?: React.ReactNode;
 }
 

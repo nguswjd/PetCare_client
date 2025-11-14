@@ -1,10 +1,12 @@
+import { useNavigate } from "react-router";
+
 import Footer from "@/components/footer";
 import Header from "@/components/header";
 
 import Review from "@/components/review";
 import Button from "@/components/ui/button";
 
-import { ChevronLeft, PencilLine } from "lucide-react";
+import { PencilLine } from "lucide-react";
 
 function Hospital() {
   const hospitalInfo = {
@@ -16,6 +18,9 @@ function Hospital() {
     businessStatus: "영업종료",
     distance: "30km",
   };
+
+  const navigate = useNavigate();
+  const handleGoReview = () => navigate(`/hospital/${hospitalInfo.id}/review`);
 
   const reviews = [
     {
@@ -63,7 +68,7 @@ function Hospital() {
                 <p>{hospitalInfo.distance}</p>
               </div>
             </div>
-            <Button label="예약하기" />
+            <Button label="예약하기" onClick={handleGoReview} />
           </section>
         </div>
       </div>
