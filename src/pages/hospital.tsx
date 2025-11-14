@@ -1,6 +1,8 @@
-import Button from "@/components/ui/button";
 import Footer from "@/components/footer";
+import Header from "@/components/header";
+
 import Review from "@/components/review";
+import Button from "@/components/ui/button";
 
 import { ChevronLeft, PencilLine } from "lucide-react";
 
@@ -45,16 +47,7 @@ function Hospital() {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="sticky top-0 z-10 bg-white">
-        <header className="relative flex w-full h-14 items-center px-4">
-          <Button
-            variant="icon"
-            icon={ChevronLeft}
-            onClick={() => window.history.back()}
-          />
-          <h2 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-medium text-base text-black">
-            {hospitalInfo.name}
-          </h2>
-        </header>
+        <Header label={hospitalInfo.name} />
 
         <div>
           <img
