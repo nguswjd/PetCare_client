@@ -1,3 +1,7 @@
+import { useEffect, useState } from "react";
+import { useParams } from "react-router";
+
+import LoadingPage from "./loading";
 import Header from "@/components/header";
 
 import { SelectBox } from "@/components/ui/selectbox";
@@ -6,18 +10,50 @@ import Field from "@/components/ui/field";
 import ReviewTextarea from "@/components/review-textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 
+interface HospitalInfo {
+  id: number;
+  name: string;
+  address: string;
+  businessStatus: string;
+  image: string;
+  alt: string;
+  distance?: string;
+  hasParking: boolean;
+}
+
 function Review() {
-  const hospitalInfo = {
-    id: 6,
-    image: "",
-    name: "D hospital",
-    alt: "이달의 리뷰왕",
-    address: "제주시 이도동",
-    businessStatus: "영업종료",
-    // department: "",
-    // animalType: "",
-    distance: "30km",
-  };
+  const { id } = useParams<{ id: string }>();
+  const [hospitalInfo, setHospitalInfo] = useState<HospitalInfo | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+
+    fetch(`/api/v1/hospital/${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setHospitalInfo({
+          id: Number(id),
+          name: data.name,
+          address: data.address,
+          businessStatus: data.status,
+          image: data.imageUrl,
+          alt: data.description,
+          hasParking: data.hasParking,
+        });
+      })
+      .catch((err) => {
+        console.error("병원 정보 불러오기 실패:", err);
+        setHospitalInfo({
+          id: Number(id),
+          name: "A hospital",
+          address: "제주시 외도동",
+          businessStatus: "24시간 영업",
+          image: "",
+          alt: "병원1",
+          hasParking: false,
+        });
+      });
+  }, [id]);
 
   const department = [
     { value: "VACCINATION", label: "예방접종" },
@@ -37,19 +73,24 @@ function Review() {
     breed: "대형견",
   };
 
+  if (!hospitalInfo) {
+    return <LoadingPage message="로딩중..." />;
+  }
+
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       <Header label="리뷰 등록하기" />
 
       <div className="p-4 border-b border-t border-b-gray-3 border-t-gray-3">
-        <div className="flex gap-2">
-          <p className="font-semibold text-xl">{hospitalInfo.name}</p>
-          <p>{hospitalInfo.address}</p>
+        <div className="flex items-center gap-2">
+          <h3 className="font-semibold text-xl">{hospitalInfo.name}</h3>
+          <p className="flex gap-2 text-gray-6 font-medium text-sm">
+            {hospitalInfo.address.split(" ").slice(0, 3).join(" ")}
+          </p>
         </div>
-
         <div className="flex gap-2 text-gray-6 font-medium text-sm">
           <p>{hospitalInfo.businessStatus}</p>
-          <p>{hospitalInfo.distance}</p>
+          {hospitalInfo.distance && <p>{hospitalInfo.distance}</p>}
         </div>
       </div>
 
@@ -65,6 +106,7 @@ function Review() {
           placeholder="진료 항목을 선택해주세요."
           options={department}
         />
+
         <div className="flex flex-col gap-1 mb-10">
           <h3 className="text-sm font-medium text-black">재방문 의사</h3>
           <div className="grid grid-cols-2">
@@ -72,10 +114,11 @@ function Review() {
             <Checkbox variant="secondary" label="없음" />
           </div>
         </div>
+
         <ReviewTextarea />
       </main>
 
-      <footer className="px-6">
+      <footer className="px-6 pb-6">
         <Button variant="primary" className="w-full" label="등록하기" />
       </footer>
     </div>
