@@ -9,4 +9,12 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      "/api": {
+        target: "https://petcare-server-lu1p.onrender.com",
+        changeOrigin: true,
+      },
+    },
+  },
 });
