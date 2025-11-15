@@ -8,7 +8,7 @@ import { SelectBox } from "@/components/ui/selectbox";
 import Button from "@/components/ui/button";
 import Field from "@/components/ui/field";
 import ReviewTextarea from "@/components/review-textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Radio } from "@/components/ui/radio";
 
 interface HospitalInfo {
   id: number;
@@ -24,6 +24,7 @@ interface HospitalInfo {
 function Review() {
   const { id } = useParams<{ id: string }>();
   const [hospitalInfo, setHospitalInfo] = useState<HospitalInfo | null>(null);
+  const [visitIntent, setVisitIntent] = useState("yes");
 
   useEffect(() => {
     if (!id) return;
@@ -107,12 +108,16 @@ function Review() {
           options={department}
         />
 
-        <div className="flex flex-col gap-1 mb-10">
+        <div className="flex flex-col gap-1 mb-4">
           <h3 className="text-sm font-medium text-black">재방문 의사</h3>
-          <div className="grid grid-cols-2">
-            <Checkbox variant="secondary" label="있음" />
-            <Checkbox variant="secondary" label="없음" />
-          </div>
+          <Radio
+            value={visitIntent}
+            onChange={setVisitIntent}
+            options={[
+              { value: "yes", label: "있음" },
+              { value: "no", label: "없음" },
+            ]}
+          />
         </div>
 
         <ReviewTextarea />
