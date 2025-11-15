@@ -8,9 +8,9 @@ const LoadingPage: React.FC<LoadingPageProps> = ({
   message = "로딩 중...",
 }) => {
   return (
-    <div className="flex flex-col gap-3 items-center justify-center min-h-screen">
-      <img src="/PetCare_logo.svg" className="w-30 h-30" alt="설명" />
-      <p className="text-main-1 font-bold text-lg">{message}</p>
+    <div className="flex flex-col items-center justify-center w-screen h-screen">
+      <img src="/PetCare_logo.svg" className="w-32 h-32" alt="설명" />
+      <p className="text-main-1 font-bold text-lg mt-4">{message}</p>
     </div>
   );
 };
