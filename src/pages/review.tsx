@@ -108,7 +108,7 @@ function Review() {
         </div>
         <ReviewTextarea />
       </main>
-      <footer className="px-6 py-4 bg-white border-t border-gray-3">
+      <footer className="px-6 py-4">
         <Button variant="primary" className="w-full" label="등록하기" />
       </footer>
     </div>

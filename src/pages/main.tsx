@@ -220,7 +220,9 @@ function MainPage() {
           </section>
         </div>
       </main>
-      <Footer />
+      <div className="sticky bottom-0 z-10 bg-white">
+        <Footer />
+      </div>
     </div>
   );
 }
