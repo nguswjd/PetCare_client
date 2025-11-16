@@ -72,9 +72,8 @@ function Review() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-dvh">
       <Header label="리뷰 등록하기" />
-
       <div className="p-4 border-b border-t border-b-gray-3 border-t-gray-3">
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-xl">{hospitalInfo.name}</h3>
@@ -87,20 +86,15 @@ function Review() {
           {hospitalInfo.distance && <p>{hospitalInfo.distance}</p>}
         </div>
       </div>
-
-      <main className="px-6 flex flex-col gap-3 py-4">
+      <main className="px-6 flex flex-col gap-4 py-4 flex-1 overflow-y-auto">
         <Field label="방문날짜" placeholder={review.visitdate} />
-
         <Field label="진료대상 동물" placeholder={review.animalType} />
-
         <Field label="품종" placeholder={review.breed} />
-
         <SelectBox
           label="진료항목"
           placeholder="진료 항목을 선택해주세요."
           options={department}
         />
-
         <div className="flex flex-col gap-1 mb-4">
           <h3 className="text-sm font-medium text-black">재방문 의사</h3>
           <Radio
@@ -112,11 +106,9 @@ function Review() {
             ]}
           />
         </div>
-
         <ReviewTextarea />
       </main>
-
-      <footer className="px-6 pb-6">
+      <footer className="px-6 py-4 bg-white border-t border-gray-3">
         <Button variant="primary" className="w-full" label="등록하기" />
       </footer>
     </div>
