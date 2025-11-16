@@ -63,7 +63,9 @@ function Hospital() {
   useEffect(() => {
     if (!id) return;
 
-    fetch(`/api/v1/hospital/${id}`)
+    const API_URL = import.meta.env.VITE_API_URL;
+
+    fetch(`${API_URL}/api/v1/hospital/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setHospitalInfo({
