@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 
-import LoadingPage from "./loading";
+import LoadingPage from "../components/loading";
 import Header from "@/components/header";
 
 import { SelectBox } from "@/components/ui/selectbox";
 import Button from "@/components/ui/button";
 import Field from "@/components/ui/field";
-import ReviewTextarea from "@/components/review-textarea";
+import ReviewTextarea from "@/components/ui/review-textarea";
 import { Radio } from "@/components/ui/radio";
 
 interface HospitalInfo {
@@ -29,7 +29,7 @@ function Review() {
   useEffect(() => {
     if (!id) return;
 
-    const API_URL = import.meta.env.VITE_API_URL;
+    const API_URL = import.meta.env.MODE === "development" ? "" : "";
 
     fetch(`${API_URL}/api/v1/hospital/${id}`)
       .then((res) => res.json())
@@ -46,15 +46,6 @@ function Review() {
       })
       .catch((err) => {
         console.error("병원 정보 불러오기 실패:", err);
-        setHospitalInfo({
-          id: Number(id),
-          name: "A hospital",
-          address: "제주시 외도동",
-          businessStatus: "24시간 영업",
-          image: "",
-          alt: "병원1",
-          hasParking: false,
-        });
       });
   }, [id]);
 

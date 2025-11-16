@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 
-import LoadingPage from "./loading";
+import LoadingPage from "../components/loading";
+import ErrorPage from "@/components/error";
 
 import Footer from "@/components/footer";
 import Header from "@/components/header";
@@ -58,15 +59,20 @@ function Hospital() {
   const navigate = useNavigate();
 
   const [hospitalInfo, setHospitalInfo] = useState<HospitalInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [hasReview] = useState(true);
 
   useEffect(() => {
     if (!id) return;
 
-    const API_URL = import.meta.env.VITE_API_URL;
-
-    fetch(`${API_URL}/api/v1/hospital/${id}`)
-      .then((res) => res.json())
+    fetch(`/api/v1/hospital/${id}`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data) => {
         setHospitalInfo({
           id: Number(id),
@@ -77,25 +83,32 @@ function Hospital() {
           alt: data.description,
           hasParking: data.hasParking,
         });
+        setLoading(false);
       })
       .catch((err) => {
         console.error("병원 정보 불러오기 실패:", err);
-        setHospitalInfo({
-          id: Number(id),
-          name: "A hospital",
-          address: "제주시 외도동",
-          businessStatus: "24시간 영업",
-          image: "",
-          alt: "병원1",
-          hasParking: false,
-        });
+        setError(true);
+        setLoading(false);
       });
   }, [id]);
 
   const handleGoReview = () => navigate(`/hospital/${id}/review`);
 
-  if (!hospitalInfo) {
+  if (loading) {
     return <LoadingPage message="로딩중..." />;
+  }
+
+  if (error) {
+    return <ErrorPage onRetry={() => navigate(-1)} />;
+  }
+
+  if (!hospitalInfo) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <p className="text-xl font-semibold">병원을 찾을 수 없습니다</p>
+        <Button label="돌아가기" onClick={() => navigate(-1)} />
+      </div>
+    );
   }
 
   return (
