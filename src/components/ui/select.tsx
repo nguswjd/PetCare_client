@@ -46,7 +46,7 @@ const SelectContent = React.forwardRef<
   <SelectPrimitive.Portal>
     <SelectPrimitive.Content
       ref={ref}
-      className={cn("w-full shadow-md border rounded-md", className)}
+      className={cn("w-full shadow-md border bg-white rounded-md", className)}
       position={position}
       {...props}
     >
