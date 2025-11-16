@@ -103,12 +103,7 @@ function Hospital() {
   }
 
   if (!hospitalInfo) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <p className="text-xl font-semibold">병원을 찾을 수 없습니다</p>
-        <Button label="돌아가기" onClick={() => navigate(-1)} />
-      </div>
-    );
+    return <ErrorPage onRetry={() => navigate(-1)} />;
   }
 
   return (
