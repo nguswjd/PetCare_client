@@ -156,7 +156,7 @@ function Hospital() {
             <Button
               variant="outline"
               label="리뷰를 남겨주세요!"
-              className="text-gray-6 border-gray-6 flex gap-2 items-center w-82 m-6"
+              className="text-gray-6 border-gray-6 flex gap-2 items-center w-82 m-6 justify-center"
               icon={PencilLine}
               onClick={handleGoReview}
             />

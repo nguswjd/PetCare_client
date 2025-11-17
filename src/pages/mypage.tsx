@@ -8,7 +8,7 @@ import Field from "@/components/ui/field";
 import { SelectBox } from "@/components/ui/selectbox";
 import type { SelectOption } from "@/components/ui/selectbox";
 
-import { PencilLine, Check } from "lucide-react";
+import { PencilLine, CheckLine } from "lucide-react";
 
 function Mypage() {
   const navigate = useNavigate();
@@ -50,6 +50,13 @@ function Mypage() {
     phone: userinfo.phonenumber,
   });
 
+  const [displayUser, setDisplayUser] = useState({
+    name: userinfo.name,
+    animalType: userinfo.animalType,
+    breed: userinfo.breeds,
+    phone: userinfo.phonenumber,
+  });
+
   const reservationInfo: ReservationInfo = {
     date: "2025.10.28",
     animalType: "육지동물",
@@ -57,6 +64,7 @@ function Mypage() {
   };
 
   const [breeds, setBreeds] = useState<SelectOption[]>([]);
+  const [displayBreeds, setDisplayBreeds] = useState<SelectOption[]>([]);
   const [editMode, setEditMode] = useState(false);
 
   const animaltypes: SelectOption[] = [
@@ -65,6 +73,17 @@ function Mypage() {
     { label: "조류", value: "AVIAN" },
     { label: "기타", value: "OTHER" },
   ];
+
+  const getAnimalTypeLabel = (value: string) => {
+    const found = animaltypes.find((option) => option.value === value);
+    return found ? found.label : value;
+  };
+
+  const getBreedLabel = (value: string) => {
+    if (!value) return "";
+    const found = displayBreeds.find((option) => option.value === value);
+    return found ? found.label : "";
+  };
 
   useEffect(() => {
     if (!form.animalType) {
@@ -95,6 +114,35 @@ function Mypage() {
     fetchBreeds();
   }, [form.animalType]);
 
+  useEffect(() => {
+    if (!displayUser.animalType) {
+      setDisplayBreeds([]);
+      return;
+    }
+
+    const fetchDisplayBreeds = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(
+          `${API_URL}/api/v1/auth/breeds/${displayUser.animalType}`
+        );
+        if (!res.ok) throw new Error("품종 불러오기 실패");
+        const data = await res.json();
+
+        const options: SelectOption[] = data.breeds.map((item: any) => ({
+          label: item.description,
+          value: item.code,
+        }));
+        setDisplayBreeds(options);
+      } catch (err) {
+        console.error(err);
+        setDisplayBreeds([]);
+      }
+    };
+
+    fetchDisplayBreeds();
+  }, [displayUser.animalType]);
+
   const handleChange = (key: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
     if (key === "animalType") {
@@ -103,18 +151,20 @@ function Mypage() {
   };
 
   const handleSave = () => {
-    console.log("저장된 데이터:", form);
+    setDisplayUser({ ...form });
     setEditMode(false);
   };
 
   return (
     <div className="h-dvh bg-white flex flex-col">
       <Header label="마이페이지" />
+
       <section className="border-y border-gray-3 p-4">
         <h2 className="hidden">내정보</h2>
-        <p className="font-semibold text-xl">{userinfo.name}</p>
+        <p className="font-semibold text-xl">{displayUser.name}</p>
         <span className="text-gray-6 text-sm">
-          {userinfo.animalType} / {userinfo.breeds}
+          {getAnimalTypeLabel(displayUser.animalType)}
+          {displayUser.breed && ` / ${getBreedLabel(displayUser.breed)}`}
         </span>
       </section>
 
@@ -138,9 +188,8 @@ function Mypage() {
                 <p>
                   품종 : {reservationInfo.animalType}({reservationInfo.breeds})
                 </p>
-                <p>날짜 : {reservationInfo.date}</p>
               </div>
-              <Button label="에약취소" className="font-medium text-sm w-25" />
+              <Button label="예약취소" className="font-medium text-sm w-25" />
             </div>
           </div>
         </section>
@@ -160,23 +209,23 @@ function Mypage() {
                 <Button
                   icon={PencilLine}
                   variant="icon"
-                  className="w-4 h-4"
+                  className="w-4 h-4 [&>svg]:!w-4 [&>svg]:!h-4"
                   onClick={() => setEditMode(true)}
                 />
               )}
               {editMode && (
                 <Button
-                  icon={Check}
+                  icon={CheckLine}
                   variant="icon"
-                  className="w-4 h-4"
+                  className="w-4 h-4 [&>svg]:!w-4 [&>svg]:!h-4"
                   onClick={handleSave}
                 />
               )}
             </div>
           </div>
 
-          <Field placeholder={userinfo.name} />
-          <Field placeholder={userinfo.phonenumber} />
+          <Field placeholder={form.name} />
+          <Field placeholder={form.phone} />
 
           <div className="flex w-full gap-2">
             <SelectBox
