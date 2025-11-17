@@ -132,7 +132,9 @@ const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
         </label>
 
         {expanded && children && variant === "primary" && (
-          <div className="mt-2 ml-7 text-sm text-gray-6">{children}</div>
+          <div className="mt-2 ml-7 text-sm text-gray-6 whitespace-pre-line overflow-y-auto h-32 scrollbar-hide">
+            {children}
+          </div>
         )}
       </div>
     );
