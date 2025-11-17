@@ -16,6 +16,7 @@ function UserForm({ onFormChange }: UserFormProps) {
     passwordConfirm: "",
     phone: "",
     animalType: "",
+    breed: "",
   });
 
   const [errors, setErrors] = useState({
@@ -28,6 +29,15 @@ function UserForm({ onFormChange }: UserFormProps) {
     phone: false,
   });
 
+  const [breeds, setBreeds] = useState<SelectOption[]>([]);
+
+  const animaltypes: SelectOption[] = [
+    { label: "육지동물", value: "TERRESTRIAL" },
+    { label: "수생동물", value: "AQUATIC" },
+    { label: "조류", value: "AVIAN" },
+    { label: "기타", value: "OTHER" },
+  ];
+
   useEffect(() => {
     const allFilled: boolean =
       !!form.name &&
@@ -35,12 +45,12 @@ function UserForm({ onFormChange }: UserFormProps) {
       !!form.password &&
       !!form.passwordConfirm &&
       !!form.phone &&
-      !!form.animalType &&
       form.password === form.passwordConfirm &&
       !errors.username &&
       !errors.phone &&
       verified.username &&
       verified.phone;
+
     onFormChange(allFilled, form);
   }, [form, errors, verified, onFormChange]);
 
@@ -53,6 +63,9 @@ function UserForm({ onFormChange }: UserFormProps) {
     if (key === "phone") {
       setErrors((prev) => ({ ...prev, phone: "" }));
       setVerified((prev) => ({ ...prev, phone: false }));
+    }
+    if (key === "animalType") {
+      setForm((prev) => ({ ...prev, breed: "" }));
     }
   };
 
@@ -130,21 +143,43 @@ function UserForm({ onFormChange }: UserFormProps) {
     }
   };
 
-  const animaltypes: SelectOption[] = [
-    { label: "육지동물", value: "TERRESTRIAL" },
-    { label: "수생동물", value: "AQUATIC" },
-    { label: "조류", value: "AVIAN" },
-    { label: "기타", value: "OTHER" },
-  ];
+  useEffect(() => {
+    if (!form.animalType) {
+      setBreeds([]);
+      return;
+    }
+
+    const fetchBreeds = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(
+          `${API_URL}/api/v1/auth/breeds/${form.animalType}`
+        );
+        if (!res.ok) throw new Error("품종 불러오기 실패");
+        const data = await res.json();
+
+        const options: SelectOption[] = data.breeds.map((item: any) => ({
+          label: item.description,
+          value: item.code,
+        }));
+        setBreeds(options);
+      } catch (err) {
+        console.error(err);
+        setBreeds([]);
+      }
+    };
+
+    fetchBreeds();
+  }, [form.animalType]);
 
   return (
     <div className="w-full flex flex-col">
-      <div className="flex w-full mb-7">
+      <div className="flex w-full">
         <Button className="w-full" variant="user" label="사용자" />
         <Button className="w-full" disabled variant="user" label="관리자" />
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 py-5">
         <Input
           placeholder="이름"
           value={form.name}
@@ -220,11 +255,14 @@ function UserForm({ onFormChange }: UserFormProps) {
             placeholder="종류"
             options={animaltypes}
             onChange={(value) => handleChange("animalType", value)}
+            value={form.animalType}
           />
           <SelectBox
             placeholder="품종"
-            options={animaltypes}
-            onChange={(value) => handleChange("animalType", value)}
+            options={breeds}
+            onChange={(value) => handleChange("breed", value)}
+            value={form.breed || ""}
+            disabled={!form.animalType || breeds.length === 0}
           />
         </div>
       </div>

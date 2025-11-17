@@ -20,6 +20,7 @@ export interface SelectBasicProps {
   width?: string;
   onChange?: (value: string) => void;
   label?: string;
+  value?: string;
 }
 
 export const SelectBox = ({
