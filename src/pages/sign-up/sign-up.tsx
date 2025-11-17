@@ -6,7 +6,7 @@ import UserForm from "./user-form";
 
 import Button from "@/components/ui/button";
 
-function Join() {
+function SignUp() {
   const [step, setStep] = useState(1);
   const [canProceedTerms, setCanProceedTerms] = useState(false);
   const [canProceedForm, setCanProceedForm] = useState(false);
@@ -109,4 +109,4 @@ function Join() {
   );
 }
 
-export default Join;
+export default SignUp;
