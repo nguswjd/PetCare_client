@@ -67,7 +67,9 @@ function Button({
       {...props}
     >
       {Icon && (
-        <Icon className={cn(variant === "icon" ? "w-6 h-6" : "w-4 h-4")} />
+        <Icon
+          className={cn(variant === "icon" ? "w-6 h-6" : "w-4 h-4", className)}
+        />
       )}
       {variant !== "icon" && label}
     </button>
