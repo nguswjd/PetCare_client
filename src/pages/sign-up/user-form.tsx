@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
+import { SelectBox } from "@/components/ui/selectbox";
+import type { SelectOption } from "@/components/ui/selectbox";
 
 interface UserFormProps {
   onFormChange: (isValid: boolean, formData: any) => void;
@@ -13,6 +15,7 @@ function UserForm({ onFormChange }: UserFormProps) {
     password: "",
     passwordConfirm: "",
     phone: "",
+    animalType: "",
   });
 
   const [errors, setErrors] = useState({
@@ -32,6 +35,7 @@ function UserForm({ onFormChange }: UserFormProps) {
       !!form.password &&
       !!form.passwordConfirm &&
       !!form.phone &&
+      !!form.animalType &&
       form.password === form.passwordConfirm &&
       !errors.username &&
       !errors.phone &&
@@ -59,7 +63,6 @@ function UserForm({ onFormChange }: UserFormProps) {
       const res = await fetch(
         `${API_URL}/api/v1/auth/check-username?username=${form.username}`
       );
-
       const data = await res.json();
 
       if (res.status === 400) {
@@ -97,7 +100,6 @@ function UserForm({ onFormChange }: UserFormProps) {
       const res = await fetch(
         `${API_URL}/api/v1/auth/check-phone?phone=${form.phone}`
       );
-
       const data = await res.json();
 
       if (res.status === 400) {
@@ -128,12 +130,20 @@ function UserForm({ onFormChange }: UserFormProps) {
     }
   };
 
+  const animaltypes: SelectOption[] = [
+    { label: "육지동물", value: "TERRESTRIAL" },
+    { label: "수생동물", value: "AQUATIC" },
+    { label: "조류", value: "AVIAN" },
+    { label: "기타", value: "OTHER" },
+  ];
+
   return (
     <div className="w-full flex flex-col">
       <div className="flex w-full mb-7">
         <Button className="w-full" variant="user" label="사용자" />
         <Button className="w-full" disabled variant="user" label="관리자" />
       </div>
+
       <div className="flex flex-col gap-3">
         <Input
           placeholder="이름"
@@ -183,7 +193,7 @@ function UserForm({ onFormChange }: UserFormProps) {
           <div className="flex gap-2">
             <Input
               placeholder="휴대폰번호"
-              type="number"
+              type="text"
               value={form.phone}
               onChange={(e) => handleChange("phone", e.target.value)}
             />
@@ -203,6 +213,19 @@ function UserForm({ onFormChange }: UserFormProps) {
               사용 가능한 번호입니다.
             </span>
           )}
+        </div>
+
+        <div className="flex w-full gap-2">
+          <SelectBox
+            placeholder="종류"
+            options={animaltypes}
+            onChange={(value) => handleChange("animalType", value)}
+          />
+          <SelectBox
+            placeholder="품종"
+            options={animaltypes}
+            onChange={(value) => handleChange("animalType", value)}
+          />
         </div>
       </div>
     </div>
