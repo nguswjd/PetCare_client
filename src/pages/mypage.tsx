@@ -2,14 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 
 import Header from "@/components/header";
-
 import Button from "@/components/ui/button";
 import Card from "@/components/ui/card";
 import Field from "@/components/ui/field";
 import { SelectBox } from "@/components/ui/selectbox";
 import type { SelectOption } from "@/components/ui/selectbox";
 
-import { PencilLine } from "lucide-react";
+import { PencilLine, Check } from "lucide-react";
 
 function Mypage() {
   const navigate = useNavigate();
@@ -58,6 +57,7 @@ function Mypage() {
   };
 
   const [breeds, setBreeds] = useState<SelectOption[]>([]);
+  const [editMode, setEditMode] = useState(false);
 
   const animaltypes: SelectOption[] = [
     { label: "육지동물", value: "TERRESTRIAL" },
@@ -100,6 +100,11 @@ function Mypage() {
     if (key === "animalType") {
       setForm((prev) => ({ ...prev, breed: "" }));
     }
+  };
+
+  const handleSave = () => {
+    console.log("저장된 데이터:", form);
+    setEditMode(false);
   };
 
   return (
@@ -148,10 +153,28 @@ function Mypage() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <h3 className="font-bold">내 정보 수정</h3>
-            <Button icon={PencilLine} variant="icon" className="w-4 h-4" />
+            <div className="flex gap-2">
+              {!editMode && (
+                <Button
+                  icon={PencilLine}
+                  variant="icon"
+                  className="w-4 h-4"
+                  onClick={() => setEditMode(true)}
+                />
+              )}
+              {editMode && (
+                <Button
+                  icon={Check}
+                  variant="icon"
+                  className="w-4 h-4"
+                  onClick={handleSave}
+                />
+              )}
+            </div>
           </div>
+
           <Field placeholder={userinfo.name} />
           <Field placeholder={userinfo.phonenumber} />
 
@@ -161,13 +184,14 @@ function Mypage() {
               options={animaltypes}
               onChange={(value) => handleChange("animalType", value)}
               value={form.animalType}
+              disabled={!editMode}
             />
             <SelectBox
               placeholder="품종"
               options={breeds}
               onChange={(value) => handleChange("breed", value)}
               value={form.breed || ""}
-              disabled={!form.animalType || breeds.length === 0}
+              disabled={!editMode || !form.animalType || breeds.length === 0}
             />
           </div>
         </section>
