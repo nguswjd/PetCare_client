@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router";
 import Login from "./pages/login";
-import Join from "./pages/join/join";
+import Join from "./pages/sign-up/sign-up";
 import MainPage from "./pages/main";
 import Hospital from "./pages/hospital";
 import Review from "./pages/review";
