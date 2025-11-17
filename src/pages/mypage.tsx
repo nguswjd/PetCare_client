@@ -38,8 +38,8 @@ function Mypage() {
 
   const userinfo: UserInfo = {
     name: "남현정",
-    animalType: "육지동물",
-    breeds: "대형견",
+    animalType: "TERRESTRIAL",
+    breeds: "DOG_LARGE",
     phonenumber: "01020385269",
   };
 
@@ -186,6 +186,7 @@ function Mypage() {
               value={form.animalType}
               disabled={!editMode}
             />
+
             <SelectBox
               placeholder="품종"
               options={breeds}

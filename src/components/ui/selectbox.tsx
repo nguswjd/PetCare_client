@@ -26,6 +26,7 @@ export interface SelectBasicProps {
 export const SelectBox = ({
   placeholder = "select",
   options,
+  value,
   defaultValue,
   disabled = false,
   onChange,
@@ -39,6 +40,7 @@ export const SelectBox = ({
         <label className="text-sm font-medium text-black">{label}</label>
       )}
       <Select
+        value={value}
         defaultValue={defaultValue}
         onValueChange={onChange}
         open={open}
