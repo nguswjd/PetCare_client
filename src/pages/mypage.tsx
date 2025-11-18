@@ -302,11 +302,7 @@ function Mypage() {
     message: "",
   });
 
-  const handleDelete = () => {
-    console.log("탈퇴 진행");
-    setShowPopup(false);
-    navigate("/");
-  };
+  const [passwordError, setPasswordError] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -465,7 +461,10 @@ function Mypage() {
         <Button
           className="w-full bg-main-2"
           label="회원탈퇴"
-          onClick={() => setShowPopup(true)}
+          onClick={() => {
+            setShowPopup(true);
+            setPasswordError(false);
+          }}
         />
         <Button className="w-full" label="로그아웃" onClick={handleLogout} />
       </div>
@@ -478,9 +477,50 @@ function Mypage() {
           placeholder="비밀번호를 입력해주세요."
           confirmLabel="탈퇴"
           cancelLabel="취소"
-          onConfirm={handleDelete}
+          onConfirm={async (password) => {
+            if (!password) {
+              setPasswordError(true);
+              return;
+            }
+
+            try {
+              const token = localStorage.getItem("token");
+              const API_URL = import.meta.env.VITE_API_URL;
+
+              const res = await fetch(`${API_URL}/api/v1/auth/withdraw`, {
+                method: "DELETE",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({ password }),
+              });
+
+              if (!res.ok) {
+                const errorData = await res.json();
+                if (res.status === 401 || res.status === 400) {
+                  setPasswordError(true);
+                  return;
+                }
+                throw new Error(errorData.message || "회원탈퇴 실패");
+              }
+
+              localStorage.removeItem("token");
+              setShowPopup(false);
+              navigate("/");
+            } catch (err: any) {
+              setShowPopup(false);
+              setAlertPopup({
+                open: true,
+                message: err.message || "회원탈퇴 실패",
+              });
+            }
+          }}
           onCancel={() => setShowPopup(false)}
           onClose={() => setShowPopup(false)}
+          error={passwordError}
+          errorMessage="비밀번호가 일치하지 않습니다."
         />
       )}
 
@@ -488,7 +528,7 @@ function Mypage() {
         <Popup
           open={alertPopup.open}
           type="alert"
-          children={`안녕히가세요.\n 다음에 뵈어요 :)`}
+          children={`이용해주셔서 감사합니다.\n안녕히가세요.`}
           title={alertPopup.message}
           onClose={() => {
             setAlertPopup({ open: false, message: "" });
