@@ -158,11 +158,41 @@ function Mypage() {
   };
 
   const [showPopup, setShowPopup] = useState(false);
+  const [alertPopup, setAlertPopup] = useState<{
+    open: boolean;
+    message: string;
+  }>({ open: false, message: "" });
 
   const handleDelete = () => {
     console.log("탈퇴 진행");
     setShowPopup(false);
     navigate("/");
+  };
+
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const API_URL = import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_URL}/api/v1/auth/logout`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "로그아웃 실패");
+      }
+
+      localStorage.removeItem("token");
+      setAlertPopup({ open: true, message: "로그아웃 되었습니다." });
+    } catch (err: any) {
+      setAlertPopup({ open: true, message: err.message || "로그아웃 실패" });
+    }
   };
 
   return (
@@ -263,7 +293,7 @@ function Mypage() {
           label="회원탈퇴"
           onClick={() => setShowPopup(true)}
         />
-        <Button className="w-full" label="로그아웃" />
+        <Button className="w-full" label="로그아웃" onClick={handleLogout} />
       </div>
 
       {showPopup && (
@@ -280,10 +310,25 @@ function Mypage() {
         />
       )}
 
+      {alertPopup.open && (
+        <Popup
+          open={alertPopup.open}
+          type="alert"
+          children={`안녕히가세요.\n 다음에 뵈어요 :)`}
+          title={alertPopup.message}
+          onClose={() => {
+            setAlertPopup({ open: false, message: "" });
+            navigate("/");
+          }}
+        />
+      )}
+
       <footer className="flex mb-4 justify-between px-6 py-2 border-y border-gray-3">
         <div className="flex flex-col">
           <p className="font-semibold text-base">PET CARE 문의하기</p>
-          <span className="text-gray-6 text-xs">nguswjd02@ajou.ac.kr</span>
+          <a href="mailto:nguswjd02@ajou.ac.kr" className="text-gray-6 text-xs">
+            nguswjd02@ajou.ac.kr
+          </a>
         </div>
         <img src="/PetCare_logo.svg" className="w-10 h-10" alt="petcare 로고" />
       </footer>

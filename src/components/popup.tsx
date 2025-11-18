@@ -57,37 +57,33 @@ export default function Popup({
   const baseBoxClass =
     "bg-white relative p-6 rounded-md flex flex-col gap-4 w-80";
 
-  const stop = (e: React.MouseEvent) => e.stopPropagation();
-
   return (
-    <div className={cn(baseOverlayClass, className)} onClick={onClose}>
-      <div className={baseBoxClass} onClick={stop}>
+    <div className={cn(baseOverlayClass, className)}>
+      <div className={baseBoxClass}>
         {title && <p className="text-center font-bold text-base">{title}</p>}
 
         {type === "confirm" && (
-          <>
-            <div className="flex justify-center gap-4">
-              <Button
-                variant="primary"
-                className="w-20 bg-white text-black"
-                label={confirmLabel}
-                onClick={() => {
-                  onConfirm?.();
-                  onClose();
-                }}
-              />
+          <div className="flex justify-center gap-4">
+            <Button
+              variant="primary"
+              className="w-20 bg-white text-black"
+              label={confirmLabel}
+              onClick={() => {
+                onConfirm?.();
+                onClose();
+              }}
+            />
 
-              <Button
-                variant="primary"
-                className="w-20"
-                label={cancelLabel}
-                onClick={() => {
-                  onCancel?.();
-                  onClose();
-                }}
-              />
-            </div>
-          </>
+            <Button
+              variant="primary"
+              className="w-20"
+              label={cancelLabel}
+              onClick={() => {
+                onCancel?.();
+                onClose();
+              }}
+            />
+          </div>
         )}
 
         {type === "form" && (
@@ -119,7 +115,7 @@ export default function Popup({
         )}
 
         {type === "alert" && (
-          <div className="">
+          <>
             <Button
               variant="icon"
               icon={X}
@@ -127,8 +123,10 @@ export default function Popup({
               onClick={onClose}
             />
 
-            <p className="text-base font-normal">{children}</p>
-          </div>
+            <p className="text-base font-normal whitespace-pre-line">
+              {children}
+            </p>
+          </>
         )}
       </div>
     </div>
