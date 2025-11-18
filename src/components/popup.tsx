@@ -1,9 +1,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-
 import Button from "@/components/ui/button";
 import Input from "./ui/input";
-
 import { X } from "lucide-react";
 
 type PopupType = "confirm" | "form" | "alert";
@@ -12,20 +10,18 @@ interface PopupProps {
   type?: PopupType;
   open: boolean;
   onClose: () => void;
-
   title?: string;
   placeholder?: string;
-
   confirmLabel?: string;
   cancelLabel?: string;
-  onConfirm?: () => void;
+  onConfirm?: (value?: string) => void | Promise<void>;
   onCancel?: () => void;
-
   alertLabel?: string;
   onAcknowledge?: () => void;
-
   children?: React.ReactNode;
   className?: string;
+  error?: boolean;
+  errorMessage?: string;
 }
 
 export default function Popup({
@@ -40,7 +36,11 @@ export default function Popup({
   onCancel,
   children,
   className,
+  error = false,
+  errorMessage = "",
 }: PopupProps) {
+  const [inputValue, setInputValue] = React.useState("");
+
   React.useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -49,6 +49,18 @@ export default function Popup({
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [open, onClose]);
+
+  React.useEffect(() => {
+    if (!open) {
+      setInputValue("");
+    }
+  }, [open]);
+
+  React.useEffect(() => {
+    if (error) {
+      setInputValue("");
+    }
+  }, [error]);
 
   if (!open) return null;
 
@@ -73,7 +85,6 @@ export default function Popup({
                 onClose();
               }}
             />
-
             <Button
               variant="primary"
               className="w-20"
@@ -88,16 +99,20 @@ export default function Popup({
 
         {type === "form" && (
           <>
-            <Input placeholder={placeholder} />
-
+            <Input
+              type="password"
+              placeholder={error ? errorMessage : placeholder}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              className={cn(error && "border-red placeholder:text-red")}
+            />
             <div className="flex justify-center gap-4">
               <Button
                 variant="primary"
                 className="w-20 bg-white text-black"
                 label={confirmLabel}
                 onClick={() => {
-                  onConfirm?.();
-                  onClose();
+                  onConfirm?.(inputValue);
                 }}
               />
 
@@ -122,7 +137,6 @@ export default function Popup({
               className="absolute top-0 right-0 m-2"
               onClick={onClose}
             />
-
             <p className="text-base font-normal whitespace-pre-line">
               {children}
             </p>

@@ -10,7 +10,7 @@ import Field from "@/components/ui/field";
 import { SelectBox } from "@/components/ui/selectbox";
 import type { SelectOption } from "@/components/ui/selectbox";
 
-import { PencilLine, CheckLine } from "lucide-react";
+import { PencilLine, Check } from "lucide-react";
 
 function Mypage() {
   const navigate = useNavigate();
@@ -162,11 +162,51 @@ function Mypage() {
     open: boolean;
     message: string;
   }>({ open: false, message: "" });
+  const [passwordError, setPasswordError] = useState(false);
 
-  const handleDelete = () => {
-    console.log("탈퇴 진행");
-    setShowPopup(false);
-    navigate("/");
+  const handleDelete = async (password?: string) => {
+    if (!password) {
+      setPasswordError(true);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const API_URL = import.meta.env.VITE_API_URL;
+
+      const res = await fetch(`${API_URL}/api/v1/auth/withdraw`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ password }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        if (res.status === 401 || res.status === 400) {
+          setPasswordError(true);
+          return;
+        }
+        throw new Error(errorData.message || "회원탈퇴 실패");
+      }
+
+      localStorage.removeItem("token");
+      setShowPopup(false);
+      setPasswordError(false);
+      setAlertPopup({
+        open: true,
+        message: "회원탈퇴가 완료되었습니다.",
+      });
+    } catch (err: any) {
+      setShowPopup(false);
+      setAlertPopup({
+        open: true,
+        message: err.message || "회원탈퇴 실패",
+      });
+    }
   };
 
   const handleLogout = async () => {
@@ -255,7 +295,7 @@ function Mypage() {
               )}
               {editMode && (
                 <Button
-                  icon={CheckLine}
+                  icon={Check}
                   variant="icon"
                   className="w-4 h-4 [&>svg]:!w-4 [&>svg]:!h-4"
                   onClick={handleSave}
@@ -291,7 +331,10 @@ function Mypage() {
         <Button
           className="w-full bg-main-2"
           label="회원탈퇴"
-          onClick={() => setShowPopup(true)}
+          onClick={() => {
+            setShowPopup(true);
+            setPasswordError(false);
+          }}
         />
         <Button className="w-full" label="로그아웃" onClick={handleLogout} />
       </div>
@@ -305,8 +348,16 @@ function Mypage() {
           confirmLabel="탈퇴"
           cancelLabel="취소"
           onConfirm={handleDelete}
-          onCancel={() => setShowPopup(false)}
-          onClose={() => setShowPopup(false)}
+          onCancel={() => {
+            setShowPopup(false);
+            setPasswordError(false);
+          }}
+          onClose={() => {
+            setShowPopup(false);
+            setPasswordError(false);
+          }}
+          error={passwordError}
+          errorMessage="비밀번호가 일치하지 않습니다."
         />
       )}
 
