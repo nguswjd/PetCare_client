@@ -10,7 +10,7 @@ import Field from "@/components/ui/field";
 import { SelectBox } from "@/components/ui/selectbox";
 import type { SelectOption } from "@/components/ui/selectbox";
 
-import { PencilLine, Check } from "lucide-react";
+import { PencilLine, CheckLine } from "lucide-react";
 
 function Mypage() {
   const navigate = useNavigate();
@@ -65,19 +65,13 @@ function Mypage() {
     breeds: "대형견",
   };
 
+  const [animalTypes, setAnimalTypes] = useState<SelectOption[]>([]);
   const [breeds, setBreeds] = useState<SelectOption[]>([]);
   const [displayBreeds, setDisplayBreeds] = useState<SelectOption[]>([]);
   const [editMode, setEditMode] = useState(false);
 
-  const animaltypes: SelectOption[] = [
-    { label: "육지동물", value: "TERRESTRIAL" },
-    { label: "수생동물", value: "AQUATIC" },
-    { label: "조류", value: "AVIAN" },
-    { label: "기타", value: "OTHER" },
-  ];
-
   const getAnimalTypeLabel = (value: string) => {
-    const found = animaltypes.find((option) => option.value === value);
+    const found = animalTypes.find((option) => option.value === value);
     return found ? found.label : value;
   };
 
@@ -86,6 +80,30 @@ function Mypage() {
     const found = displayBreeds.find((option) => option.value === value);
     return found ? found.label : "";
   };
+
+  useEffect(() => {
+    const fetchAnimalTypes = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/v1/auth/animal-types`);
+        if (!res.ok) throw new Error("동물 종류 불러오기 실패");
+        const data = await res.json();
+
+        const arrayData = Array.isArray(data) ? data : data.types || [];
+        const options: SelectOption[] = arrayData.map((item: any) => ({
+          label: item.description || item.name,
+          value: item.code || item.id,
+        }));
+
+        setAnimalTypes(options);
+      } catch (err) {
+        console.error(err);
+        setAnimalTypes([]);
+      }
+    };
+
+    fetchAnimalTypes();
+  }, []);
 
   useEffect(() => {
     if (!form.animalType) {
@@ -101,11 +119,12 @@ function Mypage() {
         );
         if (!res.ok) throw new Error("품종 불러오기 실패");
         const data = await res.json();
-
-        const options: SelectOption[] = data.breeds.map((item: any) => ({
-          label: item.description,
-          value: item.code,
-        }));
+        const options: SelectOption[] = Array.isArray(data.breeds)
+          ? data.breeds.map((item: any) => ({
+              label: item.description,
+              value: item.code,
+            }))
+          : [];
         setBreeds(options);
       } catch (err) {
         console.error(err);
@@ -130,11 +149,12 @@ function Mypage() {
         );
         if (!res.ok) throw new Error("품종 불러오기 실패");
         const data = await res.json();
-
-        const options: SelectOption[] = data.breeds.map((item: any) => ({
-          label: item.description,
-          value: item.code,
-        }));
+        const options: SelectOption[] = Array.isArray(data.breeds)
+          ? data.breeds.map((item: any) => ({
+              label: item.description,
+              value: item.code,
+            }))
+          : [];
         setDisplayBreeds(options);
       } catch (err) {
         console.error(err);
@@ -162,57 +182,16 @@ function Mypage() {
     open: boolean;
     message: string;
   }>({ open: false, message: "" });
-  const [passwordError, setPasswordError] = useState(false);
 
-  const handleDelete = async (password?: string) => {
-    if (!password) {
-      setPasswordError(true);
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-      const API_URL = import.meta.env.VITE_API_URL;
-
-      const res = await fetch(`${API_URL}/api/v1/auth/withdraw`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ password }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        if (res.status === 401 || res.status === 400) {
-          setPasswordError(true);
-          return;
-        }
-        throw new Error(errorData.message || "회원탈퇴 실패");
-      }
-
-      localStorage.removeItem("token");
-      setShowPopup(false);
-      setPasswordError(false);
-      setAlertPopup({
-        open: true,
-        message: "회원탈퇴가 완료되었습니다.",
-      });
-    } catch (err: any) {
-      setShowPopup(false);
-      setAlertPopup({
-        open: true,
-        message: err.message || "회원탈퇴 실패",
-      });
-    }
+  const handleDelete = () => {
+    console.log("탈퇴 진행");
+    setShowPopup(false);
+    navigate("/");
   };
 
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("token");
-
       const API_URL = import.meta.env.VITE_API_URL;
       const res = await fetch(`${API_URL}/api/v1/auth/logout`, {
         method: "POST",
@@ -251,7 +230,7 @@ function Mypage() {
       <main className="px-6 py-4 flex flex-col scrollbar-hide gap-4 flex-1 overflow-auto">
         <section className="flex flex-col gap-3">
           <h3 className="font-bold">예약내역</h3>
-          <div className="flex px-4 justify-between">
+          <div className="flex px-2 gap-2">
             <Card
               size="sm"
               image={hospitalinfo.image}
@@ -295,7 +274,7 @@ function Mypage() {
               )}
               {editMode && (
                 <Button
-                  icon={Check}
+                  icon={CheckLine}
                   variant="icon"
                   className="w-4 h-4 [&>svg]:!w-4 [&>svg]:!h-4"
                   onClick={handleSave}
@@ -310,7 +289,7 @@ function Mypage() {
           <div className="flex w-full gap-2">
             <SelectBox
               placeholder="종류"
-              options={animaltypes}
+              options={animalTypes}
               onChange={(value) => handleChange("animalType", value)}
               value={form.animalType}
               disabled={!editMode}
@@ -331,10 +310,7 @@ function Mypage() {
         <Button
           className="w-full bg-main-2"
           label="회원탈퇴"
-          onClick={() => {
-            setShowPopup(true);
-            setPasswordError(false);
-          }}
+          onClick={() => setShowPopup(true)}
         />
         <Button className="w-full" label="로그아웃" onClick={handleLogout} />
       </div>
@@ -348,16 +324,8 @@ function Mypage() {
           confirmLabel="탈퇴"
           cancelLabel="취소"
           onConfirm={handleDelete}
-          onCancel={() => {
-            setShowPopup(false);
-            setPasswordError(false);
-          }}
-          onClose={() => {
-            setShowPopup(false);
-            setPasswordError(false);
-          }}
-          error={passwordError}
-          errorMessage="비밀번호가 일치하지 않습니다."
+          onCancel={() => setShowPopup(false)}
+          onClose={() => setShowPopup(false)}
         />
       )}
 
