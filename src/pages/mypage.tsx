@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 
 import Header from "@/components/header";
+import Popup from "@/components/popup";
+
 import Button from "@/components/ui/button";
 import Card from "@/components/ui/card";
 import Field from "@/components/ui/field";
@@ -155,6 +157,14 @@ function Mypage() {
     setEditMode(false);
   };
 
+  const [showPopup, setShowPopup] = useState(false);
+
+  const handleDelete = () => {
+    console.log("탈퇴 진행");
+    setShowPopup(false);
+    navigate("/");
+  };
+
   return (
     <div className="h-dvh bg-white flex flex-col">
       <Header label="마이페이지" />
@@ -248,9 +258,27 @@ function Mypage() {
       </main>
 
       <div className="flex w-full py-2 px-6 gap-1">
-        <Button className="w-full bg-main-2" label="회원탈퇴" />
+        <Button
+          className="w-full bg-main-2"
+          label="회원탈퇴"
+          onClick={() => setShowPopup(true)}
+        />
         <Button className="w-full" label="로그아웃" />
       </div>
+
+      {showPopup && (
+        <Popup
+          open={showPopup}
+          type="form"
+          title="탈퇴를 진행하시겠습니까?"
+          placeholder="비밀번호를 입력해주세요."
+          confirmLabel="탈퇴"
+          cancelLabel="취소"
+          onConfirm={handleDelete}
+          onCancel={() => setShowPopup(false)}
+          onClose={() => setShowPopup(false)}
+        />
+      )}
 
       <footer className="flex mb-4 justify-between px-6 py-2 border-y border-gray-3">
         <div className="flex flex-col">
