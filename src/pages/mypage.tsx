@@ -3,24 +3,19 @@ import { useNavigate } from "react-router";
 
 import Header from "@/components/header";
 import Popup from "@/components/popup";
+import LoadingPage from "../components/loading";
 
 import Button from "@/components/ui/button";
 import Card from "@/components/ui/card";
 import Field from "@/components/ui/field";
+import Input from "@/components/ui/input";
 import { SelectBox } from "@/components/ui/selectbox";
 import type { SelectOption } from "@/components/ui/selectbox";
 
-import { PencilLine, Check } from "lucide-react";
+import { PencilLine, CheckLine } from "lucide-react";
 
 function Mypage() {
   const navigate = useNavigate();
-
-  interface UserInfo {
-    name: string;
-    animalType: string;
-    breeds: string;
-    phonenumber: string;
-  }
 
   interface ReservationInfo {
     date: string;
@@ -38,46 +33,38 @@ function Mypage() {
     distance: "30km",
   };
 
-  const userinfo: UserInfo = {
-    name: "남현정",
-    animalType: "TERRESTRIAL",
-    breeds: "DOG_LARGE",
-    phonenumber: "01020385269",
-  };
-
-  const [form, setForm] = useState({
-    name: userinfo.name,
-    animalType: userinfo.animalType,
-    breed: userinfo.breeds,
-    phone: userinfo.phonenumber,
-  });
-
-  const [displayUser, setDisplayUser] = useState({
-    name: userinfo.name,
-    animalType: userinfo.animalType,
-    breed: userinfo.breeds,
-    phone: userinfo.phonenumber,
-  });
-
   const reservationInfo: ReservationInfo = {
     date: "2025.10.28",
     animalType: "육지동물",
     breeds: "대형견",
   };
 
+  const [form, setForm] = useState({
+    name: "",
+    username: "",
+    animalType: "",
+    breed: "",
+    phone: "",
+  });
+
+  const [displayUser, setDisplayUser] = useState({
+    name: "",
+    username: "",
+    animalType: "",
+    breed: "",
+    phone: "",
+  });
+
+  const [animalTypes, setAnimalTypes] = useState<SelectOption[]>([]);
   const [breeds, setBreeds] = useState<SelectOption[]>([]);
   const [displayBreeds, setDisplayBreeds] = useState<SelectOption[]>([]);
   const [editMode, setEditMode] = useState(false);
 
-  const animaltypes: SelectOption[] = [
-    { label: "육지동물", value: "TERRESTRIAL" },
-    { label: "수생동물", value: "AQUATIC" },
-    { label: "조류", value: "AVIAN" },
-    { label: "기타", value: "OTHER" },
-  ];
+  const [errors, setErrors] = useState<{ phone?: string }>({});
+  const [verifiedPhone, setVerifiedPhone] = useState(false);
 
   const getAnimalTypeLabel = (value: string) => {
-    const found = animaltypes.find((option) => option.value === value);
+    const found = animalTypes.find((option) => option.value === value);
     return found ? found.label : value;
   };
 
@@ -86,6 +73,75 @@ function Mypage() {
     const found = displayBreeds.find((option) => option.value === value);
     return found ? found.label : "";
   };
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          navigate("/login");
+          return;
+        }
+
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/v1/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!res.ok) throw new Error("유저 정보 불러오기 실패");
+
+        const data = await res.json();
+
+        setForm({
+          name: data.name,
+          username: data.username,
+          animalType: data.species,
+          breed: data.breed,
+          phone: data.phoneNumber,
+        });
+
+        setDisplayUser({
+          name: data.name,
+          username: data.username,
+          animalType: data.species,
+          breed: data.breed,
+          phone: data.phoneNumber,
+        });
+      } catch (err) {
+        console.error(err);
+        navigate("/login");
+      }
+    };
+
+    fetchUserInfo();
+  }, [navigate]);
+
+  useEffect(() => {
+    const fetchAnimalTypes = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/v1/auth/animal-types`);
+        if (!res.ok) throw new Error("동물 종류 불러오기 실패");
+        const data = await res.json();
+
+        const arrayData = Array.isArray(data) ? data : data.types || [];
+        const options: SelectOption[] = arrayData.map((item: any) => ({
+          label: item.description || item.name,
+          value: item.code || item.id,
+        }));
+
+        setAnimalTypes(options);
+      } catch (err) {
+        console.error(err);
+        setAnimalTypes([]);
+      }
+    };
+
+    fetchAnimalTypes();
+  }, []);
 
   useEffect(() => {
     if (!form.animalType) {
@@ -101,11 +157,12 @@ function Mypage() {
         );
         if (!res.ok) throw new Error("품종 불러오기 실패");
         const data = await res.json();
-
-        const options: SelectOption[] = data.breeds.map((item: any) => ({
-          label: item.description,
-          value: item.code,
-        }));
+        const options: SelectOption[] = Array.isArray(data.breeds)
+          ? data.breeds.map((item: any) => ({
+              label: item.description,
+              value: item.code,
+            }))
+          : [];
         setBreeds(options);
       } catch (err) {
         console.error(err);
@@ -130,11 +187,12 @@ function Mypage() {
         );
         if (!res.ok) throw new Error("품종 불러오기 실패");
         const data = await res.json();
-
-        const options: SelectOption[] = data.breeds.map((item: any) => ({
-          label: item.description,
-          value: item.code,
-        }));
+        const options: SelectOption[] = Array.isArray(data.breeds)
+          ? data.breeds.map((item: any) => ({
+              label: item.description,
+              value: item.code,
+            }))
+          : [];
         setDisplayBreeds(options);
       } catch (err) {
         console.error(err);
@@ -145,74 +203,114 @@ function Mypage() {
     fetchDisplayBreeds();
   }, [displayUser.animalType]);
 
-  const handleChange = (key: keyof typeof form, value: string) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-    if (key === "animalType") {
-      setForm((prev) => ({ ...prev, breed: "" }));
+  const handleEdit = () => {
+    setEditMode(true);
+    setVerifiedPhone(false);
+    setErrors({});
+  };
+
+  const checkPhoneDuplicate = async () => {
+    if (!form.phone) return;
+
+    if (form.phone === displayUser.phone) {
+      setErrors((prev) => ({ ...prev, phone: "" }));
+      setVerifiedPhone(true);
+      return;
+    }
+
+    try {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const res = await fetch(
+        `${API_URL}/api/v1/auth/check-phone?phone=${form.phone}`
+      );
+      const data = await res.json();
+
+      if (res.status === 400 || res.status === 409) {
+        setErrors((prev) => ({ ...prev, phone: data.message }));
+        setVerifiedPhone(false);
+      } else if (res.ok) {
+        setErrors((prev) => ({ ...prev, phone: "" }));
+        setVerifiedPhone(true);
+      }
+    } catch (err) {
+      console.error(err);
+      setErrors((prev) => ({
+        ...prev,
+        phone: "중복 확인 중 오류가 발생했습니다.",
+      }));
+      setVerifiedPhone(false);
     }
   };
 
-  const handleSave = () => {
-    setDisplayUser({ ...form });
-    setEditMode(false);
+  const handleSave = async () => {
+    if (!verifiedPhone) {
+      setErrors((prev) => ({
+        ...prev,
+        phone: "휴대폰 번호 중복확인을 해주세요.",
+      }));
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("로그인이 필요합니다.");
+        navigate("/login");
+        return;
+      }
+
+      const API_URL = import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_URL}/api/v1/auth/me`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: form.name,
+          phoneNumber: form.phone,
+          species: form.animalType,
+          breed: form.breed,
+        }),
+      });
+
+      if (!res.ok) {
+        let errorMessage = "정보 수정 실패";
+        try {
+          const data = await res.json();
+          errorMessage = data.message || errorMessage;
+        } catch {}
+        throw new Error(errorMessage);
+      }
+
+      setDisplayUser({ ...form });
+      setEditMode(false);
+      setErrors({});
+      setVerifiedPhone(false);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "정보 수정 중 오류가 발생했습니다.");
+    }
   };
 
   const [showPopup, setShowPopup] = useState(false);
   const [alertPopup, setAlertPopup] = useState<{
     open: boolean;
     message: string;
-  }>({ open: false, message: "" });
-  const [passwordError, setPasswordError] = useState(false);
+  }>({
+    open: false,
+    message: "",
+  });
 
-  const handleDelete = async (password?: string) => {
-    if (!password) {
-      setPasswordError(true);
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-      const API_URL = import.meta.env.VITE_API_URL;
-
-      const res = await fetch(`${API_URL}/api/v1/auth/withdraw`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ password }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        if (res.status === 401 || res.status === 400) {
-          setPasswordError(true);
-          return;
-        }
-        throw new Error(errorData.message || "회원탈퇴 실패");
-      }
-
-      localStorage.removeItem("token");
-      setShowPopup(false);
-      setPasswordError(false);
-      setAlertPopup({
-        open: true,
-        message: "회원탈퇴가 완료되었습니다.",
-      });
-    } catch (err: any) {
-      setShowPopup(false);
-      setAlertPopup({
-        open: true,
-        message: err.message || "회원탈퇴 실패",
-      });
-    }
+  const handleDelete = () => {
+    console.log("탈퇴 진행");
+    setShowPopup(false);
+    navigate("/");
   };
 
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("token");
-
       const API_URL = import.meta.env.VITE_API_URL;
       const res = await fetch(`${API_URL}/api/v1/auth/logout`, {
         method: "POST",
@@ -235,6 +333,8 @@ function Mypage() {
     }
   };
 
+  if (!displayUser.name) return <LoadingPage message="로딩중..." />;
+
   return (
     <div className="h-dvh bg-white flex flex-col">
       <Header label="마이페이지" />
@@ -251,7 +351,7 @@ function Mypage() {
       <main className="px-6 py-4 flex flex-col scrollbar-hide gap-4 flex-1 overflow-auto">
         <section className="flex flex-col gap-3">
           <h3 className="font-bold">예약내역</h3>
-          <div className="flex px-4 justify-between">
+          <div className="flex px-2 gap-2">
             <Card
               size="sm"
               image={hospitalinfo.image}
@@ -261,7 +361,6 @@ function Mypage() {
               onClick={() => navigate(`/hospital/${hospitalinfo.id}`)}
               className="cursor-pointer"
             />
-
             <div className="flex items-center flex-col gap-2">
               <div className="text-sm text-center font-normal">
                 <p>날짜 : {reservationInfo.date}</p>
@@ -290,12 +389,12 @@ function Mypage() {
                   icon={PencilLine}
                   variant="icon"
                   className="w-4 h-4 [&>svg]:!w-4 [&>svg]:!h-4"
-                  onClick={() => setEditMode(true)}
+                  onClick={handleEdit}
                 />
               )}
               {editMode && (
                 <Button
-                  icon={Check}
+                  icon={CheckLine}
                   variant="icon"
                   className="w-4 h-4 [&>svg]:!w-4 [&>svg]:!h-4"
                   onClick={handleSave}
@@ -304,24 +403,59 @@ function Mypage() {
             </div>
           </div>
 
-          <Field placeholder={form.name} />
-          <Field placeholder={form.phone} />
+          <Input
+            value={form.name}
+            disabled={!editMode}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="이름"
+          />
+
+          <Field placeholder={form.username} />
+
+          <div className="flex gap-2">
+            <Input
+              placeholder="휴대폰 번호"
+              value={form.phone}
+              disabled={!editMode}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            />
+
+            <Button
+              className="w-27 disabled:cursor-auto"
+              variant="primary"
+              label="중복확인"
+              disabled={!editMode || !form.phone}
+              onClick={checkPhoneDuplicate}
+            />
+          </div>
+
+          {errors.phone && (
+            <span className="text-red ml-2 text-xs">{errors.phone}</span>
+          )}
+
+          {verifiedPhone && !errors.phone && editMode && form.phone && (
+            <span className="text-blue-2 ml-2 text-xs">
+              사용 가능한 번호입니다.
+            </span>
+          )}
 
           <div className="flex w-full gap-2">
             <SelectBox
               placeholder="종류"
-              options={animaltypes}
-              onChange={(value) => handleChange("animalType", value)}
+              options={animalTypes}
               value={form.animalType}
               disabled={!editMode}
+              onChange={(value) =>
+                setForm({ ...form, animalType: value, breed: "" })
+              }
             />
 
             <SelectBox
               placeholder="품종"
               options={breeds}
-              onChange={(value) => handleChange("breed", value)}
               value={form.breed || ""}
               disabled={!editMode || !form.animalType || breeds.length === 0}
+              onChange={(value) => setForm({ ...form, breed: value })}
             />
           </div>
         </section>
@@ -331,10 +465,7 @@ function Mypage() {
         <Button
           className="w-full bg-main-2"
           label="회원탈퇴"
-          onClick={() => {
-            setShowPopup(true);
-            setPasswordError(false);
-          }}
+          onClick={() => setShowPopup(true)}
         />
         <Button className="w-full" label="로그아웃" onClick={handleLogout} />
       </div>
@@ -348,16 +479,8 @@ function Mypage() {
           confirmLabel="탈퇴"
           cancelLabel="취소"
           onConfirm={handleDelete}
-          onCancel={() => {
-            setShowPopup(false);
-            setPasswordError(false);
-          }}
-          onClose={() => {
-            setShowPopup(false);
-            setPasswordError(false);
-          }}
-          error={passwordError}
-          errorMessage="비밀번호가 일치하지 않습니다."
+          onCancel={() => setShowPopup(false)}
+          onClose={() => setShowPopup(false)}
         />
       )}
 

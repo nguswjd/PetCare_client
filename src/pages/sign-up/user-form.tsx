@@ -15,7 +15,7 @@ function UserForm({ onFormChange }: UserFormProps) {
     password: "",
     passwordConfirm: "",
     phone: "",
-    animalType: "",
+    species: "",
     breed: "",
   });
 
@@ -29,14 +29,30 @@ function UserForm({ onFormChange }: UserFormProps) {
     phone: false,
   });
 
+  const [species, setSpecies] = useState<SelectOption[]>([]);
   const [breeds, setBreeds] = useState<SelectOption[]>([]);
 
-  const animaltypes: SelectOption[] = [
-    { label: "육지동물", value: "TERRESTRIAL" },
-    { label: "수생동물", value: "AQUATIC" },
-    { label: "조류", value: "AVIAN" },
-    { label: "기타", value: "OTHER" },
-  ];
+  useEffect(() => {
+    const fetchSpecies = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/v1/auth/animal-types`);
+        if (!res.ok) throw new Error("동물 종류 불러오기 실패");
+        const data = await res.json();
+        const arrayData = Array.isArray(data) ? data : data.types || [];
+        const options: SelectOption[] = arrayData.map((item: any) => ({
+          label: item.description || item.name,
+          value: item.code || item.id,
+        }));
+        setSpecies(options);
+      } catch (err) {
+        console.error(err);
+        setSpecies([]);
+      }
+    };
+
+    fetchSpecies();
+  }, []);
 
   useEffect(() => {
     const allFilled: boolean =
@@ -56,15 +72,18 @@ function UserForm({ onFormChange }: UserFormProps) {
 
   const handleChange = (key: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+
     if (key === "username") {
       setErrors((prev) => ({ ...prev, username: "" }));
       setVerified((prev) => ({ ...prev, username: false }));
     }
+
     if (key === "phone") {
       setErrors((prev) => ({ ...prev, phone: "" }));
       setVerified((prev) => ({ ...prev, phone: false }));
     }
-    if (key === "animalType") {
+
+    if (key === "species") {
       setForm((prev) => ({ ...prev, breed: "" }));
     }
   };
@@ -144,7 +163,7 @@ function UserForm({ onFormChange }: UserFormProps) {
   };
 
   useEffect(() => {
-    if (!form.animalType) {
+    if (!form.species) {
       setBreeds([]);
       return;
     }
@@ -153,7 +172,7 @@ function UserForm({ onFormChange }: UserFormProps) {
       try {
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(
-          `${API_URL}/api/v1/auth/breeds/${form.animalType}`
+          `${API_URL}/api/v1/auth/breeds/${form.species}`
         );
         if (!res.ok) throw new Error("품종 불러오기 실패");
         const data = await res.json();
@@ -170,7 +189,7 @@ function UserForm({ onFormChange }: UserFormProps) {
     };
 
     fetchBreeds();
-  }, [form.animalType]);
+  }, [form.species]);
 
   return (
     <div className="w-full flex flex-col">
@@ -228,7 +247,7 @@ function UserForm({ onFormChange }: UserFormProps) {
           <div className="flex gap-2">
             <Input
               placeholder="휴대폰번호"
-              type="text"
+              type="number"
               value={form.phone}
               onChange={(e) => handleChange("phone", e.target.value)}
             />
@@ -253,16 +272,16 @@ function UserForm({ onFormChange }: UserFormProps) {
         <div className="flex w-full gap-2">
           <SelectBox
             placeholder="종류"
-            options={animaltypes}
-            onChange={(value) => handleChange("animalType", value)}
-            value={form.animalType}
+            options={species}
+            onChange={(value) => handleChange("species", value)}
+            value={form.species}
           />
           <SelectBox
             placeholder="품종"
             options={breeds}
             onChange={(value) => handleChange("breed", value)}
             value={form.breed || ""}
-            disabled={!form.animalType || breeds.length === 0}
+            disabled={!form.species || breeds.length === 0}
           />
         </div>
       </div>
