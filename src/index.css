@@ -8,6 +8,7 @@
     sans-serif;
 
   --background: #ffffff;
+  --black-30: #0000004d;
 
   --main-1: #203f63;
   --main-2: #a0b0c0;
@@ -29,6 +30,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-black-30: var(--black-30);
 
   --color-main-1: var(--main-1);
   --color-main-2: var(--main-2);

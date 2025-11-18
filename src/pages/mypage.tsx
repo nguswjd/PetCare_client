@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 
 import Header from "@/components/header";
+import Popup from "@/components/popup";
+
 import Button from "@/components/ui/button";
 import Card from "@/components/ui/card";
 import Field from "@/components/ui/field";
 import { SelectBox } from "@/components/ui/selectbox";
 import type { SelectOption } from "@/components/ui/selectbox";
 
-import { PencilLine, CheckLine } from "lucide-react";
+import { PencilLine, Check } from "lucide-react";
 
 function Mypage() {
   const navigate = useNavigate();
@@ -155,6 +157,84 @@ function Mypage() {
     setEditMode(false);
   };
 
+  const [showPopup, setShowPopup] = useState(false);
+  const [alertPopup, setAlertPopup] = useState<{
+    open: boolean;
+    message: string;
+  }>({ open: false, message: "" });
+  const [passwordError, setPasswordError] = useState(false);
+
+  const handleDelete = async (password?: string) => {
+    if (!password) {
+      setPasswordError(true);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const API_URL = import.meta.env.VITE_API_URL;
+
+      const res = await fetch(`${API_URL}/api/v1/auth/withdraw`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ password }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        if (res.status === 401 || res.status === 400) {
+          setPasswordError(true);
+          return;
+        }
+        throw new Error(errorData.message || "회원탈퇴 실패");
+      }
+
+      localStorage.removeItem("token");
+      setShowPopup(false);
+      setPasswordError(false);
+      setAlertPopup({
+        open: true,
+        message: "회원탈퇴가 완료되었습니다.",
+      });
+    } catch (err: any) {
+      setShowPopup(false);
+      setAlertPopup({
+        open: true,
+        message: err.message || "회원탈퇴 실패",
+      });
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const API_URL = import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_URL}/api/v1/auth/logout`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "로그아웃 실패");
+      }
+
+      localStorage.removeItem("token");
+      setAlertPopup({ open: true, message: "로그아웃 되었습니다." });
+    } catch (err: any) {
+      setAlertPopup({ open: true, message: err.message || "로그아웃 실패" });
+    }
+  };
+
   return (
     <div className="h-dvh bg-white flex flex-col">
       <Header label="마이페이지" />
@@ -215,7 +295,7 @@ function Mypage() {
               )}
               {editMode && (
                 <Button
-                  icon={CheckLine}
+                  icon={Check}
                   variant="icon"
                   className="w-4 h-4 [&>svg]:!w-4 [&>svg]:!h-4"
                   onClick={handleSave}
@@ -248,14 +328,58 @@ function Mypage() {
       </main>
 
       <div className="flex w-full py-2 px-6 gap-1">
-        <Button className="w-full bg-main-2" label="회원탈퇴" />
-        <Button className="w-full" label="로그아웃" />
+        <Button
+          className="w-full bg-main-2"
+          label="회원탈퇴"
+          onClick={() => {
+            setShowPopup(true);
+            setPasswordError(false);
+          }}
+        />
+        <Button className="w-full" label="로그아웃" onClick={handleLogout} />
       </div>
+
+      {showPopup && (
+        <Popup
+          open={showPopup}
+          type="form"
+          title="탈퇴를 진행하시겠습니까?"
+          placeholder="비밀번호를 입력해주세요."
+          confirmLabel="탈퇴"
+          cancelLabel="취소"
+          onConfirm={handleDelete}
+          onCancel={() => {
+            setShowPopup(false);
+            setPasswordError(false);
+          }}
+          onClose={() => {
+            setShowPopup(false);
+            setPasswordError(false);
+          }}
+          error={passwordError}
+          errorMessage="비밀번호가 일치하지 않습니다."
+        />
+      )}
+
+      {alertPopup.open && (
+        <Popup
+          open={alertPopup.open}
+          type="alert"
+          children={`안녕히가세요.\n 다음에 뵈어요 :)`}
+          title={alertPopup.message}
+          onClose={() => {
+            setAlertPopup({ open: false, message: "" });
+            navigate("/");
+          }}
+        />
+      )}
 
       <footer className="flex mb-4 justify-between px-6 py-2 border-y border-gray-3">
         <div className="flex flex-col">
           <p className="font-semibold text-base">PET CARE 문의하기</p>
-          <span className="text-gray-6 text-xs">nguswjd02@ajou.ac.kr</span>
+          <a href="mailto:nguswjd02@ajou.ac.kr" className="text-gray-6 text-xs">
+            nguswjd02@ajou.ac.kr
+          </a>
         </div>
         <img src="/PetCare_logo.svg" className="w-10 h-10" alt="petcare 로고" />
       </footer>
