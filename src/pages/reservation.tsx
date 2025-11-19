@@ -102,7 +102,7 @@ function Reservation() {
     selectedTime;
 
   return (
-    <>
+    <div className="h-dvh">
       <Header label={hospitalInfo.name} />
 
       <div>
@@ -242,7 +242,7 @@ function Reservation() {
           }}
         />
       </footer>
-    </>
+    </div>
   );
 }
 
