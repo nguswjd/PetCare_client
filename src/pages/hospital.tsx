@@ -20,6 +20,9 @@ interface HospitalInfo {
   alt: string;
   distance?: string;
   hasParking: boolean;
+  animalTypes: string[];
+  departments: string[];
+  breeds: string[];
 }
 
 interface ReviewType {
@@ -82,6 +85,9 @@ function Hospital() {
           image: data.imageUrl,
           alt: data.description,
           hasParking: data.hasParking,
+          animalTypes: data.animalTypes || [],
+          departments: data.departments || [],
+          breeds: data.breeds,
         });
         setLoading(false);
       })
@@ -106,6 +112,11 @@ function Hospital() {
     return <ErrorPage onRetry={() => navigate(-1)} />;
   }
 
+  const handleGoReservation = () => {
+    if (!hospitalInfo) return;
+    navigate(`/hospital/${id}/reservation`, { state: { hospitalInfo } });
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="sticky top-0 z-10 bg-white">
@@ -121,7 +132,7 @@ function Hospital() {
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-xl">{hospitalInfo.name}</h3>
                 <p className="flex gap-2 text-gray-6 font-medium text-sm">
-                  {hospitalInfo.address.split(" ").slice(0, 3).join(" ")}
+                  {hospitalInfo.address.split(" ").slice(1, 3).join(" ")}
                 </p>
               </div>
               <div className="flex gap-2 text-gray-6 font-medium text-sm">
@@ -129,7 +140,7 @@ function Hospital() {
                 {hospitalInfo.distance && <p>{hospitalInfo.distance}</p>}
               </div>
             </div>
-            <Button label="예약하기" />
+            <Button label="예약하기" onClick={handleGoReservation} />
           </section>
         </div>
       </div>
