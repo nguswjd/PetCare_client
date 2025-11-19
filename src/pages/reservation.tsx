@@ -5,6 +5,7 @@ import Header from "@/components/header";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { SelectBox } from "@/components/ui/selectbox";
+import Calendar from "@/components/ui/calendar";
 
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -27,10 +28,15 @@ function Reservation() {
   const { hospitalInfo } = state as { hospitalInfo: HospitalInfo };
 
   const [isOpen, setIsOpen] = useState(false);
+
+  const [name, setName] = useState("");
   const [selectedAnimalType, setSelectedAnimalType] = useState("");
   const [selectedAnimalLabel, setSelectedAnimalLabel] = useState("");
   const [filteredBreeds, setFilteredBreeds] = useState<string[]>([]);
   const [selectedBreed, setSelectedBreed] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   const animalTypeMap: Record<string, string> = {
     육지동물: "TERRESTRIAL",
@@ -71,6 +77,29 @@ function Reservation() {
 
     fetchBreeds();
   }, [selectedAnimalType, hospitalInfo.breeds]);
+
+  const times = [
+    "08:00",
+    "09:00",
+    "10:00",
+    "11:00",
+    "12:00",
+    "13:00",
+    "14:00",
+    "15:00",
+    "16:00",
+    "17:00",
+    "18:00",
+    "19:00",
+  ];
+
+  const isFormComplete =
+    name &&
+    selectedAnimalType &&
+    selectedBreed &&
+    selectedDepartment &&
+    selectedDate &&
+    selectedTime;
 
   return (
     <>
@@ -131,10 +160,15 @@ function Reservation() {
           </div>
         </section>
 
-        <section className="px-6 flex flex-col gap-3 mt-4">
+        <section className="px-6 flex flex-col gap-3 mt-4 pb-24">
           <h2 className="hidden">병원 예약 폼</h2>
 
-          <Input placeholder="에약자 명" />
+          <Input
+            placeholder="예약자 명"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+
           <div className="flex gap-2">
             <SelectBox
               placeholder="종류"
@@ -168,9 +202,46 @@ function Reservation() {
               label: item,
               value: item,
             }))}
+            value={selectedDepartment}
+            onChange={(value) => setSelectedDepartment(value)}
           />
+
+          <div className="px-6 flex flex-col items-center gap-3 mt-4  md:flex-row md:items-center md:justify-center md:gap-6">
+            <div className="w-full max-w-sm">
+              <Calendar
+                selectedDate={selectedDate}
+                onSelectDate={(date: Date) => setSelectedDate(date)}
+              />
+            </div>
+
+            <div className="grid grid-cols-4 grid-rows-3 gap-2 w-full max-w-100">
+              {times.map((time) => (
+                <Button
+                  key={time}
+                  variant="outline"
+                  label={time}
+                  toggleable
+                  active={selectedTime === time}
+                  onClick={() => setSelectedTime(time)}
+                  className="w-full"
+                />
+              ))}
+            </div>
+          </div>
         </section>
       </div>
+
+      <footer className="fixed bottom-0 left-0 w-full px-6 pt-3 pb-6 bg-white">
+        <Button
+          label="예약하기"
+          className="w-full"
+          disabled={!isFormComplete}
+          onClick={() => {
+            if (!isFormComplete) return;
+            // API
+          }}
+        />
+      </footer>
     </>
   );
 }

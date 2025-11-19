@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import Button from "./button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -8,10 +7,14 @@ interface Day {
   isCurrentMonth: boolean;
 }
 
-const Calendar: React.FC = () => {
+interface CalendarProps {
+  selectedDate: Date | null;
+  onSelectDate: (date: Date) => void;
+}
+
+const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectDate }) => {
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(today);
-  const [selectedDate, setSelectedDate] = useState<Date>(today);
 
   const generateCalendarDays = (): Day[] => {
     const year = currentDate.getFullYear();
@@ -87,7 +90,7 @@ const Calendar: React.FC = () => {
       setCurrentDate(new Date(day.date.getFullYear(), day.date.getMonth(), 1));
     }
 
-    setSelectedDate(day.date);
+    onSelectDate(day.date);
   };
 
   return (
@@ -122,8 +125,7 @@ const Calendar: React.FC = () => {
       <div className="grid grid-cols-7 gap-1 text-center">
         {days.map((day, idx) => {
           const isSelected =
-            selectedDate.toDateString() === day.date.toDateString();
-
+            selectedDate?.toDateString() === day.date.toDateString();
           const isPast =
             day.date <
             new Date(today.getFullYear(), today.getMonth(), today.getDate());
