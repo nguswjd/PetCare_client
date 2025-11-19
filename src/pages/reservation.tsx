@@ -117,7 +117,9 @@ function Reservation() {
 
   return (
     <div className="h-dvh">
-      <Header label={hospitalInfo.name} />
+      <div className="sticky top-0 z-10 bg-white">
+        <Header label={hospitalInfo.name} />
+      </div>
 
       <div>
         <img
