@@ -37,6 +37,8 @@ function Reservation() {
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedAge, setSelectedAge] = useState("");
+  const [selectedWeight, setSelectedWeight] = useState("");
 
   const animalTypeMap: Record<string, string> = {
     육지동물: "TERRESTRIAL",
@@ -93,13 +95,25 @@ function Reservation() {
     "19:00",
   ];
 
+  const ageOptions = Array.from({ length: 21 }, (_, i) => ({
+    label: `${i}살`,
+    value: `${i}`,
+  }));
+
+  const weightOptions = Array.from({ length: 50 }, (_, i) => ({
+    label: `${i + 1}kg`,
+    value: `${i + 1}`,
+  }));
+
   const isFormComplete =
     name &&
     selectedAnimalType &&
     selectedBreed &&
     selectedDepartment &&
     selectedDate &&
-    selectedTime;
+    selectedTime &&
+    selectedAge &&
+    selectedWeight;
 
   return (
     <div className="h-dvh">
@@ -193,6 +207,22 @@ function Reservation() {
               value={selectedBreed || ""}
               onChange={(value) => setSelectedBreed(value)}
               disabled={!selectedAnimalType || filteredBreeds.length === 0}
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <SelectBox
+              placeholder="나이"
+              options={ageOptions}
+              value={selectedAge}
+              onChange={(value) => setSelectedAge(value)}
+            />
+
+            <SelectBox
+              placeholder="체중"
+              options={weightOptions}
+              value={selectedWeight}
+              onChange={(value) => setSelectedWeight(value)}
             />
           </div>
 
