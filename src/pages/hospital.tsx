@@ -69,7 +69,14 @@ function Hospital() {
   useEffect(() => {
     if (!id) return;
 
-    fetch(`/api/v1/hospital/${id}`)
+    const token = localStorage.getItem("token");
+
+    fetch(`/api/v1/hospital/${id}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    })
       .then((res) => {
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
