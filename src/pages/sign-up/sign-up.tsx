@@ -1,26 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-
-import TermsSection from "./terms-section";
-import UserForm from "./user-form";
-
+import TermsSection from "./components/terms-section";
+import UserForm from "./components/user-form";
 import Button from "@/components/ui/button";
+import { useTerms } from "./hooks/useTerms";
+import { useSignupForm } from "./hooks/useSignupForm";
 
 function SignUp() {
   const [step, setStep] = useState(1);
-  const [canProceedTerms, setCanProceedTerms] = useState(false);
-  const [canProceedForm, setCanProceedForm] = useState(false);
-  const [marketingConsent, setMarketingConsent] = useState(false);
-  const [userFormData, setUserFormData] = useState({
-    name: "",
-    username: "",
-    password: "",
-    passwordConfirm: "",
-    phone: "",
-    species: "",
-    breed: "",
-  });
-
+  const terms = useTerms();
+  const signupForm = useSignupForm();
   const navigate = useNavigate();
 
   const handleNext = () => setStep(2);
@@ -29,13 +18,13 @@ function SignUp() {
 
   const handleSignup = async () => {
     const payload = {
-      name: userFormData.name,
-      username: userFormData.username,
-      password: userFormData.password,
-      phoneNumber: userFormData.phone,
-      species: userFormData.species,
-      breed: userFormData.breed,
-      marketingConsent,
+      name: signupForm.form.name,
+      username: signupForm.form.username,
+      password: signupForm.form.password,
+      phoneNumber: signupForm.form.phone,
+      species: signupForm.form.species,
+      breed: signupForm.form.breed,
+      marketingConsent: terms.marketingConsent,
     };
 
     try {
@@ -45,7 +34,6 @@ function SignUp() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       if (!response.ok) throw new Error("회원가입 실패");
       navigate("/login");
     } catch (err) {
@@ -61,32 +49,16 @@ function SignUp() {
       >
         <img src="/PetCare_logo.svg" alt="로고" className="w-[20vw] max-w-28" />
       </header>
-
       <main className="flex-1 flex flex-col justify-center items-center px-6 w-full">
-        {step === 1 && (
-          <TermsSection
-            onCanProceedChange={(canProceed, marketing) => {
-              setCanProceedTerms(canProceed);
-              setMarketingConsent(marketing);
-            }}
-          />
-        )}
-        {step === 2 && (
-          <UserForm
-            onFormChange={(isValid, formData) => {
-              setCanProceedForm(isValid);
-              setUserFormData(formData);
-            }}
-          />
-        )}
+        {step === 1 && <TermsSection terms={terms} />}
+        {step === 2 && <UserForm signupForm={signupForm} />}
       </main>
-
       <footer className="flex flex-col gap-2 px-6 mb-6">
         {step === 1 && (
           <Button
             className="w-full"
             label="다음"
-            disabled={!canProceedTerms}
+            disabled={!terms.canProceed}
             onClick={handleNext}
           />
         )}
@@ -94,7 +66,7 @@ function SignUp() {
           <Button
             className="w-full"
             label="회원가입"
-            disabled={!canProceedForm}
+            disabled={!signupForm.isValid}
             onClick={handleSignup}
           />
         )}
