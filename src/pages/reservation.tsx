@@ -238,7 +238,7 @@ function Reservation() {
             onChange={(value) => setSelectedDepartment(value)}
           />
 
-          <div className="px-6 flex flex-col items-center gap-3 mt-4  md:flex-row md:items-center md:justify-center md:gap-6">
+          <div className="flex flex-col items-center gap-3 mt-4  md:flex-row md:items-center md:justify-center md:gap-6">
             <div className="w-full max-w-sm">
               <Calendar
                 selectedDate={selectedDate}
