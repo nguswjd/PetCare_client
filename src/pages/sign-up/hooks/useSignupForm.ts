@@ -10,6 +10,9 @@ export const useSignupForm = () => {
     phone: "",
     species: "",
     breed: "",
+    businessName: "",
+    businessNumber: "",
+    licenseNumber: "",
   });
 
   const [errors, setErrors] = useState({

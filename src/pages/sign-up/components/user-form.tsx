@@ -2,15 +2,15 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { SelectBox } from "@/components/ui/selectbox";
 import { useSignupForm } from "../hooks/useSignupForm";
-import { useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 
 interface UserFormProps {
   signupForm: ReturnType<typeof useSignupForm>;
+  isUser: boolean;
+  setIsUser: Dispatch<SetStateAction<boolean>>;
 }
 
-function UserForm({ signupForm }: UserFormProps) {
-  const [isUser, setIsUser] = useState(true);
-
+function UserForm({ signupForm, isUser, setIsUser }: UserFormProps) {
   return (
     <div className="w-full flex flex-col">
       <div>
@@ -32,7 +32,7 @@ function UserForm({ signupForm }: UserFormProps) {
 
       <div className="flex flex-col gap-3 py-5">
         <Input
-          placeholder="이름"
+          placeholder={isUser ? "이름" : "대표자 이름"}
           value={signupForm.form.name}
           onChange={(e) => signupForm.handleChange("name", e.target.value)}
         />
@@ -81,10 +81,20 @@ function UserForm({ signupForm }: UserFormProps) {
           }
         />
 
+        {!isUser && (
+          <Input
+            placeholder="사업장 이름"
+            value={signupForm.form.businessName || ""}
+            onChange={(e) =>
+              signupForm.handleChange("businessName", e.target.value)
+            }
+          />
+        )}
+
         <div className="flex flex-col gap-1">
           <div className="flex gap-2">
             <Input
-              placeholder="휴대폰번호"
+              placeholder={isUser ? "휴대폰번호" : "사업장 번호"}
               type="number"
               value={signupForm.form.phone}
               onChange={(e) => signupForm.handleChange("phone", e.target.value)}
@@ -109,23 +119,38 @@ function UserForm({ signupForm }: UserFormProps) {
           )}
         </div>
 
-        <div className="flex w-full gap-2">
-          <SelectBox
-            placeholder="종류"
-            options={signupForm.species}
-            onChange={(value) => signupForm.handleChange("species", value)}
-            value={signupForm.form.species}
-          />
-          <SelectBox
-            placeholder="품종"
-            options={signupForm.breeds}
-            onChange={(value) => signupForm.handleChange("breed", value)}
-            value={signupForm.form.breed || ""}
-            disabled={
-              !signupForm.form.species || signupForm.breeds.length === 0
-            }
-          />
-        </div>
+        {!isUser && (
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-2">
+              <Input placeholder="주소" />
+              <Button className="w-27" variant="primary" label="주소찾기" />
+            </div>
+            <div className="flex gap-2">
+              <Input placeholder="상세주소" />
+              <Input placeholder="우편번호" />
+            </div>
+          </div>
+        )}
+
+        {isUser && (
+          <div className="flex w-full gap-2">
+            <SelectBox
+              placeholder="종류"
+              options={signupForm.species}
+              onChange={(value) => signupForm.handleChange("species", value)}
+              value={signupForm.form.species}
+            />
+            <SelectBox
+              placeholder="품종"
+              options={signupForm.breeds}
+              onChange={(value) => signupForm.handleChange("breed", value)}
+              value={signupForm.form.breed || ""}
+              disabled={
+                !signupForm.form.species || signupForm.breeds.length === 0
+              }
+            />
+          </div>
+        )}
       </div>
     </div>
   );
