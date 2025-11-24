@@ -11,11 +11,13 @@ const buttonVariants = cva(
         secondary:
           "bg-white border-main-1 border text-main-1 w-18 disabled:bg-main-2 disabled:bg-white disabled:text-gray-3 disabled:border-gray-3",
         outline: "bg-white border text-main-1 border-gray-3",
-        user: "border-b border-b-main-1 text-main-1 disabled:text-gray-6 disabled:border-b-gray-3 rounded-none w-40 p-3",
+
+        user: "rounded-none w-40 p-3 border-b",
         icon: "px-0 py-0",
       },
+
       active: {
-        true: "bg-main-1 text-white",
+        true: "",
         false: "",
       },
     },
@@ -61,6 +63,10 @@ function Button({
       className={cn(
         "group",
         buttonVariants({ variant, active: isActive }),
+        variant === "user" &&
+          (isActive
+            ? "border-b-main-1 text-main-1"
+            : "border-b-gray-3 text-gray-6"),
         className
       )}
       onClick={handleClick}

@@ -2,17 +2,32 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { SelectBox } from "@/components/ui/selectbox";
 import { useSignupForm } from "../hooks/useSignupForm";
+import { useState } from "react";
 
 interface UserFormProps {
   signupForm: ReturnType<typeof useSignupForm>;
 }
 
 function UserForm({ signupForm }: UserFormProps) {
+  const [isUser, setIsUser] = useState(true);
+
   return (
     <div className="w-full flex flex-col">
-      <div className="flex w-full">
-        <Button className="w-full" variant="user" label="사용자" />
-        <Button className="w-full" disabled variant="user" label="관리자" />
+      <div>
+        <Button
+          variant="user"
+          className="w-[50%]"
+          active={isUser}
+          onClick={() => setIsUser(true)}
+          label="사용자"
+        />
+        <Button
+          variant="user"
+          className="w-[50%]"
+          active={!isUser}
+          onClick={() => setIsUser(false)}
+          label="관리자"
+        />
       </div>
 
       <div className="flex flex-col gap-3 py-5">
