@@ -177,22 +177,33 @@ function UserForm({ signupForm }: UserFormProps) {
                   onChange={(e) =>
                     signupForm.handleChange("address", e.target.value)
                   }
+                  readOnly
+                  onClick={signupForm.handleAddressSearch}
+                  className="cursor-pointer"
                 />
-                <Button className="w-27" variant="primary" label="주소찾기" />
+                <Button
+                  className="w-27"
+                  variant="primary"
+                  label="주소찾기"
+                  onClick={signupForm.handleAddressSearch}
+                />
               </div>
               <div className="flex gap-2">
-                <Input
-                  placeholder="상세주소"
-                  value={signupForm.form.detailAddress}
-                  onChange={(e) =>
-                    signupForm.handleChange("detailAddress", e.target.value)
-                  }
-                />
                 <Input
                   placeholder="우편번호"
                   value={signupForm.form.postalCode}
                   onChange={(e) =>
                     signupForm.handleChange("postalCode", e.target.value)
+                  }
+                  readOnly
+                  onClick={signupForm.handleAddressSearch}
+                  className="cursor-pointer"
+                />
+                <Input
+                  placeholder="상세주소"
+                  value={signupForm.form.detailAddress}
+                  onChange={(e) =>
+                    signupForm.handleChange("detailAddress", e.target.value)
                   }
                 />
               </div>

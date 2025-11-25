@@ -55,7 +55,6 @@ export const useSignupForm = () => {
       !!form.businessName &&
       !!form.businessNumber &&
       !!form.address &&
-      !!form.detailAddress &&
       !!form.postalCode &&
       !errors.businessNumber &&
       verified.businessNumber;
@@ -338,6 +337,38 @@ export const useSignupForm = () => {
     }
   };
 
+  const openAddressSearch = () => {
+    return new Promise<{
+      address: string;
+      zonecode: string;
+    }>((resolve, reject) => {
+      new (window as any).daum.Postcode({
+        oncomplete: function (data: any) {
+          resolve({
+            address: data.address,
+            zonecode: data.zonecode,
+          });
+        },
+        onclose: function () {
+          reject(new Error("주소 검색 창이 닫혔습니다."));
+        },
+      }).open();
+    });
+  };
+
+  const handleAddressSearch = async () => {
+    try {
+      const result = await openAddressSearch();
+      setForm((prev) => ({
+        ...prev,
+        address: result.address,
+        postalCode: result.zonecode,
+      }));
+    } catch (err) {
+      console.error("주소 검색 실패:", err);
+    }
+  };
+
   const setUserType = (value: boolean) => {
     setIsUser(value);
   };
@@ -358,5 +389,6 @@ export const useSignupForm = () => {
     checkPhoneDuplicate,
     checkHospitalNumberDuplicate,
     checkBusinessNumberDuplicate,
+    handleAddressSearch,
   };
 };
