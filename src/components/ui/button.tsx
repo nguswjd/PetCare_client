@@ -11,13 +11,11 @@ const buttonVariants = cva(
         secondary:
           "bg-white border-main-1 border text-main-1 w-18 disabled:bg-main-2 disabled:bg-white disabled:text-gray-3 disabled:border-gray-3",
         outline: "bg-white border text-main-1 border-gray-3",
-
         user: "rounded-none w-40 p-3 border-b",
         icon: "px-0 py-0",
       },
-
       active: {
-        true: "",
+        true: "bg-main-1 text-white",
         false: "",
       },
     },
@@ -43,28 +41,20 @@ function Button({
   label,
   icon: Icon,
   variant,
-  toggleable = false,
-  active: activeProp,
+  active = false,
   ...props
 }: ButtonProps) {
-  const [isActive, setIsActive] = React.useState(activeProp ?? false);
-
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (toggleable) setIsActive((prev) => !prev);
     props.onClick?.(e);
   };
-
-  React.useEffect(() => {
-    if (activeProp !== undefined) setIsActive(activeProp);
-  }, [activeProp]);
 
   return (
     <button
       className={cn(
         "group",
-        buttonVariants({ variant, active: isActive }),
+        buttonVariants({ variant, active }),
         variant === "user" &&
-          (isActive
+          (active
             ? "border-b-main-1 text-main-1"
             : "border-b-gray-3 text-gray-6"),
         className

@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import { Checkbox } from "./ui/checkbox";
 import { Radio } from "./ui/radio";
 import { SelectBox } from "./ui/selectbox";
@@ -8,8 +7,8 @@ import Button from "./ui/button";
 
 function HospitalInfo() {
   const [Parking, setParking] = useState("yes");
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
 
   const times = [
     "08:00",
@@ -33,6 +32,21 @@ function HospitalInfo() {
     children: React.ReactNode;
     required?: boolean;
   }) => <label className="text-sm text-black">{children}</label>;
+
+  const toggleDate = (date: Date) => {
+    setSelectedDates((prev) => {
+      const exists = prev.some((d) => d.toDateString() === date.toDateString());
+      return exists
+        ? prev.filter((d) => d.toDateString() !== date.toDateString())
+        : [...prev, date];
+    });
+  };
+
+  const toggleTime = (time: string) => {
+    setSelectedTimes((prev) =>
+      prev.includes(time) ? prev.filter((t) => t !== time) : [...prev, time]
+    );
+  };
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -80,10 +94,7 @@ function HospitalInfo() {
 
       <div className="flex flex-col gap-1">
         <Label children="휴무일 등록" />
-        <Calendar
-          selectedDate={selectedDate}
-          onSelectDate={(date: Date) => setSelectedDate(date)}
-        />
+        <Calendar selectedDates={selectedDates} onSelectDate={toggleDate} />
       </div>
 
       <div className="flex flex-col gap-1">
@@ -95,8 +106,8 @@ function HospitalInfo() {
               variant="secondary"
               label={time}
               toggleable
-              active={selectedTime === time}
-              onClick={() => setSelectedTime(time)}
+              active={selectedTimes.includes(time)}
+              onClick={() => toggleTime(time)}
               className="w-full"
             />
           ))}
