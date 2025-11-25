@@ -55,7 +55,7 @@ function Button({
         buttonVariants({ variant, active }),
         variant === "user" &&
           (active
-            ? "border-b-main-1 text-main-1"
+            ? "border-b-main-1 bg-white text-main-1"
             : "border-b-gray-3 text-gray-6"),
         className
       )}
