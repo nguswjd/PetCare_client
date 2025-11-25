@@ -2,22 +2,19 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { SelectBox } from "@/components/ui/selectbox";
 import { useSignupForm } from "../hooks/useSignupForm";
-import type { Dispatch, SetStateAction } from "react";
 import { useEffect } from "react";
 
 interface UserFormProps {
   signupForm: ReturnType<typeof useSignupForm>;
-  isUser: boolean;
-  setIsUser: Dispatch<SetStateAction<boolean>>;
 }
 
-function UserForm({ signupForm, isUser, setIsUser }: UserFormProps) {
+function UserForm({ signupForm }: UserFormProps) {
   useEffect(() => {
     signupForm.resetVerification();
-  }, [isUser]);
+  }, [signupForm.isUser]);
 
   const handleCheckUsername = () => {
-    if (isUser) {
+    if (signupForm.isUser) {
       signupForm.checkUsernameDuplicate();
     } else {
       signupForm.checkHospitalUsernameDuplicate();
@@ -25,7 +22,7 @@ function UserForm({ signupForm, isUser, setIsUser }: UserFormProps) {
   };
 
   const handleCheckPhone = () => {
-    if (isUser) {
+    if (signupForm.isUser) {
       signupForm.checkPhoneDuplicate();
     } else {
       signupForm.checkHospitalNumberDuplicate();
@@ -38,22 +35,22 @@ function UserForm({ signupForm, isUser, setIsUser }: UserFormProps) {
         <Button
           variant="user"
           className="w-[50%]"
-          active={isUser}
-          onClick={() => setIsUser(true)}
+          active={signupForm.isUser}
+          onClick={() => signupForm.setUserType(true)}
           label="사용자"
         />
         <Button
           variant="user"
           className="w-[50%]"
-          active={!isUser}
-          onClick={() => setIsUser(false)}
+          active={!signupForm.isUser}
+          onClick={() => signupForm.setUserType(false)}
           label="관리자"
         />
       </div>
 
       <div className="flex flex-col gap-3 py-5">
         <Input
-          placeholder={isUser ? "이름" : "대표자 이름"}
+          placeholder={signupForm.isUser ? "이름" : "대표자 이름"}
           value={signupForm.form.name}
           onChange={(e) => signupForm.handleChange("name", e.target.value)}
         />
@@ -102,7 +99,7 @@ function UserForm({ signupForm, isUser, setIsUser }: UserFormProps) {
           }
         />
 
-        {!isUser && (
+        {!signupForm.isUser && (
           <Input
             placeholder="사업장 이름"
             value={signupForm.form.businessName || ""}
@@ -115,7 +112,7 @@ function UserForm({ signupForm, isUser, setIsUser }: UserFormProps) {
         <div className="flex flex-col gap-1">
           <div className="flex gap-2">
             <Input
-              placeholder={isUser ? "휴대폰번호" : "사업장 번호"}
+              placeholder={signupForm.isUser ? "휴대폰번호" : "사업장 번호"}
               type="number"
               value={signupForm.form.phone}
               onChange={(e) => signupForm.handleChange("phone", e.target.value)}
@@ -140,7 +137,7 @@ function UserForm({ signupForm, isUser, setIsUser }: UserFormProps) {
           )}
         </div>
 
-        {!isUser && (
+        {!signupForm.isUser && (
           <>
             <div className="flex flex-col gap-1">
               <div className="flex gap-2">
@@ -203,7 +200,7 @@ function UserForm({ signupForm, isUser, setIsUser }: UserFormProps) {
           </>
         )}
 
-        {isUser && (
+        {signupForm.isUser && (
           <div className="flex w-full gap-2">
             <SelectBox
               placeholder="종류"

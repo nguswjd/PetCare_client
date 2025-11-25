@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import type { SelectOption } from "@/components/ui/selectbox";
 
 export const useSignupForm = () => {
+  const [isUser, setIsUser] = useState(true);
+
   const [form, setForm] = useState({
     name: "",
     username: "",
@@ -35,7 +37,7 @@ export const useSignupForm = () => {
   const [species, setSpecies] = useState<SelectOption[]>([]);
   const [breeds, setBreeds] = useState<SelectOption[]>([]);
 
-  const isValid =
+  const commonValid =
     !!form.name &&
     !!form.username &&
     !!form.password &&
@@ -46,6 +48,17 @@ export const useSignupForm = () => {
     !errors.phone &&
     verified.username &&
     verified.phone;
+
+  const isValid = isUser
+    ? commonValid
+    : commonValid &&
+      !!form.businessName &&
+      !!form.businessNumber &&
+      !!form.address &&
+      !!form.detailAddress &&
+      !!form.postalCode &&
+      !errors.businessNumber &&
+      verified.businessNumber;
 
   useEffect(() => {
     const fetchSpecies = async () => {
@@ -325,6 +338,10 @@ export const useSignupForm = () => {
     }
   };
 
+  const setUserType = (value: boolean) => {
+    setIsUser(value);
+  };
+
   return {
     form,
     errors,
@@ -332,6 +349,8 @@ export const useSignupForm = () => {
     species,
     breeds,
     isValid,
+    isUser,
+    setUserType,
     handleChange,
     resetVerification,
     checkUsernameDuplicate,

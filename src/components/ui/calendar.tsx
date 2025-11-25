@@ -94,7 +94,7 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectDate }) => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-4">
+    <div className="w-full max-w-md mx-auto">
       <div className="flex px-15 justify-between items-center mb-2">
         <Button
           icon={ChevronLeft}

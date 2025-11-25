@@ -8,7 +8,6 @@ import { useTerms } from "./hooks/useTerms";
 import { useSignupForm } from "./hooks/useSignupForm";
 
 function SignUp() {
-  const [isUser, setIsUser] = useState(true);
   const [step, setStep] = useState(1);
   const terms = useTerms();
   const signupForm = useSignupForm();
@@ -16,7 +15,7 @@ function SignUp() {
 
   useEffect(() => {
     if (step > 1) {
-      if (isUser) {
+      if (signupForm.isUser) {
         setStep(2);
       } else {
         if (step === 3) {
@@ -26,7 +25,7 @@ function SignUp() {
         }
       }
     }
-  }, [isUser]);
+  }, [signupForm.isUser]);
 
   const handleNext = () => setStep(2);
   const handleGoLogin = () => navigate("/login");
@@ -36,7 +35,7 @@ function SignUp() {
     try {
       const API_URL = import.meta.env.VITE_API_URL;
 
-      if (isUser) {
+      if (signupForm.isUser) {
         const payload = {
           name: signupForm.form.name,
           username: signupForm.form.username,
@@ -89,7 +88,7 @@ function SignUp() {
   };
 
   const handleFormNext = () => {
-    if (isUser) {
+    if (signupForm.isUser) {
       handleSignup();
     } else {
       setStep(3);
@@ -107,19 +106,9 @@ function SignUp() {
 
       <main className="flex-1 flex flex-col justify-center items-center px-6 w-full">
         {step === 1 && <TermsSection terms={terms} />}
-        {step === 2 && (
-          <UserForm
-            signupForm={signupForm}
-            isUser={isUser}
-            setIsUser={setIsUser}
-          />
-        )}
-        {step === 3 && !isUser && (
-          <HospitalTermsSection
-            signupForm={signupForm}
-            isUser={isUser}
-            setIsUser={setIsUser}
-          />
+        {step === 2 && <UserForm signupForm={signupForm} />}
+        {step === 3 && !signupForm.isUser && (
+          <HospitalTermsSection signupForm={signupForm} />
         )}
       </main>
 
@@ -135,13 +124,17 @@ function SignUp() {
         {step === 2 && (
           <Button
             className="w-full"
-            label={isUser ? "회원가입" : "다음"}
+            label={signupForm.isUser ? "회원가입" : "다음"}
             disabled={!signupForm.isValid}
             onClick={handleFormNext}
           />
         )}
-        {step === 3 && !isUser && (
-          <Button className="w-full" label="회원가입" onClick={handleSignup} />
+        {step === 3 && !signupForm.isUser && (
+          <Button
+            className="w-full"
+            label="병원 등록 요청하기"
+            onClick={handleSignup}
+          />
         )}
         <Button
           className="w-full"
