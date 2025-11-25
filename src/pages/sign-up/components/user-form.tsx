@@ -3,6 +3,7 @@ import Input from "@/components/ui/input";
 import { SelectBox } from "@/components/ui/selectbox";
 import { useSignupForm } from "../hooks/useSignupForm";
 import type { Dispatch, SetStateAction } from "react";
+import { useEffect } from "react";
 
 interface UserFormProps {
   signupForm: ReturnType<typeof useSignupForm>;
@@ -11,6 +12,26 @@ interface UserFormProps {
 }
 
 function UserForm({ signupForm, isUser, setIsUser }: UserFormProps) {
+  useEffect(() => {
+    signupForm.resetVerification();
+  }, [isUser]);
+
+  const handleCheckUsername = () => {
+    if (isUser) {
+      signupForm.checkUsernameDuplicate();
+    } else {
+      signupForm.checkHospitalUsernameDuplicate();
+    }
+  };
+
+  const handleCheckPhone = () => {
+    if (isUser) {
+      signupForm.checkPhoneDuplicate();
+    } else {
+      signupForm.checkHospitalNumberDuplicate();
+    }
+  };
+
   return (
     <div className="w-full flex flex-col">
       <div>
@@ -51,7 +72,7 @@ function UserForm({ signupForm, isUser, setIsUser }: UserFormProps) {
               variant="primary"
               label="중복확인"
               disabled={!signupForm.form.username}
-              onClick={signupForm.checkUsernameDuplicate}
+              onClick={handleCheckUsername}
             />
           </div>
           {signupForm.errors.username && (
@@ -104,7 +125,7 @@ function UserForm({ signupForm, isUser, setIsUser }: UserFormProps) {
               variant="primary"
               label="중복확인"
               disabled={!signupForm.form.phone}
-              onClick={signupForm.checkPhoneDuplicate}
+              onClick={handleCheckPhone}
             />
           </div>
           {signupForm.errors.phone && (
@@ -120,16 +141,66 @@ function UserForm({ signupForm, isUser, setIsUser }: UserFormProps) {
         </div>
 
         {!isUser && (
-          <div className="flex flex-col gap-2">
-            <div className="flex gap-2">
-              <Input placeholder="주소" />
-              <Button className="w-27" variant="primary" label="주소찾기" />
+          <>
+            <div className="flex flex-col gap-1">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="사업자 번호"
+                  value={signupForm.form.businessNumber}
+                  onChange={(e) =>
+                    signupForm.handleChange("businessNumber", e.target.value)
+                  }
+                />
+                <Button
+                  className="w-27"
+                  variant="primary"
+                  label="중복확인"
+                  disabled={!signupForm.form.businessNumber}
+                  onClick={signupForm.checkBusinessNumberDuplicate}
+                />
+              </div>
+              {signupForm.errors.businessNumber && (
+                <span className="text-red ml-2 text-xs">
+                  {signupForm.errors.businessNumber}
+                </span>
+              )}
+              {signupForm.verified.businessNumber &&
+                !signupForm.errors.businessNumber && (
+                  <span className="text-blue-2 ml-2 text-xs">
+                    사용 가능한 사업자 번호입니다.
+                  </span>
+                )}
             </div>
-            <div className="flex gap-2">
-              <Input placeholder="상세주소" />
-              <Input placeholder="우편번호" />
+
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="주소"
+                  value={signupForm.form.address}
+                  onChange={(e) =>
+                    signupForm.handleChange("address", e.target.value)
+                  }
+                />
+                <Button className="w-27" variant="primary" label="주소찾기" />
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="상세주소"
+                  value={signupForm.form.detailAddress}
+                  onChange={(e) =>
+                    signupForm.handleChange("detailAddress", e.target.value)
+                  }
+                />
+                <Input
+                  placeholder="우편번호"
+                  value={signupForm.form.postalCode}
+                  onChange={(e) =>
+                    signupForm.handleChange("postalCode", e.target.value)
+                  }
+                />
+              </div>
             </div>
-          </div>
+          </>
         )}
 
         {isUser && (
