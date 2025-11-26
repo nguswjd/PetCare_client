@@ -241,7 +241,7 @@ function Reservation() {
           <div className="flex flex-col items-center gap-3 mt-4  md:flex-row md:items-center md:justify-center md:gap-6">
             <div className="w-full max-w-sm">
               <Calendar
-                selectedDate={selectedDate}
+                selectedDates={selectedDate ? [selectedDate] : []}
                 onSelectDate={(date: Date) => setSelectedDate(date)}
               />
             </div>
