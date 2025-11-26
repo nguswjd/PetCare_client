@@ -10,7 +10,6 @@ import Calendar from "./ui/calendar";
 function HospitalInfo() {
   const [Parking, setParking] = useState("yes");
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
-  const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
   const [selectedTreatments, setSelectedTreatments] = useState<string[]>([]);
 
   const [animalTypes, setAnimalTypes] = useState<
@@ -98,12 +97,6 @@ function HospitalInfo() {
     });
   };
 
-  const toggleTime = (time: string) => {
-    setSelectedTimes((prev) =>
-      prev.includes(time) ? prev.filter((t) => t !== time) : [...prev, time]
-    );
-  };
-
   const toggleTreatment = (treatment: string) => {
     setSelectedTreatments((prev) =>
       prev.includes(treatment)
@@ -143,6 +136,15 @@ function HospitalInfo() {
       .filter(Boolean)
       .join(" ");
   };
+
+  const endTimes = startTime ? times.filter((t) => t >= startTime) : times;
+
+  const breakTimeOptions =
+    startTime && endTime
+      ? startTime === endTime
+        ? times
+        : times.filter((t) => t > startTime && t < endTime)
+      : times;
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -229,19 +231,26 @@ function HospitalInfo() {
             placeholder="시작시간"
             options={times.map((t) => ({ value: t, label: t }))}
             value={startTime || ""}
-            onChange={setStartTime}
+            onChange={(value) => {
+              setStartTime(value);
+              if (endTime && value && value >= endTime) setEndTime(null);
+              setBreakTimes([]);
+            }}
           />
 
           <SelectBox
             placeholder="종료시간"
-            options={times.map((t) => ({ value: t, label: t }))}
+            options={endTimes.map((t) => ({ value: t, label: t }))}
             value={endTime || ""}
-            onChange={setEndTime}
+            onChange={(value) => {
+              setEndTime(value);
+              setBreakTimes([]);
+            }}
           />
 
           <MultiSelectBox
             placeholder="휴계시간"
-            options={times.map((t) => ({ value: t, label: t }))}
+            options={breakTimeOptions.map((t) => ({ value: t, label: t }))}
             selectedValues={breakTimes}
             onChange={(value) => {
               setBreakTimes((prev) =>
