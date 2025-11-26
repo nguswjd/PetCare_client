@@ -3,9 +3,9 @@ import { useState, useEffect } from "react";
 import { Checkbox } from "./ui/checkbox";
 import { Radio } from "./ui/radio";
 import { MultiSelectBox } from "./ui/multi-selectbox";
+import { SelectBox } from "./ui/selectbox";
 import Input from "./ui/input";
 import Calendar from "./ui/calendar";
-import Button from "./ui/button";
 
 function HospitalInfo() {
   const [Parking, setParking] = useState("yes");
@@ -21,21 +21,14 @@ function HospitalInfo() {
   >([]);
   const [selectedAnimalTypes, setSelectedAnimalTypes] = useState<string[]>([]);
   const [selectedBreeds, setSelectedBreeds] = useState<string[]>([]);
+  const [startTime, setStartTime] = useState<string | null>(null);
+  const [endTime, setEndTime] = useState<string | null>(null);
+  const [breakTimes, setBreakTimes] = useState<string[]>([]);
 
-  const times = [
-    "08:00",
-    "09:00",
-    "10:00",
-    "11:00",
-    "12:00",
-    "13:00",
-    "14:00",
-    "15:00",
-    "16:00",
-    "17:00",
-    "18:00",
-    "19:00",
-  ];
+  const times: string[] = Array.from(
+    { length: 24 },
+    (_, i) => i.toString().padStart(2, "0") + ":00"
+  );
 
   const treatments = [
     "예방접종",
@@ -230,35 +223,40 @@ function HospitalInfo() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <Label children="휴무일 등록" />
-        <Calendar selectedDates={selectedDates} onSelectDate={toggleDate} />
+        <Label children="운영시간" />
+        <div className="flex gap-2">
+          <SelectBox
+            placeholder="시작시간"
+            options={times.map((t) => ({ value: t, label: t }))}
+            value={startTime || ""}
+            onChange={setStartTime}
+          />
+
+          <SelectBox
+            placeholder="종료시간"
+            options={times.map((t) => ({ value: t, label: t }))}
+            value={endTime || ""}
+            onChange={setEndTime}
+          />
+
+          <MultiSelectBox
+            placeholder="휴계시간"
+            options={times.map((t) => ({ value: t, label: t }))}
+            selectedValues={breakTimes}
+            onChange={(value) => {
+              setBreakTimes((prev) =>
+                prev.includes(value)
+                  ? prev.filter((v) => v !== value)
+                  : [...prev, value]
+              );
+            }}
+          />
+        </div>
       </div>
 
       <div className="flex flex-col gap-1">
-        <Label children="운영시간" />
-        <div className="grid grid-cols-4 gap-2">
-          {times.map((time) => (
-            <Button
-              key={time}
-              variant="secondary"
-              label={time}
-              toggleable
-              active={selectedTimes.includes(time)}
-              onClick={() => toggleTime(time)}
-              className="w-full"
-            />
-          ))}
-        </div>
-
-        <Button
-          key="24시간 영업"
-          variant="secondary"
-          label="24시간 영업"
-          toggleable
-          active={selectedTimes.includes("24시간")}
-          onClick={() => toggleTime("24시간")}
-          className="w-35"
-        />
+        <Label children="휴무일 등록" />
+        <Calendar selectedDates={selectedDates} onSelectDate={toggleDate} />
       </div>
     </div>
   );
