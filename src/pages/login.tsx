@@ -12,6 +12,8 @@ function Login() {
   const [password, setPassword] = useState("");
   const [autoLogin, setAutoLogin] = useState(false);
 
+  const [isUser, setIsUser] = useState(true);
+
   const handleSignupClick = () => {
     navigate("/signup");
   };
@@ -72,12 +74,20 @@ function Login() {
       </header>
 
       <main className="flex flex-col items-center justify-center flex-1 gap-4 px-6 -mt-[10vh]">
+        {/* 사용자 / 관리자 선택 */}
         <div className="flex w-full mb-7">
-          <Button className="w-full" variant="user" label="사용자" />
           <Button
             className="w-full"
-            disabled={true}
             variant="user"
+            active={isUser}
+            onClick={() => setIsUser(true)}
+            label="사용자"
+          />
+          <Button
+            className="w-full"
+            variant="user"
+            active={!isUser}
+            onClick={() => setIsUser(false)}
             label="관리자"
           />
         </div>

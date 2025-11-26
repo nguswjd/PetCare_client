@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import type { SelectOption } from "@/components/ui/selectbox";
 
 export const useSignupForm = () => {
-  const [isUser, setIsUser] = useState(true);
-
   const [form, setForm] = useState({
     name: "",
     username: "",
@@ -37,7 +35,7 @@ export const useSignupForm = () => {
   const [species, setSpecies] = useState<SelectOption[]>([]);
   const [breeds, setBreeds] = useState<SelectOption[]>([]);
 
-  const commonValid =
+  const isValid =
     !!form.name &&
     !!form.username &&
     !!form.password &&
@@ -48,16 +46,6 @@ export const useSignupForm = () => {
     !errors.phone &&
     verified.username &&
     verified.phone;
-
-  const isValid = isUser
-    ? commonValid
-    : commonValid &&
-      !!form.businessName &&
-      !!form.businessNumber &&
-      !!form.address &&
-      !!form.postalCode &&
-      !errors.businessNumber &&
-      verified.businessNumber;
 
   useEffect(() => {
     const fetchSpecies = async () => {
@@ -337,42 +325,6 @@ export const useSignupForm = () => {
     }
   };
 
-  const openAddressSearch = () => {
-    return new Promise<{
-      address: string;
-      zonecode: string;
-    }>((resolve, reject) => {
-      new (window as any).daum.Postcode({
-        oncomplete: function (data: any) {
-          resolve({
-            address: data.address,
-            zonecode: data.zonecode,
-          });
-        },
-        onclose: function () {
-          reject(new Error("주소 검색 창이 닫혔습니다."));
-        },
-      }).open();
-    });
-  };
-
-  const handleAddressSearch = async () => {
-    try {
-      const result = await openAddressSearch();
-      setForm((prev) => ({
-        ...prev,
-        address: result.address,
-        postalCode: result.zonecode,
-      }));
-    } catch (err) {
-      console.error("주소 검색 실패:", err);
-    }
-  };
-
-  const setUserType = (value: boolean) => {
-    setIsUser(value);
-  };
-
   return {
     form,
     errors,
@@ -380,8 +332,6 @@ export const useSignupForm = () => {
     species,
     breeds,
     isValid,
-    isUser,
-    setUserType,
     handleChange,
     resetVerification,
     checkUsernameDuplicate,
@@ -389,6 +339,5 @@ export const useSignupForm = () => {
     checkPhoneDuplicate,
     checkHospitalNumberDuplicate,
     checkBusinessNumberDuplicate,
-    handleAddressSearch,
   };
 };

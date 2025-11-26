@@ -8,11 +8,11 @@ interface Day {
 }
 
 interface CalendarProps {
-  selectedDate: Date | null;
+  selectedDates: Date[];
   onSelectDate: (date: Date) => void;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectDate }) => {
+const Calendar: React.FC<CalendarProps> = ({ selectedDates, onSelectDate }) => {
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(today);
 
@@ -56,7 +56,6 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectDate }) => {
       currentDate.getMonth() - 1,
       1
     );
-
     if (
       prevMonth.getFullYear() < today.getFullYear() ||
       (prevMonth.getFullYear() === today.getFullYear() &&
@@ -64,7 +63,6 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectDate }) => {
     ) {
       return;
     }
-
     setCurrentDate(prevMonth);
   };
 
@@ -93,8 +91,11 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectDate }) => {
     onSelectDate(day.date);
   };
 
+  const isSelected = (date: Date) =>
+    selectedDates.some((d) => d.toDateString() === date.toDateString());
+
   return (
-    <div className="w-full max-w-md mx-auto p-4">
+    <div className="w-full max-w-md mx-auto">
       <div className="flex px-15 justify-between items-center mb-2">
         <Button
           icon={ChevronLeft}
@@ -124,26 +125,23 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectDate }) => {
 
       <div className="grid grid-cols-7 gap-1 text-center">
         {days.map((day, idx) => {
-          const isSelected =
-            selectedDate?.toDateString() === day.date.toDateString();
-          const isPast =
+          const past =
             day.date <
             new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
           return (
             <button
               key={idx}
-              disabled={isPast}
+              disabled={past}
               onClick={() => handleSelectDate(day)}
               className={`w-10 h-10 flex justify-center items-center rounded-full transition-colors
                 ${!day.isCurrentMonth ? "text-gray-3" : ""}
-                ${isPast ? "text-gray-3 cursor-not-allowed" : ""}
+                ${past ? "text-gray-3 cursor-not-allowed" : ""}
                 ${
-                  isSelected
+                  isSelected(day.date)
                     ? "bg-main-1 text-white"
                     : "bg-white hover:bg-main-2/30"
-                }
-              `}
+                }`}
             >
               {day.date.getDate()}
             </button>
