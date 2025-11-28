@@ -6,11 +6,13 @@ import { MultiSelectBox } from "./ui/multi-selectbox";
 import { SelectBox } from "./ui/selectbox";
 import Input from "./ui/input";
 import Calendar from "./ui/calendar";
+import { Upload, X } from "lucide-react";
 
 function HospitalInfo() {
   const [Parking, setParking] = useState("yes");
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [selectedTreatments, setSelectedTreatments] = useState<string[]>([]);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
   const [animalTypes, setAnimalTypes] = useState<
     Array<{ code: string; description: string }>
@@ -146,8 +148,58 @@ function HospitalInfo() {
         : times.filter((t) => t > startTime && t < endTime)
       : times;
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadedImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setUploadedImage(null);
+  };
+
   return (
     <div className="w-full flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <div className="flex justify-between items-center">
+          <Label children="병원이미지 업로드" />
+          <label
+            htmlFor="image-upload"
+            className="cursor-pointer inline-flex items-center justify-center p-2 rounded-lg transition-colors"
+          >
+            <Upload className="w-5 h-5" />
+          </label>
+          <input
+            id="image-upload"
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+        </div>
+
+        {uploadedImage && (
+          <div className="relative w-full aspect-video">
+            <img
+              src={uploadedImage}
+              alt="병원 이미지"
+              className="w-full h-full object-cover rounded-lg"
+            />
+            <X
+              onClick={removeImage}
+              className="absolute top-2 w-5 h-5 right-2  text-black rounded-full flex items-center justify-center hover:bg-gray-2"
+            />
+          </div>
+        )}
+      </div>
+
       <div className="flex flex-col gap-1">
         <Label children="주차장 여부" />
         <Radio
@@ -205,7 +257,7 @@ function HospitalInfo() {
             readOnly
           />
           <textarea
-            className="text-sm p-0 text-gray-5 border-none resize-none outline-none bg-transparent w-full min-h-[20px]"
+            className="text-sm p-0 text-gray-5 border-none resize-none outline-none bg-transparent w-full min-h-5"
             value={getBreedsHashtags()}
             readOnly
             rows={1}
