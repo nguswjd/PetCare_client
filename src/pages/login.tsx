@@ -25,8 +25,11 @@ function Login() {
   const handleLogin = async () => {
     try {
       const API_URL = import.meta.env.VITE_API_URL;
+      const loginPath = isUser
+        ? "/api/v1/auth/login"
+        : "/api/v1/hospital/auth/login";
 
-      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+      const response = await fetch(`${API_URL}${loginPath}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -53,7 +56,12 @@ function Login() {
         localStorage.removeItem("autoLogin");
       }
 
-      navigate("/");
+      if (isUser) {
+        navigate("/");
+      } else {
+        navigate("/hospital-main");
+      }
+
       window.location.reload();
     } catch (error) {
       console.error("로그인 요청 오류:", error);
@@ -74,7 +82,6 @@ function Login() {
       </header>
 
       <main className="flex flex-col items-center justify-center flex-1 gap-4 px-6 -mt-[10vh]">
-        {/* 사용자 / 관리자 선택 */}
         <div className="flex w-full mb-7">
           <Button
             className="w-full"

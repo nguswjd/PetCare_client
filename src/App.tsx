@@ -6,6 +6,7 @@ import Hospital from "./pages/hospital";
 import Review from "./pages/review";
 import Mypage from "./pages/mypage";
 import Reservation from "./pages/reservation";
+import HospitalMain from "./pages/hospital-mainpage";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
       <Route path="/hospital/:id/review" element={<Review />} />
       <Route path="/mypage" element={<Mypage />} />
       <Route path="/hospital/:id/reservation" element={<Reservation />} />
+      <Route path="/hospital-main" element={<HospitalMain />} />
     </Routes>
   );
 }
