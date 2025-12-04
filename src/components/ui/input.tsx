@@ -24,16 +24,24 @@ interface InputProps
   extends Omit<React.ComponentProps<"input">, "size">,
     VariantProps<typeof inputVariants> {
   leftIcon?: LucideIcon;
+  onLeftIconClick?: () => void;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, variant, leftIcon, ...props }, ref) => {
+  ({ className, variant, leftIcon, onLeftIconClick, ...props }, ref) => {
     if (variant === "Search") {
       const LeftIcon = leftIcon || ChevronLeft;
 
       return (
         <div className="h-14 items-center flex px-5 ">
-          <Button icon={LeftIcon} variant="icon" />
+          <Button
+            icon={LeftIcon}
+            variant="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onLeftIconClick) onLeftIconClick();
+            }}
+          />
           <input
             className={cn(inputVariants({ variant }), className)}
             ref={ref}

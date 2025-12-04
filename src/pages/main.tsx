@@ -123,7 +123,7 @@ function MainPage() {
 
   return (
     <div className="bg-white flex flex-col h-dvh">
-      <header>
+      <header onClick={() => navigate("/search")}>
         <Input
           leftIcon={MapPin}
           placeholder="검색어를 입력해주세요."
