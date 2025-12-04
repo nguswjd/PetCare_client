@@ -8,11 +8,30 @@ import Input from "./ui/input";
 import Calendar from "./ui/calendar";
 import { Upload, X } from "lucide-react";
 
-function HospitalInfo() {
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+
+interface HospitalInfoProps {
+  onDataChange?: (data: HospitalFormData) => void;
+}
+
+export interface HospitalFormData {
+  hasParking: boolean;
+  departments: string[];
+  animalTypes: string[];
+  breeds: string[];
+  holidays: string[];
+  operatingStartTime: string | null;
+  operatingEndTime: string | null;
+  breakTimes: string[];
+  imageFile: File | null;
+}
+
+function HospitalInfo({ onDataChange }: HospitalInfoProps) {
   const [Parking, setParking] = useState("yes");
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [selectedTreatments, setSelectedTreatments] = useState<string[]>([]);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const [animalTypes, setAnimalTypes] = useState<
     Array<{ code: string; description: string }>
@@ -52,7 +71,9 @@ function HospitalInfo() {
   useEffect(() => {
     const fetchAnimalTypes = async () => {
       try {
-        const response = await fetch("/api/v1/auth/animal-types");
+        const response = await fetch(
+          `${API_BASE_URL}/api/v1/auth/animal-types`
+        );
         const data = await response.json();
         setAnimalTypes(data.types || []);
       } catch (error) {
@@ -72,11 +93,14 @@ function HospitalInfo() {
     const fetchAllBreeds = async () => {
       try {
         const breedPromises = selectedAnimalTypes.map((type) =>
-          fetch(`/api/v1/auth/breeds/${type}`).then((res) => res.json())
+          fetch(`${API_BASE_URL}/api/v1/auth/breeds/${type}`).then((res) =>
+            res.json()
+          )
         );
         const results = await Promise.all(breedPromises);
 
-        const allBreeds = results.flatMap((data) => data.breeds || []);
+        const allBreeds: Array<{ code: string; description: string }> =
+          results.flatMap((data) => data.breeds || []);
         const uniqueBreeds = Array.from(
           new Map(allBreeds.map((breed) => [breed.code, breed])).values()
         );
@@ -89,6 +113,33 @@ function HospitalInfo() {
 
     fetchAllBreeds();
   }, [selectedAnimalTypes]);
+
+  useEffect(() => {
+    if (onDataChange) {
+      onDataChange({
+        hasParking: Parking === "yes",
+        departments: selectedTreatments,
+        animalTypes: selectedAnimalTypes,
+        breeds: selectedBreeds,
+        holidays: selectedDates.map((d) => d.toISOString().split("T")[0]),
+        operatingStartTime: startTime,
+        operatingEndTime: endTime,
+        breakTimes: breakTimes,
+        imageFile: imageFile,
+      });
+    }
+  }, [
+    Parking,
+    selectedTreatments,
+    selectedAnimalTypes,
+    selectedBreeds,
+    selectedDates,
+    startTime,
+    endTime,
+    breakTimes,
+    imageFile,
+    onDataChange,
+  ]);
 
   const toggleDate = (date: Date) => {
     setSelectedDates((prev) => {
@@ -158,11 +209,14 @@ function HospitalInfo() {
         setUploadedImage(reader.result as string);
       };
       reader.readAsDataURL(file);
+
+      setImageFile(file);
     }
   };
 
   const removeImage = () => {
     setUploadedImage(null);
+    setImageFile(null);
   };
 
   return (
