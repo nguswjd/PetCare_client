@@ -24,16 +24,31 @@ interface InputProps
   extends Omit<React.ComponentProps<"input">, "size">,
     VariantProps<typeof inputVariants> {
   leftIcon?: LucideIcon;
+  rightIcon?: LucideIcon;
   onLeftIconClick?: () => void;
+  onRightIconClick?: () => void;
+  onSearchClick?: () => void; // 검색 버튼 클릭 핸들러 추가
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, variant, leftIcon, onLeftIconClick, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      leftIcon,
+      rightIcon,
+      onLeftIconClick,
+      onRightIconClick,
+      ...props
+    },
+    ref
+  ) => {
     if (variant === "Search") {
       const LeftIcon = leftIcon || ChevronLeft;
+      const RightIcon = rightIcon || SearchIcon;
 
       return (
-        <div className="h-14 items-center flex px-5 ">
+        <div className="h-14 items-center flex px-5">
           <Button
             icon={LeftIcon}
             variant="icon"
@@ -47,7 +62,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             {...props}
           />
-          <Button icon={SearchIcon} variant="icon" />
+          <Button
+            icon={RightIcon}
+            variant="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onRightIconClick) {
+                onRightIconClick();
+              }
+            }}
+          />
         </div>
       );
     }
@@ -63,4 +87,5 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 );
 
 Input.displayName = "Input";
+
 export default Input;
