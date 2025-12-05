@@ -15,7 +15,7 @@ interface HospitalInfo {
   id: number;
   name: string;
   address: string;
-  businessStatus: string;
+  operatingStatus: string;
   image: string;
   alt: string;
   distance?: string;
@@ -70,8 +70,9 @@ function Hospital() {
     if (!id) return;
 
     const token = localStorage.getItem("token");
+    const BASE_URL = import.meta.env.VITE_API_URL;
 
-    fetch(`/api/v1/hospital/${id}`, {
+    fetch(`${BASE_URL}/api/v1/hospital/${id}`, {
       headers: {
         "Content-Type": "application/json",
         ...(token && { Authorization: `Bearer ${token}` }),
@@ -88,7 +89,7 @@ function Hospital() {
           id: Number(id),
           name: data.name,
           address: data.address,
-          businessStatus: data.status,
+          operatingStatus: data.operatingStatus,
           image: data.imageUrl,
           alt: data.description,
           hasParking: data.hasParking,
@@ -143,7 +144,7 @@ function Hospital() {
                 </p>
               </div>
               <div className="flex gap-2 text-gray-6 font-medium text-sm">
-                <p>{hospitalInfo.businessStatus}</p>
+                <p>{hospitalInfo.operatingStatus}</p>
                 {hospitalInfo.distance && <p>{hospitalInfo.distance}</p>}
               </div>
             </div>
