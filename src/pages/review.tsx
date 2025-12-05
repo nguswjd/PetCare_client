@@ -29,9 +29,9 @@ function Review() {
   useEffect(() => {
     if (!id) return;
 
-    const API_URL = import.meta.env.MODE === "development" ? "" : "";
+    const BASE_URL = import.meta.env.VITE_API_URL;
 
-    fetch(`${API_URL}/api/v1/hospital/${id}`)
+    fetch(`${BASE_URL}/api/v1/hospital/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setHospitalInfo({
