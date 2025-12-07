@@ -3,6 +3,7 @@ import type { SelectOption } from "@/components/ui/selectbox";
 
 export const useSignupForm = () => {
   const [isUser, setIsUser] = useState(true);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -18,6 +19,15 @@ export const useSignupForm = () => {
     address: "",
     detailAddress: "",
     postalCode: "",
+    hasParking: "",
+    departments: "",
+    animalTypes: "",
+    breeds: "",
+    holidays: "",
+    operatingStartTime: "",
+    operatingEndTime: "",
+    breakTimes: "",
+    description: "",
   });
 
   const [errors, setErrors] = useState({
@@ -381,6 +391,8 @@ export const useSignupForm = () => {
     breeds,
     isValid,
     isUser,
+    imageFile,
+    setImageFile,
     setUserType,
     handleChange,
     resetVerification,

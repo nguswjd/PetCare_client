@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { Checkbox } from "./ui/checkbox";
 import { Radio } from "./ui/radio";
@@ -44,6 +44,12 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
   const [startTime, setStartTime] = useState<string | null>(null);
   const [endTime, setEndTime] = useState<string | null>(null);
   const [breakTimes, setBreakTimes] = useState<string[]>([]);
+
+  const onDataChangeRef = useRef(onDataChange);
+
+  useEffect(() => {
+    onDataChangeRef.current = onDataChange;
+  }, [onDataChange]);
 
   const times: string[] = Array.from(
     { length: 24 },
@@ -115,8 +121,8 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
   }, [selectedAnimalTypes]);
 
   useEffect(() => {
-    if (onDataChange) {
-      onDataChange({
+    if (onDataChangeRef.current) {
+      onDataChangeRef.current({
         hasParking: Parking === "yes",
         departments: selectedTreatments,
         animalTypes: selectedAnimalTypes,
@@ -138,7 +144,6 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
     endTime,
     breakTimes,
     imageFile,
-    onDataChange,
   ]);
 
   const toggleDate = (date: Date) => {
