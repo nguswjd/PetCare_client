@@ -50,13 +50,25 @@ function SignUp() {
           marketingConsent: terms.marketingConsent,
         };
 
+        console.log("=== User 회원가입 payload ===", payload);
+
         const response = await fetch(`${API_URL}/api/v1/auth/signup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
 
-        if (!response.ok) throw new Error("회원가입 실패");
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error(
+            "응답 상태:",
+            response.status,
+            "응답 데이터:",
+            errorData
+          );
+          throw new Error(errorData.message || "회원가입 실패");
+        }
+
         alert("회원가입 성공!");
         navigate("/login");
       } else {
@@ -73,33 +85,59 @@ function SignUp() {
         );
         formData.append("address", signupForm.form.address);
 
-        if (signupForm.form.hasParking) {
-          formData.append("hasParking", signupForm.form.hasParking);
+        if (signupForm.form.hasParking !== undefined) {
+          formData.append("hasParking", String(signupForm.form.hasParking));
         }
-        if (signupForm.form.departments) {
-          formData.append("departments", signupForm.form.departments);
+
+        if (
+          signupForm.form.departments &&
+          signupForm.form.departments.length > 0
+        ) {
+          formData.append(
+            "departments",
+            JSON.stringify(signupForm.form.departments)
+          );
         }
-        if (signupForm.form.animalTypes) {
-          formData.append("animalTypes", signupForm.form.animalTypes);
+
+        if (
+          signupForm.form.animalTypes &&
+          signupForm.form.animalTypes.length > 0
+        ) {
+          formData.append(
+            "animalTypes",
+            JSON.stringify(signupForm.form.animalTypes)
+          );
         }
-        if (signupForm.form.breeds) {
-          formData.append("breeds", signupForm.form.breeds);
+
+        if (signupForm.form.breeds && signupForm.form.breeds.length > 0) {
+          formData.append("breeds", JSON.stringify(signupForm.form.breeds));
         }
-        if (signupForm.form.holidays) {
-          formData.append("holidays", signupForm.form.holidays);
+
+        if (signupForm.form.holidays && signupForm.form.holidays.length > 0) {
+          formData.append("holidays", JSON.stringify(signupForm.form.holidays));
         }
+
         if (signupForm.form.operatingStartTime) {
           formData.append(
             "operatingStartTime",
             signupForm.form.operatingStartTime
           );
         }
+
         if (signupForm.form.operatingEndTime) {
           formData.append("operatingEndTime", signupForm.form.operatingEndTime);
         }
-        if (signupForm.form.breakTimes) {
-          formData.append("breakTimes", signupForm.form.breakTimes);
+
+        if (
+          signupForm.form.breakTimes &&
+          signupForm.form.breakTimes.length > 0
+        ) {
+          formData.append(
+            "breakTimes",
+            JSON.stringify(signupForm.form.breakTimes)
+          );
         }
+
         if (signupForm.form.description) {
           formData.append("description", signupForm.form.description);
         }
@@ -114,15 +152,16 @@ function SignUp() {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
+          const errorData = await response.json().catch(() => ({}));
+          console.error("응답 상태:", response.status);
+          console.error("응답 데이터:", errorData);
           throw new Error(errorData.message || "회원가입 실패");
         }
 
-        alert("병원 등록 요청이 완료되었습니다!");
         navigate("/login");
       }
     } catch (err) {
-      console.error(err);
+      console.error("회원가입 에러:", err);
       alert(
         err instanceof Error ? err.message : "회원가입 중 오류가 발생했습니다."
       );
