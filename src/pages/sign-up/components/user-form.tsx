@@ -35,6 +35,15 @@ function UserForm({ signupForm }: UserFormProps) {
   const isMatch = passwordConfirm && password === passwordConfirm;
   const isNotMatch = passwordConfirm && password !== passwordConfirm;
 
+  const formatBusinessNumber = (value: string) => {
+    const digits = value.replace(/\D/g, "");
+    const len = digits.length;
+
+    if (len < 4) return digits;
+    if (len < 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5, 10)}`;
+  };
+
   return (
     <div className="w-full flex flex-col">
       <div>
@@ -180,7 +189,10 @@ function UserForm({ signupForm }: UserFormProps) {
                   placeholder="사업자 번호"
                   value={signupForm.form.businessNumber}
                   onChange={(e) =>
-                    signupForm.handleChange("businessNumber", e.target.value)
+                    signupForm.handleChange(
+                      "businessNumber",
+                      formatBusinessNumber(e.target.value)
+                    )
                   }
                 />
                 <Button
