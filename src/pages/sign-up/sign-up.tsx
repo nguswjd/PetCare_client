@@ -38,13 +38,15 @@ function SignUp() {
       const API_URL = import.meta.env.VITE_API_URL;
 
       if (signupForm.isUser) {
+        const normalize = (v: string) => (v === "" ? null : v);
+
         const payload = {
           name: signupForm.form.name,
           username: signupForm.form.username,
           password: signupForm.form.password,
           phoneNumber: signupForm.form.phone,
-          species: signupForm.form.species,
-          breed: signupForm.form.breed,
+          species: normalize(signupForm.form.species),
+          breed: normalize(signupForm.form.breed),
           marketingConsent: terms.marketingConsent,
         };
 
