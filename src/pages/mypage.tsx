@@ -63,6 +63,9 @@ function Mypage() {
   const [errors, setErrors] = useState<{ phone?: string }>({});
   const [verifiedPhone, setVerifiedPhone] = useState(false);
 
+  // 로딩 상태 추가
+  const [isLoading, setIsLoading] = useState(true);
+
   const getAnimalTypeLabel = (value: string) => {
     const found = animalTypes.find((option) => option.value === value);
     return found ? found.label : value;
@@ -75,14 +78,17 @@ function Mypage() {
   };
 
   useEffect(() => {
+    // 토큰 확인을 먼저 수행
+    const token = localStorage.getItem("token");
+
+    // 토큰이 없으면 즉시 로그인 페이지로 리다이렉트 (API 호출 안함)
+    if (!token) {
+      navigate("/login", { replace: true });
+      return;
+    }
+
     const fetchUserInfo = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          navigate("/login");
-          return;
-        }
-
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(`${API_URL}/api/v1/auth/me`, {
           headers: {
@@ -91,7 +97,15 @@ function Mypage() {
           },
         });
 
-        if (!res.ok) throw new Error("유저 정보 불러오기 실패");
+        if (!res.ok) {
+          // 401 에러 등 인증 실패 시 로그인 페이지로
+          if (res.status === 401) {
+            localStorage.removeItem("token");
+            navigate("/login", { replace: true });
+            return;
+          }
+          throw new Error("유저 정보 불러오기 실패");
+        }
 
         const data = await res.json();
 
@@ -110,9 +124,12 @@ function Mypage() {
           breed: data.breed,
           phone: data.phoneNumber,
         });
+
+        setIsLoading(false);
       } catch (err) {
         console.error(err);
-        navigate("/login");
+        localStorage.removeItem("token");
+        navigate("/login", { replace: true });
       }
     };
 
@@ -329,7 +346,9 @@ function Mypage() {
     }
   };
 
-  if (!displayUser.name) return <LoadingPage message="로딩중..." />;
+  // 로딩 중이거나 displayUser.name이 없으면 로딩 페이지 표시
+  if (isLoading || !displayUser.name)
+    return <LoadingPage message="로딩중..." />;
 
   return (
     <div className="h-dvh bg-white flex flex-col">
