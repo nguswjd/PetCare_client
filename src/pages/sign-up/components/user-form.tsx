@@ -29,6 +29,12 @@ function UserForm({ signupForm }: UserFormProps) {
     }
   };
 
+  const password = signupForm.form.password;
+  const passwordConfirm = signupForm.form.passwordConfirm;
+  const isShortPassword = password.length > 0 && password.length < 6;
+  const isMatch = passwordConfirm && password === passwordConfirm;
+  const isNotMatch = passwordConfirm && password !== passwordConfirm;
+
   return (
     <div className="w-full flex flex-col">
       <div>
@@ -72,11 +78,13 @@ function UserForm({ signupForm }: UserFormProps) {
               onClick={handleCheckUsername}
             />
           </div>
+
           {signupForm.errors.username && (
             <span className="text-red ml-2 text-xs">
               {signupForm.errors.username}
             </span>
           )}
+
           {signupForm.verified.username && !signupForm.errors.username && (
             <span className="text-blue-2 ml-2 text-xs">
               사용 가능한 아이디입니다.
@@ -84,20 +92,45 @@ function UserForm({ signupForm }: UserFormProps) {
           )}
         </div>
 
-        <Input
-          placeholder="비밀번호"
-          type="password"
-          value={signupForm.form.password}
-          onChange={(e) => signupForm.handleChange("password", e.target.value)}
-        />
-        <Input
-          placeholder="비밀번호 확인"
-          type="password"
-          value={signupForm.form.passwordConfirm}
-          onChange={(e) =>
-            signupForm.handleChange("passwordConfirm", e.target.value)
-          }
-        />
+        <div className="flex flex-col gap-1">
+          <Input
+            placeholder="비밀번호"
+            type="password"
+            value={password}
+            onChange={(e) =>
+              signupForm.handleChange("password", e.target.value)
+            }
+          />
+
+          {isShortPassword && (
+            <span className="text-red ml-2 text-xs">
+              비밀번호는 최소 6자 이상이어야 합니다.
+            </span>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <Input
+            placeholder="비밀번호 확인"
+            type="password"
+            value={passwordConfirm}
+            onChange={(e) =>
+              signupForm.handleChange("passwordConfirm", e.target.value)
+            }
+          />
+
+          {isNotMatch && !isShortPassword && (
+            <span className="text-red ml-2 text-xs">
+              비밀번호가 일치하지 않습니다.
+            </span>
+          )}
+
+          {isMatch && !isShortPassword && (
+            <span className="text-blue-2 ml-2 text-xs">
+              비밀번호가 일치합니다.
+            </span>
+          )}
+        </div>
 
         {!signupForm.isUser && (
           <Input
@@ -125,11 +158,13 @@ function UserForm({ signupForm }: UserFormProps) {
               onClick={handleCheckPhone}
             />
           </div>
+
           {signupForm.errors.phone && (
             <span className="text-red ml-2 text-xs">
               {signupForm.errors.phone}
             </span>
           )}
+
           {signupForm.verified.phone && !signupForm.errors.phone && (
             <span className="text-blue-2 ml-2 text-xs">
               사용 가능한 번호입니다.
@@ -156,11 +191,13 @@ function UserForm({ signupForm }: UserFormProps) {
                   onClick={signupForm.checkBusinessNumberDuplicate}
                 />
               </div>
+
               {signupForm.errors.businessNumber && (
                 <span className="text-red ml-2 text-xs">
                   {signupForm.errors.businessNumber}
                 </span>
               )}
+
               {signupForm.verified.businessNumber &&
                 !signupForm.errors.businessNumber && (
                   <span className="text-blue-2 ml-2 text-xs">
@@ -188,6 +225,7 @@ function UserForm({ signupForm }: UserFormProps) {
                   onClick={signupForm.handleAddressSearch}
                 />
               </div>
+
               <div className="flex gap-2">
                 <Input
                   placeholder="우편번호"
