@@ -63,7 +63,6 @@ function Mypage() {
   const [errors, setErrors] = useState<{ phone?: string }>({});
   const [verifiedPhone, setVerifiedPhone] = useState(false);
 
-  // 로딩 상태 추가
   const [isLoading, setIsLoading] = useState(true);
 
   const getAnimalTypeLabel = (value: string) => {
@@ -78,10 +77,8 @@ function Mypage() {
   };
 
   useEffect(() => {
-    // 토큰 확인을 먼저 수행
     const token = localStorage.getItem("token");
 
-    // 토큰이 없으면 즉시 로그인 페이지로 리다이렉트 (API 호출 안함)
     if (!token) {
       navigate("/login", { replace: true });
       return;
@@ -98,7 +95,6 @@ function Mypage() {
         });
 
         if (!res.ok) {
-          // 401 에러 등 인증 실패 시 로그인 페이지로
           if (res.status === 401) {
             localStorage.removeItem("token");
             navigate("/login", { replace: true });
@@ -346,7 +342,6 @@ function Mypage() {
     }
   };
 
-  // 로딩 중이거나 displayUser.name이 없으면 로딩 페이지 표시
   if (isLoading || !displayUser.name)
     return <LoadingPage message="로딩중..." />;
 
