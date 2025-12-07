@@ -13,6 +13,7 @@ function Login() {
   const [autoLogin, setAutoLogin] = useState(false);
 
   const [isUser, setIsUser] = useState(true);
+  const [error, setError] = useState("");
 
   const handleSignupClick = () => {
     navigate("/signup");
@@ -23,6 +24,7 @@ function Login() {
   };
 
   const handleLogin = async () => {
+    setError("");
     try {
       const API_URL = import.meta.env.VITE_API_URL;
       const loginPath = isUser
@@ -36,18 +38,14 @@ function Login() {
       });
 
       const data = await response.json();
-      console.log("로그인 응답:", data);
 
       if (!response.ok) {
-        alert(data.message || "로그인 실패");
+        setError("아이디 또는 비밀번호가 일치하지 않습니다.");
         return;
       }
 
       if (data.token) {
         localStorage.setItem("token", data.token);
-        console.log("토큰 저장 완료:", data.token);
-      } else {
-        console.warn("응답에 token이 없습니다!");
       }
 
       if (autoLogin) {
@@ -63,9 +61,8 @@ function Login() {
       }
 
       window.location.reload();
-    } catch (error) {
-      console.error("로그인 요청 오류:", error);
-      alert("서버에 연결할 수 없습니다.");
+    } catch (e) {
+      setError("서버에 연결할 수 없습니다.");
     }
   };
 
@@ -114,6 +111,8 @@ function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+
+          {error && <span className="text-red ml-1 text-xs">{error}</span>}
 
           <div className="w-full flex justify-start">
             <Checkbox
