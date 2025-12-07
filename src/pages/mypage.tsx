@@ -63,6 +63,8 @@ function Mypage() {
   const [errors, setErrors] = useState<{ phone?: string }>({});
   const [verifiedPhone, setVerifiedPhone] = useState(false);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   const getAnimalTypeLabel = (value: string) => {
     const found = animalTypes.find((option) => option.value === value);
     return found ? found.label : value;
@@ -75,14 +77,15 @@ function Mypage() {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login", { replace: true });
+      return;
+    }
+
     const fetchUserInfo = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          navigate("/login");
-          return;
-        }
-
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(`${API_URL}/api/v1/auth/me`, {
           headers: {
@@ -91,7 +94,14 @@ function Mypage() {
           },
         });
 
-        if (!res.ok) throw new Error("유저 정보 불러오기 실패");
+        if (!res.ok) {
+          if (res.status === 401) {
+            localStorage.removeItem("token");
+            navigate("/login", { replace: true });
+            return;
+          }
+          throw new Error("유저 정보 불러오기 실패");
+        }
 
         const data = await res.json();
 
@@ -110,9 +120,12 @@ function Mypage() {
           breed: data.breed,
           phone: data.phoneNumber,
         });
+
+        setIsLoading(false);
       } catch (err) {
         console.error(err);
-        navigate("/login");
+        localStorage.removeItem("token");
+        navigate("/login", { replace: true });
       }
     };
 
@@ -329,7 +342,8 @@ function Mypage() {
     }
   };
 
-  if (!displayUser.name) return <LoadingPage message="로딩중..." />;
+  if (isLoading || !displayUser.name)
+    return <LoadingPage message="로딩중..." />;
 
   return (
     <div className="h-dvh bg-white flex flex-col">

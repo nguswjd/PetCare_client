@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
-
 import LoadingPage from "../components/loading";
 import ErrorPage from "@/components/error";
-
 import Footer from "@/components/footer";
 import Header from "@/components/header";
 import Review from "@/components/review";
 import Button from "@/components/ui/button";
-
 import { PencilLine } from "lucide-react";
 
 interface HospitalInfo {
@@ -60,7 +57,6 @@ const reviews: ReviewType[] = [
 function Hospital() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-
   const [hospitalInfo, setHospitalInfo] = useState<HospitalInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -85,6 +81,7 @@ function Hospital() {
         return res.json();
       })
       .then((data) => {
+        console.log("받은 데이터:", data);
         setHospitalInfo({
           id: Number(id),
           name: data.name,
@@ -95,7 +92,7 @@ function Hospital() {
           hasParking: data.hasParking,
           animalTypes: data.animalTypes || [],
           departments: data.departments || [],
-          breeds: data.breeds,
+          breeds: data.breeds || [],
         });
         setLoading(false);
       })
