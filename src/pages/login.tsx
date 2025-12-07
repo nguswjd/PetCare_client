@@ -78,7 +78,12 @@ function Login() {
         </h1>
       </header>
 
-      <main className="flex flex-col items-center justify-center flex-1 gap-4 px-6 -mt-[10vh]">
+      <main
+        className="flex flex-col items-center justify-center flex-1 gap-4 px-6 -mt-[10vh]"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleLogin();
+        }}
+      >
         <div className="flex w-full mb-7">
           <Button
             className="w-full"
