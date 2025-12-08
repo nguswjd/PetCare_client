@@ -172,7 +172,7 @@ function Search() {
       <main className="flex-1 overflow-y-auto">
         {!hasSearched ? (
           <div className="p-6 flex flex-col gap-6">
-            <div className="flex items-center justify-between pb-5 border-b border-gray-3">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-3">
               <h2 className="text-base font-semibold">최근 검색</h2>
               {recentSearches.length > 0 && (
                 <button
