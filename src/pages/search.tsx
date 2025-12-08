@@ -123,8 +123,10 @@ function Search() {
     saveRecentSearch(search);
   };
 
-  const handleHospitalClick = (hospital: Hospital) => {
-    saveRecentSearch(hospital.name);
+  const handleHospitalClick = (hospital: Hospital, saveToRecent = false) => {
+    if (saveToRecent) {
+      saveRecentSearch(hospital.name);
+    }
     navigate(`/hospital/${hospital.id}`);
   };
 
