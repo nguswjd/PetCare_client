@@ -1,10 +1,8 @@
 import { useNavigate } from "react-router";
 import { useState, useEffect } from "react";
-
 import Input from "../components/ui/input";
 import Field from "../components/ui/field";
 import Card from "../components/ui/card";
-
 import { ChevronLeft, X } from "lucide-react";
 
 interface Hospital {
@@ -25,6 +23,12 @@ interface Hospital {
   description?: string;
 }
 
+interface SearchHistoryItem {
+  id: number;
+  keyword: string;
+  createdAt: string;
+}
+
 function Search() {
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState("");
@@ -33,12 +37,21 @@ function Search() {
   const [, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isRealTimeSearch, setIsRealTimeSearch] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const BASE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    const saved = localStorage.getItem("recentSearches");
-    if (saved) setRecentSearches(JSON.parse(saved));
+    const token = localStorage.getItem("token");
+    const loggedIn = !!token;
+    setIsLoggedIn(loggedIn);
+
+    if (loggedIn) {
+      fetchUserSearchHistory();
+    } else {
+      const saved = localStorage.getItem("recentSearches");
+      if (saved) setRecentSearches(JSON.parse(saved));
+    }
   }, []);
 
   useEffect(() => {
@@ -57,50 +70,207 @@ function Search() {
     return () => clearTimeout(timer);
   }, [keyword]);
 
+  const fetchUserSearchHistory = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      const decoded = atob(token);
+      const username = decoded.split(":")[0];
+
+      if (!username) {
+        return;
+      }
+
+      const userIdUrl = `${BASE_URL}/api/v1/users/username/${username}`;
+
+      const userRes = await fetch(userIdUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!userRes.ok) {
+        return;
+      }
+
+      const userData = await userRes.json();
+      const userId = userData.id;
+
+      if (!userId) {
+        return;
+      }
+
+      const historyUrl = `${BASE_URL}/api/v1/search-history/user/${userId}?page=0&size=10`;
+
+      const res = await fetch(historyUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+
+        const keywords: string[] = data.content.map(
+          (item: SearchHistoryItem) => item.keyword
+        );
+
+        const uniqueKeywords = Array.from(new Set(keywords));
+
+        setRecentSearches(uniqueKeywords);
+      }
+    } catch (err) {
+      const saved = localStorage.getItem("recentSearches");
+      if (saved) setRecentSearches(JSON.parse(saved));
+    }
+  };
+
   const saveRecentSearch = (search: string) => {
-    const updated = [
-      search,
-      ...recentSearches.filter((s) => s !== search),
-    ].slice(0, 10);
-    setRecentSearches(updated);
-    localStorage.setItem("recentSearches", JSON.stringify(updated));
+    if (isLoggedIn) {
+      const updated = [
+        search,
+        ...recentSearches.filter((s) => s !== search),
+      ].slice(0, 10);
+      setRecentSearches(updated);
+    } else {
+      const updated = [
+        search,
+        ...recentSearches.filter((s) => s !== search),
+      ].slice(0, 10);
+      setRecentSearches(updated);
+      localStorage.setItem("recentSearches", JSON.stringify(updated));
+    }
   };
 
-  const removeRecentSearch = (search: string) => {
-    const updated = recentSearches.filter((s) => s !== search);
-    setRecentSearches(updated);
-    localStorage.setItem("recentSearches", JSON.stringify(updated));
+  const removeRecentSearch = async (search: string) => {
+    if (isLoggedIn) {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const decoded = atob(token);
+        const username = decoded.split(":")[0];
+
+        const userIdUrl = `${BASE_URL}/api/v1/users/username/${username}`;
+        const userRes = await fetch(userIdUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          const userId = userData.id;
+
+          await fetch(
+            `${BASE_URL}/api/v1/search-history/user/${userId}/keyword/${encodeURIComponent(
+              search
+            )}`,
+            {
+              method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+        }
+
+        const updated = recentSearches.filter((s) => s !== search);
+        setRecentSearches(updated);
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      const updated = recentSearches.filter((s) => s !== search);
+      setRecentSearches(updated);
+      localStorage.setItem("recentSearches", JSON.stringify(updated));
+    }
   };
 
-  const clearAllRecentSearches = () => {
-    setRecentSearches([]);
-    localStorage.removeItem("recentSearches");
+  const clearAllRecentSearches = async () => {
+    if (isLoggedIn) {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const decoded = atob(token);
+        const username = decoded.split(":")[0];
+
+        const userIdUrl = `${BASE_URL}/api/v1/users/username/${username}`;
+        const userRes = await fetch(userIdUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          const userId = userData.id;
+
+          await fetch(`${BASE_URL}/api/v1/search-history/user/${userId}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+        }
+
+        setRecentSearches([]);
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      setRecentSearches([]);
+      localStorage.removeItem("recentSearches");
+    }
   };
 
-  async function fetchHospitals(params: Record<string, any>) {
+  async function fetchHospitals(
+    params: Record<string, any>,
+    saveHistory = false
+  ) {
     const query = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "")
         query.append(key, value);
     });
 
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+
+    if (saveHistory) {
+      const token = localStorage.getItem("token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+    }
+
     const res = await fetch(
-      `${BASE_URL}/api/v1/hospitals/search?${query.toString()}`
+      `${BASE_URL}/api/v1/hospitals/search?${query.toString()}`,
+      { headers }
     );
+
     if (!res.ok) throw new Error("검색 실패");
     return res.json();
   }
 
   const fetchSearchResults = async (searchKeyword: string, silent = false) => {
     if (!searchKeyword.trim()) return;
-
     if (!silent) setIsSearching(true);
     setHasSearched(true);
 
     try {
-      const hospitals: Hospital[] = await fetchHospitals({
-        keyword: searchKeyword,
-      });
+      const hospitals: Hospital[] = await fetchHospitals(
+        {
+          keyword: searchKeyword,
+        },
+        !silent
+      );
       setSearchResults(hospitals || []);
     } catch (err) {
       console.error(err);
@@ -132,10 +302,8 @@ function Search() {
 
   const highlightKeyword = (text: string, keyword: string) => {
     if (!keyword.trim()) return text;
-
     const regex = new RegExp(`(${keyword})`, "gi");
     const parts = text.split(regex);
-
     return (
       <>
         {parts.map((part, index) =>
@@ -183,7 +351,6 @@ function Search() {
                 </button>
               )}
             </div>
-
             {recentSearches.length === 0 ? (
               <p className="text-center text-gray-5 py-8">
                 최근 검색 내역이 없습니다
@@ -250,7 +417,6 @@ function Search() {
                 )}
               </div>
             )}
-
             {isRealTimeSearch && recentSearches.length > 0 && (
               <div className="p-6 flex flex-col gap-6">
                 <div className="flex items-center justify-between pb-5 border-b border-gray-3">
@@ -262,7 +428,6 @@ function Search() {
                     전체삭제
                   </button>
                 </div>
-
                 <div className="space-y-2">
                   {recentSearches.map((search, index) => (
                     <Field

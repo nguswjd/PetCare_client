@@ -205,7 +205,7 @@ function MainPage() {
           </section>
 
           <section className="flex flex-col gap-2">
-            <h2 className="text-base font-bold">이달의 리뷰왕</h2>
+            <h2 className="text-base font-bold">이달의 추천</h2>
             <Card
               size="lg"
               image={reviewKingHospital.image}

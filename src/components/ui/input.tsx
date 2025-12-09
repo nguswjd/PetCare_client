@@ -27,7 +27,7 @@ interface InputProps
   rightIcon?: LucideIcon;
   onLeftIconClick?: () => void;
   onRightIconClick?: () => void;
-  onSearchClick?: () => void; // 검색 버튼 클릭 핸들러 추가
+  onSearchClick?: () => void;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -39,6 +39,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       rightIcon,
       onLeftIconClick,
       onRightIconClick,
+      onSearchClick,
       ...props
     },
     ref
@@ -67,7 +68,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             variant="icon"
             onClick={(e) => {
               e.stopPropagation();
-              if (onRightIconClick) {
+              if (onSearchClick) {
+                onSearchClick();
+              } else if (onRightIconClick) {
                 onRightIconClick();
               }
             }}
