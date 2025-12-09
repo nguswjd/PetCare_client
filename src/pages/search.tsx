@@ -211,7 +211,7 @@ function Search() {
           const userData = await userRes.json();
           const userId = userData.id;
 
-          await fetch(`${BASE_URL}/api/v1/search-history/user/${userId}`, {
+          await fetch(`${BASE_URL}/api/v1/search-history/user/${userId}/all`, {
             method: "DELETE",
             headers: {
               Authorization: `Bearer ${token}`,
