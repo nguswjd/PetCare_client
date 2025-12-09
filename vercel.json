@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://petcare-server-lu1p.onrender.com/api/:path*"
+      "destination": "http://3.26.101.146:8080/api/:path*"
     },
     {
       "source": "/(.*)",
