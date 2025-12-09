@@ -30,7 +30,6 @@ function MainPage() {
       name: "A hospital",
       address: "제주시 외도동",
       businessStatus: "24시간 영업",
-      distance: "30km",
     },
     {
       id: 2,
@@ -39,7 +38,6 @@ function MainPage() {
       name: "B hospital",
       address: "제주시 아라동",
       businessStatus: "영업중",
-      distance: "30km",
     },
     {
       id: 3,
@@ -48,7 +46,6 @@ function MainPage() {
       name: "C hospital",
       address: "제주시 이도동",
       businessStatus: "영업종료",
-      distance: "30km",
     },
     {
       id: 4,
@@ -57,7 +54,6 @@ function MainPage() {
       name: "D hospital",
       address: "제주시 외도동",
       businessStatus: "24시간 영업",
-      distance: "30km",
     },
   ];
 
@@ -68,7 +64,6 @@ function MainPage() {
     name: "C hospital",
     address: "제주시 이도동",
     businessStatus: "영업종료",
-    distance: "30km",
   };
 
   const reviewKingHospital = {
@@ -78,7 +73,6 @@ function MainPage() {
     name: "D hospital",
     address: "제주시 이도동",
     businessStatus: "영업종료",
-    distance: "30km",
   };
 
   const scrollToIndex = (index: number) => {
@@ -180,7 +174,6 @@ function MainPage() {
                 name={hospital.name}
                 address={hospital.address}
                 businessStatus={hospital.businessStatus}
-                distance={hospital.distance}
                 onClick={() => navigate(`/hospital/${hospital.id}`)}
                 className="cursor-pointer"
               />
@@ -198,7 +191,6 @@ function MainPage() {
               name={closestHospital.name}
               address={closestHospital.address}
               businessStatus={closestHospital.businessStatus}
-              distance={closestHospital.distance}
               onClick={() => navigate(`/hospital/${closestHospital.id}`)}
               className="cursor-pointer"
             />
@@ -213,7 +205,6 @@ function MainPage() {
               name={reviewKingHospital.name}
               address={reviewKingHospital.address}
               businessStatus={reviewKingHospital.businessStatus}
-              distance={reviewKingHospital.distance}
               onClick={() => navigate(`/hospital/${reviewKingHospital.id}`)}
               className="cursor-pointer"
             />
