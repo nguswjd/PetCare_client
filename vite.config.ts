@@ -12,7 +12,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://petcare-server-lu1p.onrender.com",
+        target: "http://3.26.101.146:8080",
         changeOrigin: true,
       },
     },
