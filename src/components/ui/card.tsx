@@ -62,29 +62,35 @@ const Card = ({
         )}
       />
       {(name || address || content || businessStatus || distance) && (
-        <div className="grid grid-cols-2 items-center w-42">
-          {name && <p className="text-base font-semibold text-black">{name}</p>}
-          {address && (
-            <p className="text-sm font-normal text-gray-6">{address}</p>
-          )}
-          {size === "sm" ? (
-            content && (
-              <p className="font-medium text-sm text-gray-6 col-span-2">
-                {content}
-              </p>
-            )
-          ) : (
-            <>
-              {businessStatus && (
-                <p className="font-medium text-sm text-gray-7">
-                  {businessStatus}
+        <div className="items-center w-full">
+          <div className="flex gap-2 items-center">
+            {name && (
+              <p className="text-base font-semibold text-black">{name}</p>
+            )}
+            {address && (
+              <p className="text-sm font-normal text-gray-6">{address}</p>
+            )}
+          </div>
+          <div className="flex gap-2 items-center">
+            {size === "sm" ? (
+              content && (
+                <p className="font-medium text-sm text-gray-6 col-span-2">
+                  {content}
                 </p>
-              )}
-              {distance && (
-                <p className="font-medium text-sm text-gray-7">{distance}</p>
-              )}
-            </>
-          )}
+              )
+            ) : (
+              <>
+                {businessStatus && (
+                  <p className="font-medium text-sm text-gray-7">
+                    {businessStatus}
+                  </p>
+                )}
+                {distance && (
+                  <p className="font-medium text-sm text-gray-7">{distance}</p>
+                )}
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
