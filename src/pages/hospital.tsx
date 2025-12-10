@@ -125,7 +125,6 @@ function Hospital() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header Section */}
       <div className="sticky top-0 z-10 bg-white">
         <Header label={hospitalInfo.name} />
         <div>
@@ -152,7 +151,6 @@ function Hospital() {
         </div>
       </div>
 
-      {/* Main Content */}
       <main className="flex-1 overflow-y-auto scrollbar-hide flex items-center justify-center">
         {hasReview ? (
           <div className="w-full">
@@ -169,7 +167,6 @@ function Hospital() {
         )}
       </main>
 
-      {/* Footer Section */}
       <div className="sticky bottom-0 z-10 bg-white">
         {hasReview ? (
           <div className="flex flex-col items-center w-full">
