@@ -51,7 +51,7 @@ export const useSignupForm = () => {
     const fetchSpecies = async () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL;
-        const res = await fetch(`${API_URL}/api/v1/auth/animal-types`);
+        const res = await fetch(`${API_URL}/api/v1/animal-types`);
         if (!res.ok) throw new Error("동물 종류 불러오기 실패");
         const data = await res.json();
         const arrayData = Array.isArray(data) ? data : data.types || [];
@@ -78,9 +78,7 @@ export const useSignupForm = () => {
     const fetchBreeds = async () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL;
-        const res = await fetch(
-          `${API_URL}/api/v1/auth/breeds/${form.species}`
-        );
+        const res = await fetch(`${API_URL}/api/v1/breeds/${form.species}`);
         if (!res.ok) throw new Error("품종 불러오기 실패");
         const data = await res.json();
         const options: SelectOption[] = data.breeds.map((item: any) => ({

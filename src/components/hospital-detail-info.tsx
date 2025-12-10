@@ -26,12 +26,19 @@ export interface HospitalFormData {
   imageFile: File | null;
 }
 
+interface Department {
+  code: string;
+  description: string;
+}
+
 function HospitalInfo({ onDataChange }: HospitalInfoProps) {
   const [Parking, setParking] = useState("yes");
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
-  const [selectedTreatments, setSelectedTreatments] = useState<string[]>([]);
+  const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+
+  const [departments, setDepartments] = useState<Department[]>([]);
 
   const [animalTypes, setAnimalTypes] = useState<
     Array<{ code: string; description: string }>
@@ -56,17 +63,6 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
     (_, i) => i.toString().padStart(2, "0") + ":00"
   );
 
-  const treatments = [
-    "예방접종",
-    "내과/외과",
-    "치과/피부과/안과",
-    "중성화수술",
-    "건강검진",
-    "응급진료",
-    "정형외과/심장내과/중앙클리닉",
-    "기타",
-  ];
-
   const Label = ({
     children,
   }: {
@@ -75,15 +71,27 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
   }) => <label className="text-sm text-black">{children}</label>;
 
   useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/v1/departments`);
+        const data = await response.json();
+        setDepartments(data.departments || []);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
+
+  useEffect(() => {
     const fetchAnimalTypes = async () => {
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/v1/auth/animal-types`
-        );
+        const response = await fetch(`${API_BASE_URL}/api/v1/animal-types`);
         const data = await response.json();
         setAnimalTypes(data.types || []);
       } catch (error) {
-        console.error("동물 종류 조회 실패:", error);
+        console.error(error);
       }
     };
 
@@ -99,7 +107,7 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
     const fetchAllBreeds = async () => {
       try {
         const breedPromises = selectedAnimalTypes.map((type) =>
-          fetch(`${API_BASE_URL}/api/v1/auth/breeds/${type}`).then((res) =>
+          fetch(`${API_BASE_URL}/api/v1/breeds/${type}`).then((res) =>
             res.json()
           )
         );
@@ -112,7 +120,7 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
         );
         setBreeds(uniqueBreeds);
       } catch (error) {
-        console.error("품종 조회 실패:", error);
+        console.error(error);
         setBreeds([]);
       }
     };
@@ -124,7 +132,7 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
     if (onDataChangeRef.current) {
       onDataChangeRef.current({
         hasParking: Parking === "yes",
-        departments: selectedTreatments,
+        departments: selectedDepartments,
         animalTypes: selectedAnimalTypes,
         breeds: selectedBreeds,
         holidays: selectedDates.map((d) => d.toISOString().split("T")[0]),
@@ -136,7 +144,7 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
     }
   }, [
     Parking,
-    selectedTreatments,
+    selectedDepartments,
     selectedAnimalTypes,
     selectedBreeds,
     selectedDates,
@@ -155,11 +163,9 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
     });
   };
 
-  const toggleTreatment = (treatment: string) => {
-    setSelectedTreatments((prev) =>
-      prev.includes(treatment)
-        ? prev.filter((t) => t !== treatment)
-        : [...prev, treatment]
+  const toggleDepartment = (code: string) => {
+    setSelectedDepartments((prev) =>
+      prev.includes(code) ? prev.filter((d) => d !== code) : [...prev, code]
     );
   };
 
@@ -274,13 +280,13 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
       <div className="flex flex-col gap-1">
         <Label children="진료항목" />
         <div className="grid grid-cols-2 gap-2">
-          {treatments.map((treatment) => (
+          {departments.map((dept) => (
             <Checkbox
-              key={treatment}
+              key={dept.code}
               variant="secondary"
-              label={treatment}
-              checked={selectedTreatments.includes(treatment)}
-              onCheckedChange={() => toggleTreatment(treatment)}
+              label={dept.description}
+              checked={selectedDepartments.includes(dept.code)}
+              onCheckedChange={() => toggleDepartment(dept.code)}
             />
           ))}
         </div>

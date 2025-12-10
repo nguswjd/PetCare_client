@@ -58,7 +58,7 @@ function Reservation() {
       try {
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(
-          `${API_URL}/api/v1/auth/breeds/${selectedAnimalType}`
+          `${API_URL}/api/v1/breeds/${selectedAnimalType}`
         );
         if (!res.ok) throw new Error("품종 불러오기 실패");
 

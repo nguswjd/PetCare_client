@@ -85,36 +85,40 @@ function SignUp() {
         );
         formData.append("address", signupForm.form.address);
 
-        if (signupForm.form.hasParking !== undefined) {
-          formData.append("hasParking", String(signupForm.form.hasParking));
+        if (signupForm.form.hasParking) {
+          formData.append("hasParking", signupForm.form.hasParking);
         }
 
         if (
           signupForm.form.departments &&
-          signupForm.form.departments.length > 0
+          signupForm.form.departments !== "" &&
+          signupForm.form.departments !== "[]"
         ) {
-          formData.append(
-            "departments",
-            JSON.stringify(signupForm.form.departments)
-          );
+          formData.append("departments", signupForm.form.departments);
         }
 
         if (
           signupForm.form.animalTypes &&
-          signupForm.form.animalTypes.length > 0
+          signupForm.form.animalTypes !== "" &&
+          signupForm.form.animalTypes !== "[]"
         ) {
-          formData.append(
-            "animalTypes",
-            JSON.stringify(signupForm.form.animalTypes)
-          );
+          formData.append("animalTypes", signupForm.form.animalTypes);
         }
 
-        if (signupForm.form.breeds && signupForm.form.breeds.length > 0) {
-          formData.append("breeds", JSON.stringify(signupForm.form.breeds));
+        if (
+          signupForm.form.breeds &&
+          signupForm.form.breeds !== "" &&
+          signupForm.form.breeds !== "[]"
+        ) {
+          formData.append("breeds", signupForm.form.breeds);
         }
 
-        if (signupForm.form.holidays && signupForm.form.holidays.length > 0) {
-          formData.append("holidays", JSON.stringify(signupForm.form.holidays));
+        if (
+          signupForm.form.holidays &&
+          signupForm.form.holidays !== "" &&
+          signupForm.form.holidays !== "[]"
+        ) {
+          formData.append("holidays", signupForm.form.holidays);
         }
 
         if (signupForm.form.operatingStartTime) {
@@ -130,12 +134,10 @@ function SignUp() {
 
         if (
           signupForm.form.breakTimes &&
-          signupForm.form.breakTimes.length > 0
+          signupForm.form.breakTimes !== "" &&
+          signupForm.form.breakTimes !== "[]"
         ) {
-          formData.append(
-            "breakTimes",
-            JSON.stringify(signupForm.form.breakTimes)
-          );
+          formData.append("breakTimes", signupForm.form.breakTimes);
         }
 
         if (signupForm.form.description) {
@@ -144,6 +146,15 @@ function SignUp() {
 
         if (signupForm.imageFile) {
           formData.append("imageFile", signupForm.imageFile);
+        }
+
+        console.log("=== 병원 회원가입 FormData ===");
+        for (let [key, value] of formData.entries()) {
+          if (value instanceof File) {
+            console.log(`${key}: [File] ${value.name}`);
+          } else {
+            console.log(`${key}:`, value);
+          }
         }
 
         const response = await fetch(`${API_URL}/api/v1/hospital/auth/signup`, {
@@ -158,6 +169,7 @@ function SignUp() {
           throw new Error(errorData.message || "회원가입 실패");
         }
 
+        alert("병원 등록 요청이 완료되었습니다!");
         navigate("/login");
       }
     } catch (err) {

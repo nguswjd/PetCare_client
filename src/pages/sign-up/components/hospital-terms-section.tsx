@@ -12,7 +12,7 @@ interface HospitalTermsSectionProps {
 function HospitalTermsSection({ signupForm }: HospitalTermsSectionProps) {
   const handleHospitalDataChange = useCallback(
     (data: HospitalFormData) => {
-      signupForm.handleChange("hasParking", data.hasParking.toString());
+      signupForm.handleChange("hasParking", String(data.hasParking));
       signupForm.handleChange("departments", JSON.stringify(data.departments));
       signupForm.handleChange("animalTypes", JSON.stringify(data.animalTypes));
       signupForm.handleChange("breeds", JSON.stringify(data.breeds));
@@ -23,7 +23,6 @@ function HospitalTermsSection({ signupForm }: HospitalTermsSectionProps) {
       );
       signupForm.handleChange("operatingEndTime", data.operatingEndTime || "");
       signupForm.handleChange("breakTimes", JSON.stringify(data.breakTimes));
-
       if (data.imageFile) {
         signupForm.setImageFile(data.imageFile);
       }
