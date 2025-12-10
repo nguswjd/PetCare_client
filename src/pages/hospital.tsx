@@ -92,7 +92,7 @@ function Hospital() {
           animalTypes: data.animalTypes || [],
           departments: data.departments || [],
           breeds: data.breeds || [],
-          holidays: data.holidays || [], // ⭐ holidays 추가
+          holidays: data.holidays || [],
         };
 
         setHospitalInfo(hospital);

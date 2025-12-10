@@ -148,7 +148,9 @@ function Reservation() {
             <div className="text-sm text-gray-6 py-2 flex justify-between font-medium">
               <div className="flex flex-col">
                 <p>주차장 {hospitalInfo.hasParking ? "있음" : "없음"}</p>
-                <p>{hospitalInfo.breeds.join(", ")}</p>
+                <p className="overflow-hidden w-50 text-ellipsis whitespace-nowrap">
+                  {hospitalInfo.breeds.join(", ")}
+                </p>
               </div>
               <p className="ml-auto text-right">총 리뷰 10,000</p>
             </div>
