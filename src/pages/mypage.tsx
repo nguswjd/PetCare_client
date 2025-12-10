@@ -333,7 +333,8 @@ function Mypage() {
         throw new Error(errorData.message || "로그아웃 실패");
       }
 
-      localStorage.removeItem("token");
+      localStorage.clear();
+
       setAlertPopup({ open: true, message: "로그아웃 되었습니다." });
     } catch (err: any) {
       setAlertPopup({ open: true, message: err.message || "로그아웃 실패" });
