@@ -21,6 +21,7 @@ interface HospitalInfo {
   animalTypes: string[];
   departments: string[];
   breeds: string[];
+  holidays?: string[]; // ⭐ holidays 추가
 }
 
 function Reservation() {
@@ -243,6 +244,7 @@ function Reservation() {
               <Calendar
                 selectedDates={selectedDate ? [selectedDate] : []}
                 onSelectDate={(date: Date) => setSelectedDate(date)}
+                holidays={hospitalInfo.holidays || []} // ⭐ holidays 전달
               />
             </div>
 
@@ -270,7 +272,6 @@ function Reservation() {
           disabled={!isFormComplete}
           onClick={() => {
             if (!isFormComplete) return;
-            // API
           }}
         />
       </footer>

@@ -21,6 +21,7 @@ interface HospitalInfo {
   animalTypes: string[];
   departments: string[];
   breeds: string[];
+  holidays?: string[];
 }
 
 interface ReviewType {
@@ -91,11 +92,11 @@ function Hospital() {
           animalTypes: data.animalTypes || [],
           departments: data.departments || [],
           breeds: data.breeds || [],
+          holidays: data.holidays || [], // ⭐ holidays 추가
         };
 
         setHospitalInfo(hospital);
 
-        // ⭐ 최근 본 병원 저장 → 중복 호출 제거
         await addRecentHospitalUnified({
           id: hospital.id,
           name: hospital.name,
