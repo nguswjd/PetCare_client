@@ -65,6 +65,7 @@ function Hospital() {
 
   useEffect(() => {
     if (!id) return;
+
     const token = localStorage.getItem("token");
     const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -91,16 +92,11 @@ function Hospital() {
           departments: data.departments || [],
           breeds: data.breeds || [],
         };
-        setHospitalInfo(hospital);
-        await addRecentHospitalUnified({
-          id: hospital.id,
-          name: hospital.name,
-          address: hospital.address,
-          imageUrl: hospital.image,
-          operatingStatus: hospital.operatingStatus,
-        });
 
-        addRecentHospitalUnified({
+        setHospitalInfo(hospital);
+
+        // ⭐ 최근 본 병원 저장 → 중복 호출 제거
+        await addRecentHospitalUnified({
           id: hospital.id,
           name: hospital.name,
           address: hospital.address,
@@ -119,7 +115,9 @@ function Hospital() {
   const handleGoReview = () => navigate(`/hospital/${id}/review`);
   const handleGoReservation = () => {
     if (!hospitalInfo) return;
-    navigate(`/hospital/${id}/reservation`, { state: { hospitalInfo } });
+    navigate(`/hospital/${id}/reservation`, {
+      state: { hospitalInfo },
+    });
   };
 
   if (loading) return <LoadingPage message="로딩중..." />;
@@ -127,6 +125,7 @@ function Hospital() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Header Section */}
       <div className="sticky top-0 z-10 bg-white">
         <Header label={hospitalInfo.name} />
         <div>
@@ -152,6 +151,8 @@ function Hospital() {
           </section>
         </div>
       </div>
+
+      {/* Main Content */}
       <main className="flex-1 overflow-y-auto scrollbar-hide flex items-center justify-center">
         {hasReview ? (
           <div className="w-full">
@@ -167,6 +168,8 @@ function Hospital() {
           />
         )}
       </main>
+
+      {/* Footer Section */}
       <div className="sticky bottom-0 z-10 bg-white">
         {hasReview ? (
           <div className="flex flex-col items-center w-full">

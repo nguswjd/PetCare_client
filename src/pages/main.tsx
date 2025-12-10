@@ -46,7 +46,7 @@ function MainPage() {
   const reviewKingHospital = {
     id: 6,
     image: "",
-    alt: "이달의 리뷰왕",
+    alt: "이달의 추천",
     name: "D hospital",
     address: "제주시 이도동",
     businessStatus: "영업종료",
@@ -206,7 +206,7 @@ function MainPage() {
             />
           </section>
           <section className="flex flex-col gap-2">
-            <h2 className="text-base font-bold">이달의 리뷰왕</h2>
+            <h2 className="text-base font-bold">이달의 추천</h2>
             <Card
               size="lg"
               image={reviewKingHospital.image}
