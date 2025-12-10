@@ -65,7 +65,9 @@ const Card = ({
         <div className="grid grid-cols-2 items-center w-42">
           {name && <p className="text-base font-semibold text-black">{name}</p>}
           {address && (
-            <p className="text-sm font-normal text-gray-6">{address}</p>
+            <p className="text-sm font-normal text-gray-6 truncate">
+              {address}
+            </p>
           )}
           {size === "sm" ? (
             content && (
