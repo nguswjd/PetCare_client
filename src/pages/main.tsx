@@ -1,17 +1,28 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
-
 import Card from "../components/ui/card";
 import Input from "../components/ui/input";
 import Footer from "../components/footer";
-
+import { getRecentHospitalsUnified } from "@/utils/recentHospitals";
 import { MapPin } from "lucide-react";
+
+interface HospitalType {
+  id: number;
+  image: string;
+  alt: string;
+  name: string;
+  address: string;
+  businessStatus: string;
+  distance?: string;
+}
 
 function MainPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const autoScrollRef = useRef<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
+  const [recentHospitals, setRecentHospitals] = useState<HospitalType[]>([]);
+  const [loadingRecent, setLoadingRecent] = useState(true);
 
   const ads = [
     { id: 1, alt: "광고1" },
@@ -20,45 +31,6 @@ function MainPage() {
     { id: 4, alt: "광고4" },
     { id: 5, alt: "광고5" },
     { id: 6, alt: "광고6" },
-  ];
-
-  const recentHospitals = [
-    {
-      id: 1,
-      image: "",
-      alt: "병원1",
-      name: "A hospital",
-      address: "제주시 외도동",
-      businessStatus: "24시간 영업",
-      distance: "30km",
-    },
-    {
-      id: 2,
-      image: "",
-      alt: "병원2",
-      name: "B hospital",
-      address: "제주시 아라동",
-      businessStatus: "영업중",
-      distance: "30km",
-    },
-    {
-      id: 3,
-      image: "",
-      alt: "병원3",
-      name: "C hospital",
-      address: "제주시 이도동",
-      businessStatus: "영업종료",
-      distance: "30km",
-    },
-    {
-      id: 4,
-      image: "",
-      alt: "병원4",
-      name: "D hospital",
-      address: "제주시 외도동",
-      businessStatus: "24시간 영업",
-      distance: "30km",
-    },
   ];
 
   const closestHospital = {
@@ -81,6 +53,33 @@ function MainPage() {
     distance: "30km",
   };
 
+  useEffect(() => {
+    const loadRecentHospitals = async () => {
+      setLoadingRecent(true);
+      try {
+        const hospitals = await getRecentHospitalsUnified();
+
+        const formatted = hospitals.map((h) => ({
+          id: h.id,
+          image: h.imageUrl || "",
+          alt: h.name,
+          name: h.name,
+          address: h.address.split(" ").slice(0, 2).join(" "),
+          businessStatus: h.operatingStatus,
+        }));
+
+        setRecentHospitals(formatted);
+      } catch (e) {
+        console.error(e);
+        setRecentHospitals([]);
+      } finally {
+        setLoadingRecent(false);
+      }
+    };
+
+    loadRecentHospitals();
+  }, []);
+
   const scrollToIndex = (index: number) => {
     if (scrollRef.current) {
       const cardWidth = scrollRef.current.offsetWidth;
@@ -102,9 +101,7 @@ function MainPage() {
   };
 
   const stopAutoScroll = () => {
-    if (autoScrollRef.current) {
-      clearInterval(autoScrollRef.current);
-    }
+    if (autoScrollRef.current) clearInterval(autoScrollRef.current);
   };
 
   useEffect(() => {
@@ -116,8 +113,7 @@ function MainPage() {
     if (scrollRef.current) {
       const scrollLeft = scrollRef.current.scrollLeft;
       const cardWidth = scrollRef.current.offsetWidth;
-      const newIndex = Math.round(scrollLeft / cardWidth);
-      setCurrentIndex(newIndex);
+      setCurrentIndex(Math.round(scrollLeft / cardWidth));
     }
   };
 
@@ -149,7 +145,6 @@ function MainPage() {
               </div>
             ))}
           </div>
-
           <div className="flex justify-center gap-1.5 mt-3">
             {ads.map((_, index) => (
               <button
@@ -168,27 +163,34 @@ function MainPage() {
           </div>
         </div>
 
-        <section className="flex flex-col gap-2">
-          <h2 className="text-base px-6  font-bold">최근 검색한 병원</h2>
-          <div className="flex px-6 gap-2 overflow-x-auto scrollbar-hide ">
-            {recentHospitals.map((hospital) => (
-              <Card
-                key={hospital.id}
-                size="md"
-                image={hospital.image}
-                alt={hospital.alt}
-                name={hospital.name}
-                address={hospital.address}
-                businessStatus={hospital.businessStatus}
-                distance={hospital.distance}
-                onClick={() => navigate(`/hospital/${hospital.id}`)}
-                className="cursor-pointer"
-              />
-            ))}
-          </div>
-        </section>
+        {!loadingRecent && (
+          <section className="flex flex-col gap-2">
+            <h2 className="text-base px-6 font-bold">최근 검색한 병원</h2>
+            {recentHospitals.length === 0 ? (
+              <p className="text-center text-gray-5 py-20">
+                최근 본 병원이 없습니다
+              </p>
+            ) : (
+              <div className="flex px-6 gap-2 overflow-x-auto scrollbar-hide">
+                {recentHospitals.map((hospital) => (
+                  <Card
+                    key={hospital.id}
+                    size="md"
+                    image={hospital.image}
+                    alt={hospital.alt}
+                    name={hospital.name}
+                    address={hospital.address}
+                    businessStatus={hospital.businessStatus}
+                    onClick={() => navigate(`/hospital/${hospital.id}`)}
+                    className="cursor-pointer"
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
-        <div className="grid px-6  mb-5 gap-3 grid-cols-2">
+        <div className="grid px-6 mb-5 gap-3 grid-cols-2">
           <section className="flex flex-col gap-2">
             <h2 className="text-base font-bold">가까운 병원</h2>
             <Card
@@ -203,7 +205,6 @@ function MainPage() {
               className="cursor-pointer"
             />
           </section>
-
           <section className="flex flex-col gap-2">
             <h2 className="text-base font-bold">이달의 리뷰왕</h2>
             <Card

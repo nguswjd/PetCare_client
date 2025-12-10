@@ -7,6 +7,7 @@ import Header from "@/components/header";
 import Review from "@/components/review";
 import Button from "@/components/ui/button";
 import { PencilLine } from "lucide-react";
+import { addRecentHospitalUnified } from "@/utils/recentHospitals";
 
 interface HospitalInfo {
   id: number;
@@ -64,7 +65,6 @@ function Hospital() {
 
   useEffect(() => {
     if (!id) return;
-
     const token = localStorage.getItem("token");
     const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -75,14 +75,11 @@ function Hospital() {
       },
     })
       .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
+        if (!res.ok) throw new Error();
         return res.json();
       })
-      .then((data) => {
-        console.log("받은 데이터:", data);
-        setHospitalInfo({
+      .then(async (data) => {
+        const hospital = {
           id: Number(id),
           name: data.name,
           address: data.address,
@@ -93,34 +90,40 @@ function Hospital() {
           animalTypes: data.animalTypes || [],
           departments: data.departments || [],
           breeds: data.breeds || [],
+        };
+        setHospitalInfo(hospital);
+        await addRecentHospitalUnified({
+          id: hospital.id,
+          name: hospital.name,
+          address: hospital.address,
+          imageUrl: hospital.image,
+          operatingStatus: hospital.operatingStatus,
         });
+
+        addRecentHospitalUnified({
+          id: hospital.id,
+          name: hospital.name,
+          address: hospital.address,
+          imageUrl: hospital.image,
+          operatingStatus: hospital.operatingStatus,
+        });
+
         setLoading(false);
       })
-      .catch((err) => {
-        console.error("병원 정보 불러오기 실패:", err);
+      .catch(() => {
         setError(true);
         setLoading(false);
       });
   }, [id]);
 
   const handleGoReview = () => navigate(`/hospital/${id}/review`);
-
-  if (loading) {
-    return <LoadingPage message="로딩중..." />;
-  }
-
-  if (error) {
-    return <ErrorPage onRetry={() => navigate(-1)} />;
-  }
-
-  if (!hospitalInfo) {
-    return <ErrorPage onRetry={() => navigate(-1)} />;
-  }
-
   const handleGoReservation = () => {
     if (!hospitalInfo) return;
     navigate(`/hospital/${id}/reservation`, { state: { hospitalInfo } });
   };
+
+  if (loading) return <LoadingPage message="로딩중..." />;
+  if (error || !hospitalInfo) return <ErrorPage onRetry={() => navigate(-1)} />;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -149,7 +152,6 @@ function Hospital() {
           </section>
         </div>
       </div>
-
       <main className="flex-1 overflow-y-auto scrollbar-hide flex items-center justify-center">
         {hasReview ? (
           <div className="w-full">
@@ -165,7 +167,6 @@ function Hospital() {
           />
         )}
       </main>
-
       <div className="sticky bottom-0 z-10 bg-white">
         {hasReview ? (
           <div className="flex flex-col items-center w-full">
