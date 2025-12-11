@@ -50,8 +50,6 @@ function SignUp() {
           marketingConsent: terms.marketingConsent,
         };
 
-        console.log("=== User 회원가입 payload ===", payload);
-
         const response = await fetch(`${API_URL}/api/v1/auth/signup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -69,8 +67,12 @@ function SignUp() {
           throw new Error(errorData.message || "회원가입 실패");
         }
 
-        alert("회원가입 성공!");
-        navigate("/login");
+        navigate("/login", {
+          state: {
+            showSuccessPopup: true,
+            message: "환영합니다!\n병원을 찾아 쉽게 예약하세요.",
+          },
+        });
       } else {
         const formData = new FormData();
 
@@ -148,15 +150,6 @@ function SignUp() {
           formData.append("imageFile", signupForm.imageFile);
         }
 
-        console.log("=== 병원 회원가입 FormData ===");
-        for (let [key, value] of formData.entries()) {
-          if (value instanceof File) {
-            console.log(`${key}: [File] ${value.name}`);
-          } else {
-            console.log(`${key}:`, value);
-          }
-        }
-
         const response = await fetch(`${API_URL}/api/v1/hospital/auth/signup`, {
           method: "POST",
           body: formData,
@@ -169,8 +162,12 @@ function SignUp() {
           throw new Error(errorData.message || "회원가입 실패");
         }
 
-        alert("병원 등록 요청이 완료되었습니다!");
-        navigate("/login");
+        navigate("/login", {
+          state: {
+            showSuccessPopup: true,
+            message: "환영합니다!\n리뷰와 예약을 쉽게 확인하세요.",
+          },
+        });
       }
     } catch (err) {
       console.error("회원가입 에러:", err);
