@@ -47,16 +47,15 @@ function Reservation() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
 
   const [name, setName] = useState("");
   const [animalTypes, setAnimalTypes] = useState<AnimalType[]>([]);
   const [selectedAnimalType, setSelectedAnimalType] = useState("");
   const [selectedAnimalTypeCode, setSelectedAnimalTypeCode] = useState("");
-  const [breeds, setBreeds] = useState<Breed[]>([]);
   const [filteredBreeds, setFilteredBreeds] = useState<Breed[]>([]);
   const [selectedBreed, setSelectedBreed] = useState("");
   const [selectedBreedCode, setSelectedBreedCode] = useState("");
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [filteredDepartments, setFilteredDepartments] = useState<Department[]>(
     []
   );
@@ -68,21 +67,62 @@ function Reservation() {
   const [selectedWeight, setSelectedWeight] = useState("");
 
   useEffect(() => {
+    const token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("accessToken") ||
+      localStorage.getItem("authToken") ||
+      sessionStorage.getItem("token");
+
+    if (!token) {
+      setShowLoginPopup(true);
+      return;
+    }
+
+    const fetchUserInfo = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/v1/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!res.ok) {
+          localStorage.removeItem("token");
+          setShowLoginPopup(true);
+          return;
+        }
+
+        const data = await res.json();
+
+        setName(data.name ?? "");
+        if (data.species) setSelectedAnimalTypeCode(data.species);
+        if (data.breed) setSelectedBreedCode(data.breed);
+      } catch {
+        localStorage.removeItem("token");
+        setShowLoginPopup(true);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
+  useEffect(() => {
     const fetchAnimalTypes = async () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(`${API_URL}/api/v1/animal-types`);
-        if (!res.ok) throw new Error("동물 종류 불러오기 실패");
-
+        if (!res.ok) throw new Error("");
         const data = await res.json();
-
-        const filtered = data.types.filter((type: AnimalType) =>
+        const arrayData: AnimalType[] = Array.isArray(data)
+          ? data
+          : data.types || [];
+        const filtered = arrayData.filter((type: AnimalType) =>
           hospitalInfo.animalTypes.includes(type.description)
         );
-
         setAnimalTypes(filtered);
-      } catch (err) {
-        console.error(err);
+      } catch {
         setAnimalTypes([]);
       }
     };
@@ -95,19 +135,16 @@ function Reservation() {
       try {
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(`${API_URL}/api/v1/departments`);
-        if (!res.ok) throw new Error("진료과목 불러오기 실패");
-
+        if (!res.ok) throw new Error("");
         const data = await res.json();
-
-        const filtered = data.departments.filter((dept: Department) =>
+        const arrayData: Department[] = Array.isArray(data)
+          ? data
+          : data.departments || [];
+        const filtered = arrayData.filter((dept: Department) =>
           hospitalInfo.departments.includes(dept.description)
         );
-
-        setDepartments(data.departments);
         setFilteredDepartments(filtered);
-      } catch (err) {
-        console.error(err);
-        setDepartments([]);
+      } catch {
         setFilteredDepartments([]);
       }
     };
@@ -117,10 +154,9 @@ function Reservation() {
 
   useEffect(() => {
     if (!selectedAnimalTypeCode) {
-      setBreeds([]);
       setFilteredBreeds([]);
       setSelectedBreed("");
-      setSelectedBreedCode("");
+      if (!selectedBreedCode) setSelectedBreedCode("");
       return;
     }
 
@@ -130,21 +166,28 @@ function Reservation() {
         const res = await fetch(
           `${API_URL}/api/v1/breeds/${selectedAnimalTypeCode}`
         );
-        if (!res.ok) throw new Error("품종 불러오기 실패");
-
+        if (!res.ok) throw new Error("");
         const data = await res.json();
-
-        const filtered = data.breeds.filter((breed: Breed) =>
+        const arrayData: Breed[] = Array.isArray(data.breeds)
+          ? data.breeds
+          : data.breeds || [];
+        const filtered = arrayData.filter((breed: Breed) =>
           hospitalInfo.breeds.includes(breed.description)
         );
-
-        setBreeds(data.breeds);
         setFilteredBreeds(filtered);
-        setSelectedBreed("");
-        setSelectedBreedCode("");
-      } catch (err) {
-        console.error(err);
-        setBreeds([]);
+
+        if (selectedBreedCode) {
+          const found = filtered.find((b) => b.code === selectedBreedCode);
+          if (found) {
+            setSelectedBreed(found.description);
+          } else {
+            setSelectedBreed("");
+            setSelectedBreedCode("");
+          }
+        } else {
+          setSelectedBreed("");
+        }
+      } catch {
         setFilteredBreeds([]);
         setSelectedBreed("");
         setSelectedBreedCode("");
@@ -152,7 +195,19 @@ function Reservation() {
     };
 
     fetchBreeds();
-  }, [selectedAnimalTypeCode, hospitalInfo.breeds]);
+  }, [selectedAnimalTypeCode, hospitalInfo.breeds, selectedBreedCode]);
+
+  useEffect(() => {
+    if (!animalTypes.length || !selectedAnimalTypeCode) return;
+    const found = animalTypes.find((a) => a.code === selectedAnimalTypeCode);
+    if (found) setSelectedAnimalType(found.description);
+  }, [animalTypes, selectedAnimalTypeCode]);
+
+  useEffect(() => {
+    if (!filteredBreeds.length || !selectedBreedCode) return;
+    const found = filteredBreeds.find((b) => b.code === selectedBreedCode);
+    if (found) setSelectedBreed(found.description);
+  }, [filteredBreeds, selectedBreedCode]);
 
   const times = [
     "08:00",
@@ -223,59 +278,39 @@ function Reservation() {
         sessionStorage.getItem("token");
 
       if (!token) {
-        alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
-        navigate("/login");
+        setShowLoginPopup(true);
         return;
       }
 
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
-
       const res = await fetch(`${API_URL}/api/v1/reservations`, {
         method: "POST",
-        headers,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(reservationData),
       });
 
       if (!res.ok) {
         const contentType = res.headers.get("content-type");
-        let errorData = null;
-
-        if (contentType && contentType.includes("application/json")) {
-          errorData = await res.json();
-        } else {
-          errorData = await res.text();
-        }
+        let errorData = contentType?.includes("application/json")
+          ? await res.json()
+          : await res.text();
 
         let errorMessage = "예약 중 오류가 발생했습니다.";
-        if (res.status === 401) {
-          errorMessage = "로그인이 필요합니다.";
-        } else if (res.status === 403) {
-          errorMessage = "권한이 없습니다.";
-        } else if (res.status === 409) {
-          errorMessage = "이미 예약된 시간입니다.";
-        } else if (
-          errorData &&
-          typeof errorData === "object" &&
-          errorData.message
-        ) {
+        if (res.status === 401) errorMessage = "로그인이 필요합니다.";
+        else if (res.status === 403) errorMessage = "권한이 없습니다.";
+        else if (res.status === 409) errorMessage = "이미 예약된 시간입니다.";
+        else if (typeof errorData === "object" && errorData.message)
           errorMessage = errorData.message;
-        }
 
         throw new Error(errorMessage);
       }
 
       await res.json();
       setShowSuccessPopup(true);
-    } catch (err) {
-      console.error("예약 에러:", err);
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "예약 중 오류가 발생했습니다. 다시 시도해주세요.";
-      alert(errorMessage);
+    } catch (err: any) {
+      alert(err.message || "예약 중 오류가 발생했습니다.");
     }
   };
 
@@ -366,6 +401,8 @@ function Reservation() {
                 if (selected) {
                   setSelectedAnimalType(selected.description);
                   setSelectedAnimalTypeCode(selected.code);
+                  setSelectedBreed("");
+                  setSelectedBreedCode("");
                 }
               }}
             />
@@ -458,6 +495,17 @@ function Reservation() {
           onClick={handleReservation}
         />
       </footer>
+
+      <Popup
+        type="confirm"
+        open={showLoginPopup}
+        title="로그인 후 이용 가능합니다."
+        confirmLabel="예"
+        cancelLabel="아니오"
+        onConfirm={() => navigate("/login")}
+        onCancel={() => navigate(-1)}
+        onClose={() => setShowLoginPopup(false)}
+      />
 
       <Popup
         type="alert"
