@@ -52,11 +52,9 @@ function Reservation() {
   const [animalTypes, setAnimalTypes] = useState<AnimalType[]>([]);
   const [selectedAnimalType, setSelectedAnimalType] = useState("");
   const [selectedAnimalTypeCode, setSelectedAnimalTypeCode] = useState("");
-  const [breeds, setBreeds] = useState<Breed[]>([]);
   const [filteredBreeds, setFilteredBreeds] = useState<Breed[]>([]);
   const [selectedBreed, setSelectedBreed] = useState("");
   const [selectedBreedCode, setSelectedBreedCode] = useState("");
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [filteredDepartments, setFilteredDepartments] = useState<Department[]>(
     []
   );
@@ -103,11 +101,9 @@ function Reservation() {
           hospitalInfo.departments.includes(dept.description)
         );
 
-        setDepartments(data.departments);
         setFilteredDepartments(filtered);
       } catch (err) {
         console.error(err);
-        setDepartments([]);
         setFilteredDepartments([]);
       }
     };
@@ -117,7 +113,6 @@ function Reservation() {
 
   useEffect(() => {
     if (!selectedAnimalTypeCode) {
-      setBreeds([]);
       setFilteredBreeds([]);
       setSelectedBreed("");
       setSelectedBreedCode("");
@@ -138,13 +133,11 @@ function Reservation() {
           hospitalInfo.breeds.includes(breed.description)
         );
 
-        setBreeds(data.breeds);
         setFilteredBreeds(filtered);
         setSelectedBreed("");
         setSelectedBreedCode("");
       } catch (err) {
         console.error(err);
-        setBreeds([]);
         setFilteredBreeds([]);
         setSelectedBreed("");
         setSelectedBreedCode("");
