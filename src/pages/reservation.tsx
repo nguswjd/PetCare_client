@@ -47,6 +47,7 @@ function Reservation() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
 
   const [name, setName] = useState("");
   const [animalTypes, setAnimalTypes] = useState<AnimalType[]>([]);
@@ -71,8 +72,9 @@ function Reservation() {
       localStorage.getItem("accessToken") ||
       localStorage.getItem("authToken") ||
       sessionStorage.getItem("token");
+
     if (!token) {
-      navigate("/login", { replace: true });
+      setShowLoginPopup(true);
       return;
     }
 
@@ -88,7 +90,7 @@ function Reservation() {
 
         if (!res.ok) {
           localStorage.removeItem("token");
-          navigate("/login", { replace: true });
+          setShowLoginPopup(true);
           return;
         }
 
@@ -99,19 +101,19 @@ function Reservation() {
         if (data.breed) setSelectedBreedCode(data.breed);
       } catch {
         localStorage.removeItem("token");
-        navigate("/login", { replace: true });
+        setShowLoginPopup(true);
       }
     };
 
     fetchUserInfo();
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     const fetchAnimalTypes = async () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(`${API_URL}/api/v1/animal-types`);
-        if (!res.ok) throw new Error("동물 종류 불러오기 실패");
+        if (!res.ok) throw new Error("");
         const data = await res.json();
         const arrayData: AnimalType[] = Array.isArray(data)
           ? data
@@ -133,7 +135,7 @@ function Reservation() {
       try {
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(`${API_URL}/api/v1/departments`);
-        if (!res.ok) throw new Error("진료과목 불러오기 실패");
+        if (!res.ok) throw new Error("");
         const data = await res.json();
         const arrayData: Department[] = Array.isArray(data)
           ? data
@@ -164,7 +166,7 @@ function Reservation() {
         const res = await fetch(
           `${API_URL}/api/v1/breeds/${selectedAnimalTypeCode}`
         );
-        if (!res.ok) throw new Error("품종 불러오기 실패");
+        if (!res.ok) throw new Error("");
         const data = await res.json();
         const arrayData: Breed[] = Array.isArray(data.breeds)
           ? data.breeds
@@ -173,6 +175,7 @@ function Reservation() {
           hospitalInfo.breeds.includes(breed.description)
         );
         setFilteredBreeds(filtered);
+
         if (selectedBreedCode) {
           const found = filtered.find((b) => b.code === selectedBreedCode);
           if (found) {
@@ -275,8 +278,7 @@ function Reservation() {
         sessionStorage.getItem("token");
 
       if (!token) {
-        alert("로그인이 필요합니다.");
-        navigate("/login");
+        setShowLoginPopup(true);
         return;
       }
 
@@ -296,7 +298,6 @@ function Reservation() {
           : await res.text();
 
         let errorMessage = "예약 중 오류가 발생했습니다.";
-
         if (res.status === 401) errorMessage = "로그인이 필요합니다.";
         else if (res.status === 403) errorMessage = "권한이 없습니다.";
         else if (res.status === 409) errorMessage = "이미 예약된 시간입니다.";
@@ -494,6 +495,17 @@ function Reservation() {
           onClick={handleReservation}
         />
       </footer>
+
+      <Popup
+        type="confirm"
+        open={showLoginPopup}
+        title="로그인 후 이용 가능합니다."
+        confirmLabel="예"
+        cancelLabel="아니오"
+        onConfirm={() => navigate("/login")}
+        onCancel={() => navigate(-1)}
+        onClose={() => setShowLoginPopup(false)}
+      />
 
       <Popup
         type="alert"
