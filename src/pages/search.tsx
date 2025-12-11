@@ -208,7 +208,7 @@ function Search() {
                 <p className="text-gray-5">검색 결과가 없습니다</p>
               </div>
             ) : (
-              <div className="flex flex-col max-h-70 overflow-y-auto">
+              <div className="flex flex-col overflow-y-auto">
                 {searchResults.map((hospital) =>
                   isRealTimeSearch ? (
                     <div
