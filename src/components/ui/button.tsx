@@ -43,10 +43,13 @@ function Button({
   variant,
   active = false,
   toggleable,
+  disabled,
   ...props
 }: ButtonProps) {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    props.onClick?.(e);
+    if (!disabled) {
+      props.onClick?.(e);
+    }
   };
 
   return (
@@ -61,6 +64,8 @@ function Button({
         className
       )}
       onClick={handleClick}
+      disabled={disabled}
+      {...props}
     >
       {Icon && (
         <Icon className={cn(variant === "icon" ? "w-6 h-6" : "w-4 h-4")} />
