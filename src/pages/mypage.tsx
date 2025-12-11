@@ -14,30 +14,33 @@ import type { SelectOption } from "@/components/ui/selectbox";
 
 import { PencilLine, CheckLine } from "lucide-react";
 
+interface Reservation {
+  id: number;
+  userId: number;
+  hospitalId: number;
+  hospitalName: string;
+  reserverName: string;
+  animalType: string;
+  breed: string;
+  age: number;
+  weight: number;
+  department: string;
+  reservationDate: string;
+  reservationTime: string;
+  status: string;
+  createdAt: string;
+}
+
+interface HospitalInfo {
+  id: number;
+  name: string;
+  address: string;
+  imageUrl: string;
+  operatingStatus: string;
+}
+
 function Mypage() {
   const navigate = useNavigate();
-
-  interface ReservationInfo {
-    date: string;
-    animalType: string;
-    breeds: string;
-  }
-
-  const hospitalinfo = {
-    id: 5,
-    image: "",
-    alt: "가까운 병원",
-    name: "C hospital",
-    address: "제주시 이도동",
-    businessStatus: "영업종료",
-    distance: "30km",
-  };
-
-  const reservationInfo: ReservationInfo = {
-    date: "2025.10.28",
-    animalType: "육지동물",
-    breeds: "대형견",
-  };
 
   const [form, setForm] = useState({
     name: "",
@@ -64,6 +67,18 @@ function Mypage() {
   const [verifiedPhone, setVerifiedPhone] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [hospitalsInfo, setHospitalsInfo] = useState<{
+    [key: number]: HospitalInfo;
+  }>({});
+  const [animalTypeMap, setAnimalTypeMap] = useState<{ [key: string]: string }>(
+    {}
+  );
+  const [breedMap, setBreedMap] = useState<{ [key: string]: string }>({});
+  const [selectedReservation, setSelectedReservation] =
+    useState<Reservation | null>(null);
+  const [showCancelPopup, setShowCancelPopup] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const getAnimalTypeLabel = (value: string) => {
     const found = animalTypes.find((option) => option.value === value);
@@ -129,7 +144,72 @@ function Mypage() {
       }
     };
 
+    const fetchReservations = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/v1/reservations`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error("예약 목록 불러오기 실패");
+
+        const data = await res.json();
+        const activeReservations = data.filter(
+          (r: Reservation) => r.status === "PENDING" || r.status === "CONFIRMED"
+        );
+        setReservations(activeReservations);
+
+        const hospitalIds = Array.from(
+          new Set(activeReservations.map((r: Reservation) => r.hospitalId))
+        ) as number[];
+        const hospitalPromises = hospitalIds.map((id: number) =>
+          fetch(`${API_URL}/api/v1/hospital/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }).then((res) => res.json())
+        );
+
+        const hospitalsData = await Promise.all(hospitalPromises);
+        const hospitalsMap: { [key: number]: HospitalInfo } = {};
+        hospitalsData.forEach((hospital, index) => {
+          hospitalsMap[hospitalIds[index]] = {
+            id: hospitalIds[index],
+            name: hospital.name,
+            address: hospital.address,
+            imageUrl: hospital.imageUrl,
+            operatingStatus: hospital.operatingStatus,
+          };
+        });
+        setHospitalsInfo(hospitalsMap);
+
+        const allAnimalTypes = new Set(
+          activeReservations.map((r: Reservation) => r.animalType)
+        );
+        const breedPromises = Array.from(allAnimalTypes).map((type: any) =>
+          fetch(`${API_URL}/api/v1/breeds/${type}`).then((res) => res.json())
+        );
+
+        const breedsData = await Promise.all(breedPromises);
+        const breedMapping: { [key: string]: string } = {};
+        breedsData.forEach((data) => {
+          if (data.breeds) {
+            data.breeds.forEach((breed: any) => {
+              breedMapping[breed.code] = breed.description;
+            });
+          }
+        });
+        setBreedMap(breedMapping);
+      } catch (err) {
+        console.error(err);
+        setReservations([]);
+      }
+    };
+
     fetchUserInfo();
+    fetchReservations();
   }, [navigate]);
 
   useEffect(() => {
@@ -147,6 +227,12 @@ function Mypage() {
         }));
 
         setAnimalTypes(options);
+
+        const typeMapping: { [key: string]: string } = {};
+        arrayData.forEach((item: any) => {
+          typeMapping[item.code || item.id] = item.description || item.name;
+        });
+        setAnimalTypeMap(typeMapping);
       } catch (err) {
         console.error(err);
         setAnimalTypes([]);
@@ -304,6 +390,44 @@ function Mypage() {
     }
   };
 
+  const handleCancelReservation = async () => {
+    if (!selectedReservation) return;
+
+    const token = localStorage.getItem("token");
+    const API_URL = import.meta.env.VITE_API_URL;
+
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `${API_URL}/api/v1/reservations/${selectedReservation.id}/cancel`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("예약 취소에 실패했습니다.");
+      }
+
+      setReservations((prev) =>
+        prev.filter((r) => r.id !== selectedReservation.id)
+      );
+      setShowCancelPopup(false);
+      setShowSuccessPopup(true);
+      setSelectedReservation(null);
+    } catch (err) {
+      console.error("예약 취소 에러:", err);
+      alert("예약 취소 중 오류가 발생했습니다.");
+    }
+  };
+
   const [showPopup, setShowPopup] = useState(false);
   const [alertPopup, setAlertPopup] = useState<{
     open: boolean;
@@ -357,39 +481,65 @@ function Mypage() {
         </span>
       </section>
 
-      <main className="px-6 py-4 flex flex-col scrollbar-hide gap-4 flex-1 overflow-auto">
+      <main className="py-4 flex flex-col scrollbar-hide gap-4 flex-1 overflow-auto">
         <section className="flex flex-col gap-3">
-          <h3 className="font-bold">예약내역</h3>
-          <div className="flex px-2 gap-2">
-            <Card
-              size="sm"
-              image={hospitalinfo.image}
-              alt={hospitalinfo.alt}
-              name={hospitalinfo.name}
-              address={hospitalinfo.address}
-              onClick={() => navigate(`/hospital/${hospitalinfo.id}`)}
-              className="cursor-pointer"
-            />
-            <div className="flex items-center flex-col gap-2">
-              <div className="text-sm text-center font-normal">
-                <p>날짜 : {reservationInfo.date}</p>
-                <p>
-                  품종 : {reservationInfo.animalType}({reservationInfo.breeds})
-                </p>
-              </div>
-              <Button label="예약취소" className="font-medium text-sm w-25" />
+          <h3 className="font-bold mx-6">예약내역</h3>
+          {reservations.length === 0 ? (
+            <div className="w-full h-31 flex items-center justify-center">
+              <p className="text-gray-5">예약 내역이 없습니다.</p>
             </div>
-          </div>
+          ) : (
+            <div className="flex px-6 overflow-x-auto scrollbar-hide">
+              {reservations.map((reservation) => {
+                const hospital = hospitalsInfo[reservation.hospitalId];
+                if (!hospital) return null;
+
+                return (
+                  <div key={reservation.id} className="flex px-2 gap-1">
+                    <Card
+                      size="sm"
+                      image={hospital.imageUrl}
+                      alt={hospital.name}
+                      name={hospital.name}
+                      address={hospital.address}
+                      onClick={() => navigate(`/hospital/${hospital.id}`)}
+                      className="cursor-pointer"
+                    />
+                    <div className="flex items-center flex-col gap-1">
+                      <div className="text-sm w-37 text-center font-normal">
+                        <p>날짜: {reservation.reservationDate}</p>
+                        <p>시간: {reservation.reservationTime}</p>
+                        <p>
+                          품종:{" "}
+                          {animalTypeMap[reservation.animalType] ||
+                            reservation.animalType}{" "}
+                          ({breedMap[reservation.breed] || reservation.breed})
+                        </p>
+                      </div>
+                      <Button
+                        label="예약취소"
+                        className="font-medium text-sm w-25"
+                        onClick={() => {
+                          setSelectedReservation(reservation);
+                          setShowCancelPopup(true);
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </section>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-3 mx-6">
           <h3 className="font-bold">나의 리뷰</h3>
           <div className="w-full h-31 flex items-center justify-center">
             <p className="text-gray-5">등록된 리뷰가 없습니다.</p>
           </div>
         </section>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-3 mx-6">
           <div className="flex justify-between items-center">
             <h3 className="font-bold">내 정보 수정</h3>
             <div className="flex gap-2">
@@ -397,7 +547,7 @@ function Mypage() {
                 <Button
                   icon={PencilLine}
                   variant="icon"
-                  className="w-4 h-4 [&>svg]:!w-4 [&>svg]:!h-4"
+                  className="w-4 h-4"
                   onClick={handleEdit}
                 />
               )}
@@ -536,6 +686,26 @@ function Mypage() {
           errorMessage="비밀번호가 일치하지 않습니다."
         />
       )}
+
+      <Popup
+        type="confirm"
+        open={showCancelPopup}
+        onClose={() => setShowCancelPopup(false)}
+        title="예약을 취소하시겠습니까?"
+        confirmLabel="예"
+        cancelLabel="아니오"
+        onConfirm={handleCancelReservation}
+        onCancel={() => setShowCancelPopup(false)}
+      />
+
+      <Popup
+        type="alert"
+        open={showSuccessPopup}
+        onClose={() => setShowSuccessPopup(false)}
+        title="예약취소가 완료되었습니다."
+      >
+        감사합니다.
+      </Popup>
 
       {alertPopup.open && (
         <Popup
