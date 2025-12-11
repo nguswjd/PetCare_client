@@ -10,7 +10,7 @@ export interface ViewHistoryResponse {
 }
 
 export const saveViewHistoryApi = async (hospitalId: number, token: string) => {
-  const response = await fetch(`${BASE_URL}/api/v1/view-history`, {
+  const res = await fetch("/api/v1/view-history", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -19,7 +19,7 @@ export const saveViewHistoryApi = async (hospitalId: number, token: string) => {
     body: JSON.stringify({ hospitalId }),
   });
 
-  if (!response.ok) {
+  if (!res.ok) {
     throw new Error("최근 본 병원 저장 실패");
   }
 };

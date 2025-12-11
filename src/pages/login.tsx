@@ -1,19 +1,28 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
-
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router";
 import Button from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import Input from "@/components/ui/input";
+import Popup from "@/components/popup";
 
 function Login() {
   const navigate = useNavigate();
-
+  const location = useLocation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [autoLogin, setAutoLogin] = useState(false);
-
   const [isUser, setIsUser] = useState(true);
   const [error, setError] = useState("");
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  useEffect(() => {
+    if (location.state?.showSuccessPopup) {
+      setShowSuccessPopup(true);
+      setSuccessMessage(location.state.message || "회원가입 성공!");
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   const handleSignupClick = () => {
     navigate("/signup");
@@ -30,36 +39,29 @@ function Login() {
       const loginPath = isUser
         ? "/api/v1/auth/login"
         : "/api/v1/hospital/auth/login";
-
       const response = await fetch(`${API_URL}${loginPath}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
-
       const data = await response.json();
-
       if (!response.ok) {
         setError("아이디 또는 비밀번호가 일치하지 않습니다.");
         return;
       }
-
       if (data.token) {
         localStorage.setItem("token", data.token);
       }
-
       if (autoLogin) {
         localStorage.setItem("autoLogin", "true");
       } else {
         localStorage.removeItem("autoLogin");
       }
-
       if (isUser) {
         navigate("/");
       } else {
         navigate("/hospital-main");
       }
-
       window.location.reload();
     } catch (e) {
       setError("서버에 연결할 수 없습니다.");
@@ -77,7 +79,6 @@ function Login() {
           />
         </h1>
       </header>
-
       <main
         className="flex flex-col items-center justify-center flex-1 gap-4 px-6 -mt-[10vh]"
         onKeyDown={(e) => {
@@ -100,7 +101,6 @@ function Login() {
             label="관리자"
           />
         </div>
-
         <div className="w-full flex flex-col gap-4">
           <Input
             className="w-full"
@@ -108,7 +108,6 @@ function Login() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
-
           <Input
             className="w-full"
             type="password"
@@ -116,9 +115,7 @@ function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-
           {error && <span className="text-red ml-1 text-xs">{error}</span>}
-
           <div className="w-full flex justify-start">
             <Checkbox
               label="자동로그인"
@@ -126,11 +123,9 @@ function Login() {
               onCheckedChange={(v) => setAutoLogin(v)}
             />
           </div>
-
           <Button className="w-full" label="로그인" onClick={handleLogin} />
         </div>
       </main>
-
       <footer className="flex px-6 justify-center mb-6">
         <Button
           variant="outline"
@@ -139,6 +134,14 @@ function Login() {
           onClick={handleSignupClick}
         />
       </footer>
+      <Popup
+        type="alert"
+        open={showSuccessPopup}
+        onClose={() => setShowSuccessPopup(false)}
+        title="회원가입 성공"
+      >
+        {successMessage}
+      </Popup>
     </div>
   );
 }

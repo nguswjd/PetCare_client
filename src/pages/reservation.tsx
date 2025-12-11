@@ -21,6 +21,7 @@ interface HospitalInfo {
   animalTypes: string[];
   departments: string[];
   breeds: string[];
+  holidays?: string[]; // ⭐ holidays 추가
 }
 
 function Reservation() {
@@ -58,7 +59,7 @@ function Reservation() {
       try {
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(
-          `${API_URL}/api/v1/auth/breeds/${selectedAnimalType}`
+          `${API_URL}/api/v1/breeds/${selectedAnimalType}`
         );
         if (!res.ok) throw new Error("품종 불러오기 실패");
 
@@ -147,7 +148,9 @@ function Reservation() {
             <div className="text-sm text-gray-6 py-2 flex justify-between font-medium">
               <div className="flex flex-col">
                 <p>주차장 {hospitalInfo.hasParking ? "있음" : "없음"}</p>
-                <p>{hospitalInfo.breeds.join(", ")}</p>
+                <p className="overflow-hidden w-50 text-ellipsis whitespace-nowrap">
+                  {hospitalInfo.breeds.join(", ")}
+                </p>
               </div>
               <p className="ml-auto text-right">총 리뷰 10,000</p>
             </div>
@@ -243,6 +246,7 @@ function Reservation() {
               <Calendar
                 selectedDates={selectedDate ? [selectedDate] : []}
                 onSelectDate={(date: Date) => setSelectedDate(date)}
+                holidays={hospitalInfo.holidays || []} // ⭐ holidays 전달
               />
             </div>
 
@@ -270,7 +274,6 @@ function Reservation() {
           disabled={!isFormComplete}
           onClick={() => {
             if (!isFormComplete) return;
-            // API
           }}
         />
       </footer>

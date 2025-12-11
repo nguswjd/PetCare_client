@@ -10,9 +10,14 @@ interface Day {
 interface CalendarProps {
   selectedDates: Date[];
   onSelectDate: (date: Date) => void;
+  holidays?: string[];
 }
 
-const Calendar: React.FC<CalendarProps> = ({ selectedDates, onSelectDate }) => {
+const Calendar: React.FC<CalendarProps> = ({
+  selectedDates,
+  onSelectDate,
+  holidays = [],
+}) => {
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(today);
 
@@ -82,7 +87,11 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDates, onSelectDate }) => {
     const isPast =
       day.date <
       new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    if (isPast) return;
+
+    const dateStr = day.date.toISOString().split("T")[0];
+    const isHoliday = holidays.includes(dateStr);
+
+    if (isPast || isHoliday) return;
 
     if (!day.isCurrentMonth) {
       setCurrentDate(new Date(day.date.getFullYear(), day.date.getMonth(), 1));
@@ -93,6 +102,8 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDates, onSelectDate }) => {
 
   const isSelected = (date: Date) =>
     selectedDates.some((d) => d.toDateString() === date.toDateString());
+
+  const formatDate = (date: Date) => date.toISOString().split("T")[0];
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -125,25 +136,37 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDates, onSelectDate }) => {
 
       <div className="grid grid-cols-7 gap-1 text-center">
         {days.map((day, idx) => {
-          const past =
+          const dateStr = formatDate(day.date);
+
+          const isHoliday = holidays.includes(dateStr);
+          const isPast =
             day.date <
             new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+          const disabled = isPast || isHoliday;
 
           return (
             <button
               key={idx}
-              disabled={past}
+              disabled={disabled}
               onClick={() => handleSelectDate(day)}
-              className={`w-10 h-10 flex justify-center items-center rounded-full transition-colors
+              className={`
+                relative w-10 h-10 flex flex-col justify-center items-center 
+                rounded-full transition-colors
                 ${!day.isCurrentMonth ? "text-gray-3" : ""}
-                ${past ? "text-gray-3 cursor-not-allowed" : ""}
+                ${disabled ? "text-gray-3 cursor-not-allowed" : ""}
                 ${
                   isSelected(day.date)
                     ? "bg-main-1 text-white"
                     : "bg-white hover:bg-main-2/30"
-                }`}
+                }
+              `}
             >
               {day.date.getDate()}
+
+              {isHoliday && (
+                <span className="absolute bottom-0 w-1 h-1 bg-gray-3 rounded-full"></span>
+              )}
             </button>
           );
         })}

@@ -21,6 +21,7 @@ interface HospitalInfo {
   animalTypes: string[];
   departments: string[];
   breeds: string[];
+  holidays?: string[];
 }
 
 interface ReviewType {
@@ -65,6 +66,7 @@ function Hospital() {
 
   useEffect(() => {
     if (!id) return;
+
     const token = localStorage.getItem("token");
     const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -90,17 +92,12 @@ function Hospital() {
           animalTypes: data.animalTypes || [],
           departments: data.departments || [],
           breeds: data.breeds || [],
+          holidays: data.holidays || [],
         };
-        setHospitalInfo(hospital);
-        await addRecentHospitalUnified({
-          id: hospital.id,
-          name: hospital.name,
-          address: hospital.address,
-          imageUrl: hospital.image,
-          operatingStatus: hospital.operatingStatus,
-        });
 
-        addRecentHospitalUnified({
+        setHospitalInfo(hospital);
+
+        await addRecentHospitalUnified({
           id: hospital.id,
           name: hospital.name,
           address: hospital.address,
@@ -119,7 +116,9 @@ function Hospital() {
   const handleGoReview = () => navigate(`/hospital/${id}/review`);
   const handleGoReservation = () => {
     if (!hospitalInfo) return;
-    navigate(`/hospital/${id}/reservation`, { state: { hospitalInfo } });
+    navigate(`/hospital/${id}/reservation`, {
+      state: { hospitalInfo },
+    });
   };
 
   if (loading) return <LoadingPage message="로딩중..." />;
@@ -152,6 +151,7 @@ function Hospital() {
           </section>
         </div>
       </div>
+
       <main className="flex-1 overflow-y-auto scrollbar-hide flex items-center justify-center">
         {hasReview ? (
           <div className="w-full">
@@ -167,6 +167,7 @@ function Hospital() {
           />
         )}
       </main>
+
       <div className="sticky bottom-0 z-10 bg-white">
         {hasReview ? (
           <div className="flex flex-col items-center w-full">

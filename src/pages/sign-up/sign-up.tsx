@@ -50,8 +50,6 @@ function SignUp() {
           marketingConsent: terms.marketingConsent,
         };
 
-        console.log("=== User 회원가입 payload ===", payload);
-
         const response = await fetch(`${API_URL}/api/v1/auth/signup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -69,8 +67,12 @@ function SignUp() {
           throw new Error(errorData.message || "회원가입 실패");
         }
 
-        alert("회원가입 성공!");
-        navigate("/login");
+        navigate("/login", {
+          state: {
+            showSuccessPopup: true,
+            message: "환영합니다!\n병원을 찾아 쉽게 예약하세요.",
+          },
+        });
       } else {
         const formData = new FormData();
 
@@ -85,36 +87,40 @@ function SignUp() {
         );
         formData.append("address", signupForm.form.address);
 
-        if (signupForm.form.hasParking !== undefined) {
-          formData.append("hasParking", String(signupForm.form.hasParking));
+        if (signupForm.form.hasParking) {
+          formData.append("hasParking", signupForm.form.hasParking);
         }
 
         if (
           signupForm.form.departments &&
-          signupForm.form.departments.length > 0
+          signupForm.form.departments !== "" &&
+          signupForm.form.departments !== "[]"
         ) {
-          formData.append(
-            "departments",
-            JSON.stringify(signupForm.form.departments)
-          );
+          formData.append("departments", signupForm.form.departments);
         }
 
         if (
           signupForm.form.animalTypes &&
-          signupForm.form.animalTypes.length > 0
+          signupForm.form.animalTypes !== "" &&
+          signupForm.form.animalTypes !== "[]"
         ) {
-          formData.append(
-            "animalTypes",
-            JSON.stringify(signupForm.form.animalTypes)
-          );
+          formData.append("animalTypes", signupForm.form.animalTypes);
         }
 
-        if (signupForm.form.breeds && signupForm.form.breeds.length > 0) {
-          formData.append("breeds", JSON.stringify(signupForm.form.breeds));
+        if (
+          signupForm.form.breeds &&
+          signupForm.form.breeds !== "" &&
+          signupForm.form.breeds !== "[]"
+        ) {
+          formData.append("breeds", signupForm.form.breeds);
         }
 
-        if (signupForm.form.holidays && signupForm.form.holidays.length > 0) {
-          formData.append("holidays", JSON.stringify(signupForm.form.holidays));
+        if (
+          signupForm.form.holidays &&
+          signupForm.form.holidays !== "" &&
+          signupForm.form.holidays !== "[]"
+        ) {
+          formData.append("holidays", signupForm.form.holidays);
         }
 
         if (signupForm.form.operatingStartTime) {
@@ -130,12 +136,10 @@ function SignUp() {
 
         if (
           signupForm.form.breakTimes &&
-          signupForm.form.breakTimes.length > 0
+          signupForm.form.breakTimes !== "" &&
+          signupForm.form.breakTimes !== "[]"
         ) {
-          formData.append(
-            "breakTimes",
-            JSON.stringify(signupForm.form.breakTimes)
-          );
+          formData.append("breakTimes", signupForm.form.breakTimes);
         }
 
         if (signupForm.form.description) {
@@ -158,7 +162,12 @@ function SignUp() {
           throw new Error(errorData.message || "회원가입 실패");
         }
 
-        navigate("/login");
+        navigate("/login", {
+          state: {
+            showSuccessPopup: true,
+            message: "환영합니다!\n리뷰와 예약을 쉽게 확인하세요.",
+          },
+        });
       }
     } catch (err) {
       console.error("회원가입 에러:", err);

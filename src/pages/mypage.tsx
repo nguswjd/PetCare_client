@@ -136,7 +136,7 @@ function Mypage() {
     const fetchAnimalTypes = async () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL;
-        const res = await fetch(`${API_URL}/api/v1/auth/animal-types`);
+        const res = await fetch(`${API_URL}/api/v1/animal-types`);
         if (!res.ok) throw new Error("동물 종류 불러오기 실패");
         const data = await res.json();
 
@@ -165,9 +165,7 @@ function Mypage() {
     const fetchBreeds = async () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL;
-        const res = await fetch(
-          `${API_URL}/api/v1/auth/breeds/${form.animalType}`
-        );
+        const res = await fetch(`${API_URL}/api/v1/breeds/${form.animalType}`);
         if (!res.ok) throw new Error("품종 불러오기 실패");
         const data = await res.json();
         const options: SelectOption[] = Array.isArray(data.breeds)
@@ -196,7 +194,7 @@ function Mypage() {
       try {
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(
-          `${API_URL}/api/v1/auth/breeds/${displayUser.animalType}`
+          `${API_URL}/api/v1/breeds/${displayUser.animalType}`
         );
         if (!res.ok) throw new Error("품종 불러오기 실패");
         const data = await res.json();
@@ -335,7 +333,8 @@ function Mypage() {
         throw new Error(errorData.message || "로그아웃 실패");
       }
 
-      localStorage.removeItem("token");
+      localStorage.clear();
+
       setAlertPopup({ open: true, message: "로그아웃 되었습니다." });
     } catch (err: any) {
       setAlertPopup({ open: true, message: err.message || "로그아웃 실패" });
