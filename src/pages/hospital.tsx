@@ -6,6 +6,7 @@ import Footer from "@/components/footer";
 import Header from "@/components/header";
 import Review from "@/components/review";
 import Button from "@/components/ui/button";
+import Popup from "@/components/popup";
 import { PencilLine } from "lucide-react";
 import { addRecentHospitalUnified } from "@/utils/recentHospitals";
 
@@ -30,6 +31,23 @@ interface ReviewType {
   department: string;
   revisit: string;
   content: string;
+}
+
+interface ActiveReservation {
+  id: number;
+  userId: number;
+  hospitalId: number;
+  hospitalName: string;
+  reserverName: string;
+  animalType: string;
+  breed: string;
+  age: number;
+  weight: number;
+  department: string;
+  reservationDate: string;
+  reservationTime: string;
+  status: string;
+  createdAt: string;
 }
 
 const reviews: ReviewType[] = [
@@ -63,6 +81,10 @@ function Hospital() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [hasReview] = useState(true);
+  const [activeReservation, setActiveReservation] =
+    useState<ActiveReservation | null>(null);
+  const [showCancelPopup, setShowCancelPopup] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -111,14 +133,68 @@ function Hospital() {
         setError(true);
         setLoading(false);
       });
+
+    if (token) {
+      fetch(`${BASE_URL}/api/v1/reservations/hospital/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error();
+          return res.json();
+        })
+        .then((data) => {
+          setActiveReservation(data);
+        })
+        .catch(() => {
+          setActiveReservation(null);
+        });
+    }
   }, [id]);
 
   const handleGoReview = () => navigate(`/hospital/${id}/review`);
+
   const handleGoReservation = () => {
     if (!hospitalInfo) return;
     navigate(`/hospital/${id}/reservation`, {
       state: { hospitalInfo },
     });
+  };
+
+  const handleCancelReservation = async () => {
+    if (!activeReservation) return;
+
+    const token = localStorage.getItem("token");
+    const BASE_URL = import.meta.env.VITE_API_URL;
+
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `${BASE_URL}/api/v1/reservations/${activeReservation.id}/cancel`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("예약 취소에 실패했습니다.");
+      }
+
+      setActiveReservation(null);
+      setShowCancelPopup(false);
+      setShowSuccessPopup(true);
+    } catch (err) {
+      console.error("예약 취소 에러:", err);
+      alert("예약 취소 중 오류가 발생했습니다.");
+    }
   };
 
   if (loading) return <LoadingPage message="로딩중..." />;
@@ -147,7 +223,14 @@ function Hospital() {
                 {hospitalInfo.distance && <p>{hospitalInfo.distance}</p>}
               </div>
             </div>
-            <Button label="예약하기" onClick={handleGoReservation} />
+            {activeReservation ? (
+              <Button
+                label="예약취소"
+                onClick={() => setShowCancelPopup(true)}
+              />
+            ) : (
+              <Button label="예약하기" onClick={handleGoReservation} />
+            )}
           </section>
         </div>
       </div>
@@ -184,6 +267,26 @@ function Hospital() {
         )}
         <Footer />
       </div>
+
+      <Popup
+        type="confirm"
+        open={showCancelPopup}
+        onClose={() => setShowCancelPopup(false)}
+        title="예약을 취소하시겠습니까?"
+        confirmLabel="예"
+        cancelLabel="아니오"
+        onConfirm={handleCancelReservation}
+        onCancel={() => setShowCancelPopup(false)}
+      />
+
+      <Popup
+        type="alert"
+        open={showSuccessPopup}
+        onClose={() => setShowSuccessPopup(false)}
+        title="예약취소가 완료되었습니다."
+      >
+        감사합니다.
+      </Popup>
     </div>
   );
 }

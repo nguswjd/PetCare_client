@@ -1,4 +1,4 @@
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 
 import Header from "@/components/header";
@@ -6,6 +6,7 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import { SelectBox } from "@/components/ui/selectbox";
 import Calendar from "@/components/ui/calendar";
+import Popup from "@/components/popup";
 
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -21,37 +22,105 @@ interface HospitalInfo {
   animalTypes: string[];
   departments: string[];
   breeds: string[];
-  holidays?: string[]; // ⭐ holidays 추가
+  holidays?: string[];
+}
+
+interface AnimalType {
+  code: string;
+  description: string;
+}
+
+interface Breed {
+  code: string;
+  description: string;
+}
+
+interface Department {
+  code: string;
+  description: string;
 }
 
 function Reservation() {
   const { state } = useLocation();
+  const navigate = useNavigate();
   const { hospitalInfo } = state as { hospitalInfo: HospitalInfo };
 
   const [isOpen, setIsOpen] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const [name, setName] = useState("");
+  const [animalTypes, setAnimalTypes] = useState<AnimalType[]>([]);
   const [selectedAnimalType, setSelectedAnimalType] = useState("");
-  const [selectedAnimalLabel, setSelectedAnimalLabel] = useState("");
-  const [filteredBreeds, setFilteredBreeds] = useState<string[]>([]);
+  const [selectedAnimalTypeCode, setSelectedAnimalTypeCode] = useState("");
+  const [breeds, setBreeds] = useState<Breed[]>([]);
+  const [filteredBreeds, setFilteredBreeds] = useState<Breed[]>([]);
   const [selectedBreed, setSelectedBreed] = useState("");
+  const [selectedBreedCode, setSelectedBreedCode] = useState("");
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [filteredDepartments, setFilteredDepartments] = useState<Department[]>(
+    []
+  );
   const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedDepartmentCode, setSelectedDepartmentCode] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedAge, setSelectedAge] = useState("");
   const [selectedWeight, setSelectedWeight] = useState("");
 
-  const animalTypeMap: Record<string, string> = {
-    육지동물: "TERRESTRIAL",
-    조류: "AVIAN",
-    수생동물: "AQUATIC",
-    기타: "OTHER",
-  };
+  useEffect(() => {
+    const fetchAnimalTypes = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/v1/animal-types`);
+        if (!res.ok) throw new Error("동물 종류 불러오기 실패");
+
+        const data = await res.json();
+
+        const filtered = data.types.filter((type: AnimalType) =>
+          hospitalInfo.animalTypes.includes(type.description)
+        );
+
+        setAnimalTypes(filtered);
+      } catch (err) {
+        console.error(err);
+        setAnimalTypes([]);
+      }
+    };
+
+    fetchAnimalTypes();
+  }, [hospitalInfo.animalTypes]);
 
   useEffect(() => {
-    if (!selectedAnimalType) {
+    const fetchDepartments = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/v1/departments`);
+        if (!res.ok) throw new Error("진료과목 불러오기 실패");
+
+        const data = await res.json();
+
+        const filtered = data.departments.filter((dept: Department) =>
+          hospitalInfo.departments.includes(dept.description)
+        );
+
+        setDepartments(data.departments);
+        setFilteredDepartments(filtered);
+      } catch (err) {
+        console.error(err);
+        setDepartments([]);
+        setFilteredDepartments([]);
+      }
+    };
+
+    fetchDepartments();
+  }, [hospitalInfo.departments]);
+
+  useEffect(() => {
+    if (!selectedAnimalTypeCode) {
+      setBreeds([]);
       setFilteredBreeds([]);
       setSelectedBreed("");
+      setSelectedBreedCode("");
       return;
     }
 
@@ -59,27 +128,31 @@ function Reservation() {
       try {
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(
-          `${API_URL}/api/v1/breeds/${selectedAnimalType}`
+          `${API_URL}/api/v1/breeds/${selectedAnimalTypeCode}`
         );
         if (!res.ok) throw new Error("품종 불러오기 실패");
 
         const data = await res.json();
 
-        const filtered = data.breeds
-          .map((item: any) => item.description)
-          .filter((breed: string) => hospitalInfo.breeds.includes(breed));
+        const filtered = data.breeds.filter((breed: Breed) =>
+          hospitalInfo.breeds.includes(breed.description)
+        );
 
+        setBreeds(data.breeds);
         setFilteredBreeds(filtered);
         setSelectedBreed("");
+        setSelectedBreedCode("");
       } catch (err) {
         console.error(err);
+        setBreeds([]);
         setFilteredBreeds([]);
         setSelectedBreed("");
+        setSelectedBreedCode("");
       }
     };
 
     fetchBreeds();
-  }, [selectedAnimalType, hospitalInfo.breeds]);
+  }, [selectedAnimalTypeCode, hospitalInfo.breeds]);
 
   const times = [
     "08:00",
@@ -108,13 +181,103 @@ function Reservation() {
 
   const isFormComplete =
     name &&
-    selectedAnimalType &&
-    selectedBreed &&
-    selectedDepartment &&
+    selectedAnimalTypeCode &&
+    selectedBreedCode &&
+    selectedDepartmentCode &&
     selectedDate &&
     selectedTime &&
     selectedAge &&
     selectedWeight;
+
+  const handleReservation = async () => {
+    if (!isFormComplete) return;
+
+    try {
+      const API_URL = import.meta.env.VITE_API_URL;
+
+      const formattedDate = selectedDate
+        ? `${selectedDate.getFullYear()}-${String(
+            selectedDate.getMonth() + 1
+          ).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(
+            2,
+            "0"
+          )}`
+        : "";
+
+      const reservationData = {
+        hospitalId: hospitalInfo.id,
+        reserverName: name,
+        animalType: selectedAnimalTypeCode,
+        breed: selectedBreedCode,
+        age: parseInt(selectedAge),
+        weight: parseInt(selectedWeight),
+        department: selectedDepartmentCode,
+        reservationDate: formattedDate,
+        reservationTime: `${selectedTime}:00`,
+      };
+
+      const token =
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        localStorage.getItem("authToken") ||
+        sessionStorage.getItem("token");
+
+      if (!token) {
+        alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
+        navigate("/login");
+        return;
+      }
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+
+      const res = await fetch(`${API_URL}/api/v1/reservations`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(reservationData),
+      });
+
+      if (!res.ok) {
+        const contentType = res.headers.get("content-type");
+        let errorData = null;
+
+        if (contentType && contentType.includes("application/json")) {
+          errorData = await res.json();
+        } else {
+          errorData = await res.text();
+        }
+
+        let errorMessage = "예약 중 오류가 발생했습니다.";
+        if (res.status === 401) {
+          errorMessage = "로그인이 필요합니다.";
+        } else if (res.status === 403) {
+          errorMessage = "권한이 없습니다.";
+        } else if (res.status === 409) {
+          errorMessage = "이미 예약된 시간입니다.";
+        } else if (
+          errorData &&
+          typeof errorData === "object" &&
+          errorData.message
+        ) {
+          errorMessage = errorData.message;
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      await res.json();
+      setShowSuccessPopup(true);
+    } catch (err) {
+      console.error("예약 에러:", err);
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "예약 중 오류가 발생했습니다. 다시 시도해주세요.";
+      alert(errorMessage);
+    }
+  };
 
   return (
     <div className="h-dvh">
@@ -191,27 +354,39 @@ function Reservation() {
           <div className="flex gap-2">
             <SelectBox
               placeholder="종류"
-              options={hospitalInfo.animalTypes.map((item) => ({
-                label: item,
-                value: item,
+              options={animalTypes.map((item) => ({
+                label: item.description,
+                value: item.description,
               }))}
-              value={selectedAnimalLabel || ""}
+              value={selectedAnimalType || ""}
               onChange={(value) => {
-                setSelectedAnimalLabel(value);
-                setSelectedAnimalType(animalTypeMap[value]);
-                setFilteredBreeds([]);
+                const selected = animalTypes.find(
+                  (item) => item.description === value
+                );
+                if (selected) {
+                  setSelectedAnimalType(selected.description);
+                  setSelectedAnimalTypeCode(selected.code);
+                }
               }}
             />
 
             <SelectBox
               placeholder="품종"
               options={filteredBreeds.map((item) => ({
-                label: item,
-                value: item,
+                label: item.description,
+                value: item.description,
               }))}
               value={selectedBreed || ""}
-              onChange={(value) => setSelectedBreed(value)}
-              disabled={!selectedAnimalType || filteredBreeds.length === 0}
+              onChange={(value) => {
+                const selected = filteredBreeds.find(
+                  (item) => item.description === value
+                );
+                if (selected) {
+                  setSelectedBreed(selected.description);
+                  setSelectedBreedCode(selected.code);
+                }
+              }}
+              disabled={!selectedAnimalTypeCode || filteredBreeds.length === 0}
             />
           </div>
 
@@ -233,20 +408,28 @@ function Reservation() {
 
           <SelectBox
             placeholder="진료 항목을 선택해주세요."
-            options={hospitalInfo.departments.map((item) => ({
-              label: item,
-              value: item,
+            options={filteredDepartments.map((item) => ({
+              label: item.description,
+              value: item.description,
             }))}
             value={selectedDepartment}
-            onChange={(value) => setSelectedDepartment(value)}
+            onChange={(value) => {
+              const selected = filteredDepartments.find(
+                (item) => item.description === value
+              );
+              if (selected) {
+                setSelectedDepartment(selected.description);
+                setSelectedDepartmentCode(selected.code);
+              }
+            }}
           />
 
-          <div className="flex flex-col items-center gap-3 mt-4  md:flex-row md:items-center md:justify-center md:gap-6">
+          <div className="flex flex-col items-center gap-3 mt-4 md:flex-row md:items-center md:justify-center md:gap-6">
             <div className="w-full max-w-sm">
               <Calendar
                 selectedDates={selectedDate ? [selectedDate] : []}
                 onSelectDate={(date: Date) => setSelectedDate(date)}
-                holidays={hospitalInfo.holidays || []} // ⭐ holidays 전달
+                holidays={hospitalInfo.holidays || []}
               />
             </div>
 
@@ -272,11 +455,21 @@ function Reservation() {
           label="예약하기"
           className="w-full"
           disabled={!isFormComplete}
-          onClick={() => {
-            if (!isFormComplete) return;
-          }}
+          onClick={handleReservation}
         />
       </footer>
+
+      <Popup
+        type="alert"
+        open={showSuccessPopup}
+        onClose={() => {
+          setShowSuccessPopup(false);
+          navigate(`/hospital/${hospitalInfo.id}`);
+        }}
+        title="예약 완료 되었습니다"
+      >
+        감사합니다.
+      </Popup>
     </div>
   );
 }
