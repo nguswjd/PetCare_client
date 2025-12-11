@@ -51,6 +51,17 @@ export default function Popup({
   }, [open, onClose]);
 
   React.useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  React.useEffect(() => {
     if (!open) {
       setInputValue("");
     }

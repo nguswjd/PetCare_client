@@ -516,7 +516,20 @@ function Reservation() {
         }}
         title="예약 완료 되었습니다"
       >
-        감사합니다.
+        예약자 명 : {name} <br />
+        날짜 :{" "}
+        {selectedDate
+          ? `${selectedDate.getFullYear()}-${String(
+              selectedDate.getMonth() + 1
+            ).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(
+              2,
+              "0"
+            )}`
+          : ""}{" "}
+        {selectedTime}
+        <br />
+        품종 : {selectedBreed} <br />
+        진료항목 : {selectedDepartment}
       </Popup>
     </div>
   );
