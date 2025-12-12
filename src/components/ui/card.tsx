@@ -71,7 +71,7 @@ const Card = ({
           )}
           {size === "sm" ? (
             content && (
-              <p className="font-medium text-sm text-gray-6 col-span-2">
+              <p className="font-medium text-sm text-gray-6 col-span-2 truncate">
                 {content}
               </p>
             )
