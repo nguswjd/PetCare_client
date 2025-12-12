@@ -75,24 +75,27 @@ function HospitalMainPage() {
               onClick={handleGoReview}
             />
           </div>
-          <div className="flex px-6 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 px-6 overflow-x-auto scrollbar-hide">
             <Card
               size="sm"
               image=""
               name="예약자명"
-              address="육지동물 / 고양이"
+              animalType="육지동물 / 고양이"
+              className="[&>div]:gap-y-0.5"
             />
             <Card
               size="sm"
               image=""
               name="예약자명"
-              address="육지동물 / 고양이"
+              animalType="육지동물 / 고양이"
+              className="[&>div]:gap-y-0.5"
             />
             <Card
               size="sm"
               image=""
               name="예약자명"
-              address="육지동물 / 고양이"
+              animalType="육지동물 / 고양이"
+              className="[&>div]:gap-y-0.5"
             />
           </div>
         </section>
@@ -108,30 +111,33 @@ function HospitalMainPage() {
             />
           </div>
 
-          <div className="flex px-6 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 px-6 overflow-x-auto scrollbar-hide">
             <Card
               size="sm"
               image=""
               alt="병원 이미지"
               name="예약자명"
-              address="육지동물 / 고양이"
+              animalType="육지동물 / 고양이"
               content="리뷰리뷰리뷰리뷰"
+              className="[&>div]:gap-y-0.5"
             />
             <Card
               size="sm"
               image=""
               alt="병원 이미지"
               name="예약자명"
-              address="육지동물 / 개(대형)"
+              animalType="육지동물 / 개(대형)"
               content="리뷰리뷰리뷰리뷰리뷰리뷰리뷰리뷰리뷰리뷰"
+              className="[&>div]:gap-y-0.5"
             />
             <Card
               size="sm"
               image=""
               alt="병원 이미지"
               name="예약자명"
-              address="조류 / 앵무새"
+              animalType="조류 / 앵무새"
               content="리뷰리뷰리뷰리뷰리뷰리뷰리뷰리뷰리뷰리뷰"
+              className="[&>div]:gap-y-0.5"
             />
           </div>
         </section>

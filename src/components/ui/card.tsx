@@ -33,6 +33,7 @@ interface CardProps
   alt?: string;
   name?: string;
   address?: string;
+  animalType?: string;
   content?: string;
   businessStatus?: string;
   distance?: string;
@@ -45,6 +46,7 @@ const Card = ({
   alt,
   name,
   address,
+  animalType,
   content,
   businessStatus,
   distance,
@@ -61,22 +63,41 @@ const Card = ({
           "object-cover rounded-md bg-gray-4"
         )}
       />
-      {(name || address || content || businessStatus || distance) && (
-        <div className="grid grid-cols-2 items-center w-42">
-          {name && <p className="text-base font-semibold text-black">{name}</p>}
-          {address && (
-            <p className="text-sm font-normal text-gray-6 truncate">
-              {address}
-            </p>
-          )}
+      {(name ||
+        address ||
+        animalType ||
+        content ||
+        businessStatus ||
+        distance) && (
+        <div className="flex flex-col gap-0.5 w-42">
+          <div
+            className={cn(
+              "grid items-center",
+              animalType ? "grid-cols-[1fr_auto]" : "grid-cols-2"
+            )}
+          >
+            {name && (
+              <p className="text-base font-semibold text-black">{name}</p>
+            )}
+            {(animalType || address) && (
+              <p
+                className={cn(
+                  "text-sm font-normal text-gray-6 truncate",
+                  animalType ? "w-auto" : ""
+                )}
+              >
+                {animalType || address}
+              </p>
+            )}
+          </div>
           {size === "sm" ? (
             content && (
-              <p className="font-medium text-sm text-gray-6 col-span-2 truncate">
+              <p className="font-medium text-sm text-gray-6 truncate">
                 {content}
               </p>
             )
           ) : (
-            <>
+            <div className="grid grid-cols-2">
               {businessStatus && (
                 <p className="font-medium text-sm text-gray-7">
                   {businessStatus}
@@ -85,7 +106,7 @@ const Card = ({
               {distance && (
                 <p className="font-medium text-sm text-gray-7">{distance}</p>
               )}
-            </>
+            </div>
           )}
         </div>
       )}
