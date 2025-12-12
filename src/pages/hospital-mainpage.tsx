@@ -180,15 +180,14 @@ function HospitalMainPage() {
     <div className="h-dvh flex flex-col">
       <Header label="병원 관리 페이지" showBackButton={false} />
 
-      <main className="py-4 flex flex-col flex-1 overflow-auto gap-4">
-        <section className="p-4 border-b border-t border-b-gray-3 border-t-gray-3">
+      <main className="pb-5 flex flex-col flex-1 overflow-auto gap-4">
+        <section className="p-4 border-b border-t border-y-gray-3">
           <h2 className="hidden">내 병원 정보</h2>
-          <div className="flex flex-col gap-2">
-            <h3 className="font-semibold text-xl">{hospitalData.name}</h3>
-            <p className="flex gap-2 text-gray-6 font-medium text-sm">
-              {hospitalData.address}
-            </p>
-          </div>
+          <Header
+            variant="hospital"
+            hospitalData={hospitalData}
+            showBackButton={false}
+          />
         </section>
 
         <section className="flex flex-col gap-2">
