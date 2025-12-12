@@ -158,7 +158,9 @@ function HospitalMainPage() {
   };
 
   const handleGoReview = () => navigate(`/hospital-main/review`);
-  const handleGoReservation = () => navigate(`/hospital-main/reservation`);
+  const handleGoReservation = () => {
+    navigate("/hospital-main/reservation", { state: { hospitalData } });
+  };
 
   if (loading) {
     return (
