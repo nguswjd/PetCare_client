@@ -5,6 +5,7 @@ import Header from "@/components/header";
 import Popup from "@/components/popup";
 import Button from "@/components/ui/button";
 import Card from "@/components/ui/card";
+import Field from "@/components/ui/field";
 
 import HospitalInfo from "@/components/hospital-detail-info";
 
@@ -289,6 +290,10 @@ function HospitalMainPage() {
               )}
             </div>
           </div>
+
+          <Field placeholder={hospitalData?.representativeName} />
+          <Field placeholder={hospitalData?.name} />
+          <Field placeholder={hospitalData?.address} />
 
           <HospitalInfo
             editMode={editMode}

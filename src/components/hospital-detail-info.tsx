@@ -260,10 +260,9 @@ function HospitalInfo({
 
   return (
     <div className="w-full flex flex-col gap-4">
-      {/* 이미지 업로드 */}
       <div className="flex flex-col gap-2">
         <div className="flex justify-between items-center">
-          <Label children="병원이미지 업로드" />
+          <Label children={editMode ? "병원이미지 업로드" : "병원이미지"} />
           {editMode && (
             <label
               htmlFor="image-upload"
