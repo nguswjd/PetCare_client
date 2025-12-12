@@ -555,7 +555,7 @@ function Mypage() {
                 <Button
                   icon={CheckLine}
                   variant="icon"
-                  className="w-4 h-4 [&>svg]:!w-4 [&>svg]:!h-4"
+                  className="w-4 h-4"
                   onClick={handleSave}
                 />
               )}
