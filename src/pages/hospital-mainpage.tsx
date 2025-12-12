@@ -157,7 +157,10 @@ function HospitalMainPage() {
     }
   };
 
-  const handleGoReview = () => navigate(`/hospital-main/review`);
+  const handleGoReview = () => {
+    navigate("/hospital-main/review", { state: { hospitalData } });
+  };
+
   const handleGoReservation = () => {
     navigate("/hospital-main/reservation", { state: { hospitalData } });
   };
