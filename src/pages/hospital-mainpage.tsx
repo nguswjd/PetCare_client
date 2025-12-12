@@ -47,6 +47,9 @@ function HospitalMainPage() {
     }
   };
 
+  const handleGoReview = () => navigate(`/hospital-main/review`);
+  const handleGoReservation = () => navigate(`/hospital-main/reservation`);
+
   return (
     <div className="h-dvh flex flex-col">
       <Header label="병원 관리 페이지" showBackButton={false} />
@@ -65,7 +68,12 @@ function HospitalMainPage() {
         <section>
           <div className="px-6 flex w-full justify-between">
             <h2 className="font-bold">예약내역</h2>
-            <Button variant="icon" icon={ChevronLast} className="w-4 h-4" />
+            <Button
+              variant="icon"
+              icon={ChevronLast}
+              className="w-4 h-4"
+              onClick={handleGoReview}
+            />
           </div>
           <div className="flex px-6 overflow-x-auto scrollbar-hide">
             <Card
@@ -92,7 +100,12 @@ function HospitalMainPage() {
         <section>
           <div className="px-6 flex w-full justify-between">
             <h2 className="font-bold">병원 리뷰</h2>
-            <Button variant="icon" icon={ChevronLast} className="w-4 h-4" />
+            <Button
+              variant="icon"
+              icon={ChevronLast}
+              className="w-4 h-4"
+              onClick={handleGoReservation}
+            />
           </div>
 
           <div className="flex px-6 overflow-x-auto scrollbar-hide">

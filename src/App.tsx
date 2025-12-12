@@ -8,6 +8,8 @@ import Mypage from "./pages/mypage";
 import Reservation from "./pages/reservation";
 import HospitalMain from "./pages/hospital-mainpage";
 import Search from "./pages/search";
+import HospitalReview from "./pages/hospital-review";
+import HospitalReservation from "./pages/hospital-reservation";
 
 function App() {
   return (
@@ -21,6 +23,11 @@ function App() {
       <Route path="/hospital/:id/reservation" element={<Reservation />} />
       <Route path="/hospital-main" element={<HospitalMain />} />
       <Route path="/search" element={<Search />} />
+      <Route path="/hospital-main/review" element={<HospitalReview />} />
+      <Route
+        path="/hospital-main/reservation"
+        element={<HospitalReservation />}
+      />
     </Routes>
   );
 }
