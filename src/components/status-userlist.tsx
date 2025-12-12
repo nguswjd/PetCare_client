@@ -13,7 +13,7 @@ const StatusUserList = () => {
   };
 
   return (
-    <div className="flex gap-6 max-w-90 w-full">
+    <div className="flex gap-6 max-w-90 w-full border-b border-b-gray-5 pb-4">
       <Button
         variant="icon"
         icon={checked ? SquareCheckBig : Square}
