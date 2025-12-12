@@ -470,7 +470,7 @@ function Mypage() {
 
   return (
     <div className="h-dvh bg-white flex flex-col">
-      <Header label="마이페이지" />
+      <Header label="마이페이지" variant="label" showBackButton={true} />
 
       <section className="border-y border-gray-3 p-4">
         <h2 className="hidden">내정보</h2>

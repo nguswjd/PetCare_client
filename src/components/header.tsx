@@ -1,5 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
 
+import Button from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
+
 type HospitalData = {
   name: string;
   address: string;
@@ -36,12 +39,11 @@ function Header({
   return (
     <header className={headerVariants({ variant, showBackButton })}>
       {showBackButton && variant === "label" && (
-        <button
-          className="absolute left-4"
+        <Button
+          variant="icon"
+          icon={ChevronLeft}
           onClick={() => window.history.back()}
-        >
-          &#8592;
-        </button>
+        />
       )}
 
       {variant === "hospital" && hospitalData ? (

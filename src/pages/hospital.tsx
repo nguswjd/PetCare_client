@@ -203,7 +203,11 @@ function Hospital() {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="sticky top-0 z-10 bg-white">
-        <Header label={hospitalInfo.name} />
+        <Header
+          label={hospitalInfo.name}
+          variant="label"
+          showBackButton={true}
+        />
         <div>
           <img
             src={hospitalInfo.image}
