@@ -61,6 +61,16 @@ function HospitalReservation() {
       </main>
 
       <Footer variant="hospital" />
+
+      <div className="absolute top-2 right-6 z-10">
+        <Button
+          label="로그아웃"
+          onClick={() => {
+            localStorage.removeItem("token");
+            window.location.href = "/";
+          }}
+        />
+      </div>
     </div>
   );
 }
