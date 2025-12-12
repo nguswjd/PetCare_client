@@ -81,4 +81,9 @@
   input[type="number"] {
     -moz-appearance: textfield;
   }
+
+  .required::after {
+    content: " *";
+    color: var(--red);
+  }
 }

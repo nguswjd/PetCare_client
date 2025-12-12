@@ -102,10 +102,12 @@ function HospitalInfo({
 
   const Label = ({
     children,
+    className = "",
   }: {
     children: React.ReactNode;
+    className?: string;
     required?: boolean;
-  }) => <label className="text-sm text-black">{children}</label>;
+  }) => <label className={`text-sm text-black ${className}`}>{children}</label>;
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -262,7 +264,12 @@ function HospitalInfo({
     <div className="w-full flex flex-col gap-4">
       <div className="flex flex-col gap-2">
         <div className="flex justify-between items-center">
-          <Label children={editMode ? "병원이미지 업로드" : "병원이미지"} />
+          <div className="">
+            <Label
+              children={editMode ? "병원이미지 업로드" : "병원이미지"}
+              className="required"
+            />
+          </div>
           {editMode && (
             <label
               htmlFor="image-upload"
@@ -298,7 +305,6 @@ function HospitalInfo({
         )}
       </div>
 
-      {/* 주차장 */}
       <div className="flex flex-col gap-1">
         <Label children="주차장 여부" />
         <Radio
@@ -311,9 +317,8 @@ function HospitalInfo({
         />
       </div>
 
-      {/* 진료항목 */}
       <div className="flex flex-col gap-1">
-        <Label children="진료항목" />
+        <Label children="진료항목" className="required" />
         <div className="grid grid-cols-2 gap-2">
           {departments.map((dept) => (
             <Checkbox
@@ -328,9 +333,8 @@ function HospitalInfo({
         </div>
       </div>
 
-      {/* 진료동물 */}
       <div className="w-full flex flex-col gap-2">
-        <Label children="진료동물" />
+        <Label children="진료동물" className="required" />
         <div className="flex gap-2">
           <MultiSelectBox
             placeholder="종류"
@@ -383,9 +387,8 @@ function HospitalInfo({
         </div>
       </div>
 
-      {/* 운영시간 */}
       <div className="flex flex-col gap-1">
-        <Label children="운영시간" />
+        <Label children="운영시간" className="required" />
         <div className="flex gap-2">
           <SelectBox
             placeholder="시작시간"
