@@ -470,7 +470,7 @@ function Mypage() {
 
   return (
     <div className="h-dvh bg-white flex flex-col">
-      <Header label="마이페이지" />
+      <Header label="마이페이지" variant="label" showBackButton={true} />
 
       <section className="border-y border-gray-3 p-4">
         <h2 className="hidden">내정보</h2>
@@ -547,7 +547,7 @@ function Mypage() {
                 <Button
                   icon={PencilLine}
                   variant="icon"
-                  className="w-4 h-4"
+                  iconSize="w-5 h-5"
                   onClick={handleEdit}
                 />
               )}
@@ -555,7 +555,7 @@ function Mypage() {
                 <Button
                   icon={CheckLine}
                   variant="icon"
-                  className="w-4 h-4 [&>svg]:!w-4 [&>svg]:!h-4"
+                  iconSize="w-5 h-5"
                   onClick={handleSave}
                 />
               )}

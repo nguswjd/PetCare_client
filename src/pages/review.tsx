@@ -73,7 +73,7 @@ function Review() {
 
   return (
     <div className="flex flex-col h-dvh">
-      <Header label="리뷰 등록하기" />
+      <Header label="리뷰 등록하기" variant="label" showBackButton={true} />
       <div className="p-4 border-b border-t border-b-gray-3 border-t-gray-3">
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-xl">{hospitalInfo.name}</h3>

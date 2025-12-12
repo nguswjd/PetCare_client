@@ -317,7 +317,11 @@ function Reservation() {
   return (
     <div className="h-dvh">
       <div className="sticky top-0 z-10 bg-white">
-        <Header label={hospitalInfo.name} />
+        <Header
+          label={hospitalInfo.name}
+          variant="label"
+          showBackButton={true}
+        />
       </div>
 
       <div>
