@@ -547,7 +547,7 @@ function Mypage() {
                 <Button
                   icon={PencilLine}
                   variant="icon"
-                  className="w-4 h-4"
+                  iconSize="w-5 h-5"
                   onClick={handleEdit}
                 />
               )}
@@ -555,7 +555,7 @@ function Mypage() {
                 <Button
                   icon={CheckLine}
                   variant="icon"
-                  className="w-4 h-4"
+                  iconSize="w-5 h-5"
                   onClick={handleSave}
                 />
               )}

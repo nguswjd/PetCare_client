@@ -9,7 +9,7 @@ import Field from "@/components/ui/field";
 
 import HospitalInfo from "@/components/hospital-detail-info";
 
-import { PencilLine, Check, ChevronLast } from "lucide-react";
+import { PencilLine, CheckLine, ChevronLast } from "lucide-react";
 
 interface HospitalData {
   name: string;
@@ -276,15 +276,15 @@ function HospitalMainPage() {
                 <Button
                   icon={PencilLine}
                   variant="icon"
-                  className="w-4 h-4"
+                  iconSize="w-5 h-5"
                   onClick={handleEdit}
                 />
               )}
               {editMode && (
                 <Button
-                  icon={Check}
+                  icon={CheckLine}
                   variant="icon"
-                  className="w-4 h-4"
+                  iconSize="w-5 h-5"
                   onClick={handleSave}
                 />
               )}
