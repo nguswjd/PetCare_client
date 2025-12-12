@@ -6,6 +6,13 @@ import Footer from "../components/footer";
 import { getRecentHospitalsUnified } from "@/utils/recentHospitals";
 import { MapPin } from "lucide-react";
 
+import Ad1 from "@/assets/ads/ad1_petcare.png";
+import Ad2 from "@/assets/ads/ad2_cites.png";
+import Ad3 from "@/assets/ads/ad3_animalfood.jpg";
+import Ad4 from "@/assets/ads/ad1_petcare.png";
+import Ad5 from "@/assets/ads/ad2_cites.png";
+import Ad6 from "@/assets/ads/ad3_animalfood.jpg";
+
 interface HospitalType {
   id: number;
   image: string;
@@ -25,12 +32,12 @@ function MainPage() {
   const [loadingRecent, setLoadingRecent] = useState(true);
 
   const ads = [
-    { id: 1, alt: "광고1" },
-    { id: 2, alt: "광고2" },
-    { id: 3, alt: "광고3" },
-    { id: 4, alt: "광고4" },
-    { id: 5, alt: "광고5" },
-    { id: 6, alt: "광고6" },
+    { id: 1, image: Ad1, alt: "petcare 홍보물" },
+    { id: 2, image: Ad2, alt: "사이테스 관련 안내문" },
+    { id: 3, image: Ad3, alt: "동물 사료 홍보물" },
+    { id: 4, image: Ad4, alt: "광고4" },
+    { id: 5, image: Ad5, alt: "광고5" },
+    { id: 6, image: Ad6, alt: "광고6" },
   ];
 
   const closestHospital = {
@@ -141,7 +148,7 @@ function MainPage() {
           >
             {ads.map((ad) => (
               <div key={ad.id} className="w-full flex-shrink-0 snap-center">
-                <Card size="lg" image="" alt={ad.alt} />
+                <Card size="lg" image={ad.image} alt={ad.alt} />
               </div>
             ))}
           </div>

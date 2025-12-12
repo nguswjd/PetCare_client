@@ -186,7 +186,7 @@ function HospitalMainPage() {
       <Header label="병원 관리 페이지" showBackButton={false} />
 
       <main className="pb-5 flex flex-col flex-1 overflow-auto gap-4">
-        <section className="p-4 border-b border-t border-y-gray-3">
+        <section className="p-4 border-y border-y-gray-3">
           <h2 className="hidden">내 병원 정보</h2>
           <Header
             variant="hospital"
