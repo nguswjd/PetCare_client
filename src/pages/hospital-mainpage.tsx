@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 
 import Header from "@/components/header";
@@ -8,7 +8,25 @@ import Card from "@/components/ui/card";
 
 import HospitalInfo from "@/components/hospital-detail-info";
 
-import { PencilLine, ChevronLast } from "lucide-react";
+import { PencilLine, Check, ChevronLast } from "lucide-react";
+
+interface HospitalData {
+  name: string;
+  address: string;
+  representativeName: string;
+  hospitalNumber: string;
+  businessRegistrationNumber: string;
+  imageUrl: string | null;
+  hasParking: boolean;
+  departments: string[];
+  animalTypes: string[];
+  breeds: string[];
+  holidays: string[];
+  operatingStartTime: string | null;
+  operatingEndTime: string | null;
+  is24Hours: boolean;
+  breakTimes: string[];
+}
 
 function HospitalMainPage() {
   const navigate = useNavigate();
@@ -21,34 +39,141 @@ function HospitalMainPage() {
     message: "",
   });
   const [passwordError, setPasswordError] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [hospitalData, setHospitalData] = useState<HospitalData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState<any>(null);
 
-  const handleLogout = async () => {
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    const fetchHospitalData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          navigate("/");
+          return;
+        }
+
+        const res = await fetch(`${API_URL}/api/v1/hospital/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error("병원 정보를 불러올 수 없습니다.");
+        }
+
+        const data = await res.json();
+        setHospitalData(data);
+      } catch (err: any) {
+        console.error(err);
+        setAlertPopup({
+          open: true,
+          message: err.message || "병원 정보를 불러올 수 없습니다.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHospitalData();
+  }, [API_URL, navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setAlertPopup({ open: true, message: "로그아웃 되었습니다." });
+  };
+
+  const handleEdit = () => {
+    setEditMode(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData) {
+      setAlertPopup({
+        open: true,
+        message: "변경된 내용이 없습니다.",
+      });
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
-      const API_URL = import.meta.env.VITE_API_URL;
-      const res = await fetch(`${API_URL}/api/v1/hospital/auth/logout`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
+      const form = new FormData();
+
+      if (hospitalData) {
+        form.append("representativeName", hospitalData.representativeName);
+        form.append("name", hospitalData.name);
+        form.append("hospitalNumber", hospitalData.hospitalNumber);
+        form.append("address", hospitalData.address);
+      }
+
+      form.append("hasParking", JSON.stringify(formData.hasParking));
+      form.append("departments", JSON.stringify(formData.departments));
+      form.append("animalTypes", JSON.stringify(formData.animalTypes));
+      form.append("breeds", JSON.stringify(formData.breeds));
+      form.append("holidays", JSON.stringify(formData.holidays));
+
+      if (formData.operatingStartTime) {
+        form.append("operatingStartTime", formData.operatingStartTime);
+      }
+      if (formData.operatingEndTime) {
+        form.append("operatingEndTime", formData.operatingEndTime);
+      }
+
+      form.append("breakTimes", JSON.stringify(formData.breakTimes));
+
+      if (formData.imageFile) {
+        form.append("imageFile", formData.imageFile);
+      }
+
+      const res = await fetch(
+        `${API_URL}/api/v1/hospital/auth/update-details`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: form,
+        }
+      );
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message || "로그아웃 실패");
+        throw new Error(errorData.message || "수정 실패");
       }
 
-      localStorage.removeItem("token");
-      setAlertPopup({ open: true, message: "로그아웃 되었습니다." });
+      const updatedData = await res.json();
+      setHospitalData(updatedData);
+      setEditMode(false);
     } catch (err: any) {
-      setAlertPopup({ open: true, message: err.message || "로그아웃 실패" });
+      setAlertPopup({
+        open: true,
+        message: err.message || "정보 수정에 실패했습니다.",
+      });
     }
   };
 
   const handleGoReview = () => navigate(`/hospital-main/review`);
   const handleGoReservation = () => navigate(`/hospital-main/reservation`);
+
+  if (loading) {
+    return (
+      <div className="h-dvh flex items-center justify-center">
+        <p className="text-gray-6">로딩 중...</p>
+      </div>
+    );
+  }
+
+  if (!hospitalData) {
+    return (
+      <div className="h-dvh flex items-center justify-center">
+        <p className="text-gray-6">병원 정보를 불러올 수 없습니다.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="h-dvh flex flex-col">
@@ -58,21 +183,21 @@ function HospitalMainPage() {
         <section className="p-4 border-b border-t border-b-gray-3 border-t-gray-3">
           <h2 className="hidden">내 병원 정보</h2>
           <div className="flex flex-col gap-2">
-            <h3 className="font-semibold text-xl">A hosptial</h3>
+            <h3 className="font-semibold text-xl">{hospitalData.name}</h3>
             <p className="flex gap-2 text-gray-6 font-medium text-sm">
-              경기도 수원시 뭐시기뭐시기
+              {hospitalData.address}
             </p>
           </div>
         </section>
 
-        <section>
+        <section className="flex flex-col gap-2">
           <div className="px-6 flex w-full justify-between">
             <h2 className="font-bold">예약내역</h2>
             <Button
               variant="icon"
               icon={ChevronLast}
               className="w-4 h-4"
-              onClick={handleGoReview}
+              onClick={handleGoReservation}
             />
           </div>
           <div className="flex gap-2 px-6 overflow-x-auto scrollbar-hide">
@@ -100,14 +225,14 @@ function HospitalMainPage() {
           </div>
         </section>
 
-        <section>
+        <section className="flex flex-col gap-2">
           <div className="px-6 flex w-full justify-between">
             <h2 className="font-bold">병원 리뷰</h2>
             <Button
               variant="icon"
               icon={ChevronLast}
               className="w-4 h-4"
-              onClick={handleGoReservation}
+              onClick={handleGoReview}
             />
           </div>
 
@@ -142,12 +267,11 @@ function HospitalMainPage() {
           </div>
         </section>
 
-        <section className="px-6">
-          <h2 className="hidden">병원 정보 수정</h2>
+        <section className="px-6 flex flex-col gap-2">
           <div className="flex justify-between items-center">
-            <h3 className="font-bold">내 정보 수정</h3>
+            <h3 className="font-bold">병원 정보 수정</h3>
             <div className="flex gap-2">
-              {/* {!editMode && (
+              {!editMode && (
                 <Button
                   icon={PencilLine}
                   variant="icon"
@@ -157,16 +281,20 @@ function HospitalMainPage() {
               )}
               {editMode && (
                 <Button
-                  icon={CheckLine}
+                  icon={Check}
                   variant="icon"
                   className="w-4 h-4"
                   onClick={handleSave}
                 />
-              )} */}
+              )}
             </div>
           </div>
 
-          <HospitalInfo />
+          <HospitalInfo
+            editMode={editMode}
+            initialData={hospitalData}
+            onDataChange={setFormData}
+          />
         </section>
       </main>
 
@@ -198,7 +326,6 @@ function HospitalMainPage() {
 
             try {
               const token = localStorage.getItem("token");
-              const API_URL = import.meta.env.VITE_API_URL;
 
               const res = await fetch(
                 `${API_URL}/api/v1/hospital/auth/withdraw`,
@@ -244,11 +371,17 @@ function HospitalMainPage() {
         <Popup
           open={alertPopup.open}
           type="alert"
-          children={`이용해주셔서 감사합니다.\n안녕히가세요.`}
+          children={
+            alertPopup.message === "로그아웃 되었습니다."
+              ? `이용해주셔서 감사합니다.\n안녕히가세요.`
+              : alertPopup.message
+          }
           title={alertPopup.message}
           onClose={() => {
             setAlertPopup({ open: false, message: "" });
-            navigate("/");
+            if (alertPopup.message === "로그아웃 되었습니다.") {
+              navigate("/");
+            }
           }}
         />
       )}

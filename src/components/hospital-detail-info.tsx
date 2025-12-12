@@ -12,6 +12,18 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
 interface HospitalInfoProps {
   onDataChange?: (data: HospitalFormData) => void;
+  editMode?: boolean;
+  initialData?: {
+    imageUrl: string | null;
+    hasParking: boolean;
+    departments: string[];
+    animalTypes: string[];
+    breeds: string[];
+    holidays: string[];
+    operatingStartTime: string | null;
+    operatingEndTime: string | null;
+    breakTimes: string[];
+  };
 }
 
 export interface HospitalFormData {
@@ -31,7 +43,11 @@ interface Department {
   description: string;
 }
 
-function HospitalInfo({ onDataChange }: HospitalInfoProps) {
+function HospitalInfo({
+  onDataChange,
+  editMode = true,
+  initialData,
+}: HospitalInfoProps) {
   const [Parking, setParking] = useState("yes");
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
@@ -39,7 +55,6 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const [departments, setDepartments] = useState<Department[]>([]);
-
   const [animalTypes, setAnimalTypes] = useState<
     Array<{ code: string; description: string }>
   >([]);
@@ -53,10 +68,32 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
   const [breakTimes, setBreakTimes] = useState<string[]>([]);
 
   const onDataChangeRef = useRef(onDataChange);
-
   useEffect(() => {
     onDataChangeRef.current = onDataChange;
   }, [onDataChange]);
+
+  const formatTime = (time: string | null) => {
+    if (!time) return null;
+    return time.slice(0, 5);
+  };
+
+  useEffect(() => {
+    if (initialData) {
+      setParking(initialData.hasParking ? "yes" : "no");
+      setSelectedDepartments(initialData.departments || []);
+      setSelectedAnimalTypes(initialData.animalTypes || []);
+      setSelectedBreeds(initialData.breeds || []);
+      setSelectedDates((initialData.holidays || []).map((h) => new Date(h)));
+      setStartTime(formatTime(initialData.operatingStartTime));
+      setEndTime(formatTime(initialData.operatingEndTime));
+      setBreakTimes(
+        (initialData.breakTimes || [])
+          .map(formatTime)
+          .filter((t): t is string => t !== null)
+      );
+      if (initialData.imageUrl) setUploadedImage(initialData.imageUrl);
+    }
+  }, [initialData]);
 
   const times: string[] = Array.from(
     { length: 24 },
@@ -80,7 +117,6 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
         console.error(error);
       }
     };
-
     fetchDepartments();
   }, []);
 
@@ -94,7 +130,6 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
         console.error(error);
       }
     };
-
     fetchAnimalTypes();
   }, []);
 
@@ -103,7 +138,6 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
       setBreeds([]);
       return;
     }
-
     const fetchAllBreeds = async () => {
       try {
         const breedPromises = selectedAnimalTypes.map((type) =>
@@ -112,11 +146,9 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
           )
         );
         const results = await Promise.all(breedPromises);
-
-        const allBreeds: Array<{ code: string; description: string }> =
-          results.flatMap((data) => data.breeds || []);
+        const allBreeds = results.flatMap((data) => data.breeds || []);
         const uniqueBreeds = Array.from(
-          new Map(allBreeds.map((breed) => [breed.code, breed])).values()
+          new Map(allBreeds.map((b) => [b.code, b])).values()
         );
         setBreeds(uniqueBreeds);
       } catch (error) {
@@ -124,7 +156,6 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
         setBreeds([]);
       }
     };
-
     fetchAllBreeds();
   }, [selectedAnimalTypes]);
 
@@ -155,6 +186,7 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
   ]);
 
   const toggleDate = (date: Date) => {
+    if (!editMode) return;
     setSelectedDates((prev) => {
       const exists = prev.some((d) => d.toDateString() === date.toDateString());
       return exists
@@ -164,42 +196,39 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
   };
 
   const toggleDepartment = (code: string) => {
+    if (!editMode) return;
     setSelectedDepartments((prev) =>
       prev.includes(code) ? prev.filter((d) => d !== code) : [...prev, code]
     );
   };
 
   const handleAnimalTypeChange = (value: string) => {
+    if (!editMode) return;
     setSelectedAnimalTypes((prev) =>
       prev.includes(value) ? prev.filter((t) => t !== value) : [...prev, value]
     );
   };
 
   const handleBreedChange = (value: string) => {
+    if (!editMode) return;
     setSelectedBreeds((prev) =>
       prev.includes(value) ? prev.filter((b) => b !== value) : [...prev, value]
     );
   };
 
-  const getAnimalTypesHashtags = () => {
-    return selectedAnimalTypes
-      .map((code) => {
-        const type = animalTypes.find((t) => t.code === code);
-        return type ? `#${type.description}` : "";
-      })
+  const getAnimalTypesHashtags = () =>
+    selectedAnimalTypes
+      .map((code) => animalTypes.find((t) => t.code === code)?.description)
       .filter(Boolean)
+      .map((desc) => `#${desc}`)
       .join(" ");
-  };
 
-  const getBreedsHashtags = () => {
-    return selectedBreeds
-      .map((code) => {
-        const breed = breeds.find((b) => b.code === code);
-        return breed ? `#${breed.description}` : "";
-      })
+  const getBreedsHashtags = () =>
+    selectedBreeds
+      .map((code) => breeds.find((b) => b.code === code)?.description)
       .filter(Boolean)
+      .map((desc) => `#${desc}`)
       .join(" ");
-  };
 
   const endTimes = startTime ? times.filter((t) => t >= startTime) : times;
 
@@ -211,42 +240,45 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
       : times;
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!editMode) return;
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!file.type.startsWith("image/")) return;
 
-    if (file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadedImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setUploadedImage(reader.result as string);
+    reader.readAsDataURL(file);
 
-      setImageFile(file);
-    }
+    setImageFile(file);
   };
 
   const removeImage = () => {
+    if (!editMode) return;
     setUploadedImage(null);
     setImageFile(null);
   };
 
   return (
     <div className="w-full flex flex-col gap-4">
+      {/* 이미지 업로드 */}
       <div className="flex flex-col gap-2">
         <div className="flex justify-between items-center">
           <Label children="병원이미지 업로드" />
-          <label
-            htmlFor="image-upload"
-            className="cursor-pointer inline-flex items-center justify-center p-2 rounded-lg transition-colors"
-          >
-            <Upload className="w-5 h-5" />
-          </label>
+          {editMode && (
+            <label
+              htmlFor="image-upload"
+              className="cursor-pointer inline-flex items-center justify-center p-2 rounded-lg transition-colors"
+            >
+              <Upload className="w-5 h-5" />
+            </label>
+          )}
           <input
             id="image-upload"
             type="file"
             accept="image/*"
             onChange={handleImageUpload}
             className="hidden"
+            disabled={!editMode}
           />
         </div>
 
@@ -257,19 +289,22 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
               alt="병원 이미지"
               className="w-full h-full object-cover rounded-lg"
             />
-            <X
-              onClick={removeImage}
-              className="absolute top-2 w-5 h-5 right-2  text-black rounded-full flex items-center justify-center hover:bg-gray-2"
-            />
+            {editMode && (
+              <X
+                onClick={removeImage}
+                className="absolute top-2 w-5 h-5 right-2 cursor-pointer text-black rounded-full flex items-center justify-center hover:bg-gray-2"
+              />
+            )}
           </div>
         )}
       </div>
 
+      {/* 주차장 */}
       <div className="flex flex-col gap-1">
         <Label children="주차장 여부" />
         <Radio
           value={Parking}
-          onChange={setParking}
+          onChange={editMode ? setParking : () => {}}
           options={[
             { value: "yes", label: "있음" },
             { value: "no", label: "없음" },
@@ -277,6 +312,7 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
         />
       </div>
 
+      {/* 진료항목 */}
       <div className="flex flex-col gap-1">
         <Label children="진료항목" />
         <div className="grid grid-cols-2 gap-2">
@@ -287,11 +323,13 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
               label={dept.description}
               checked={selectedDepartments.includes(dept.code)}
               onCheckedChange={() => toggleDepartment(dept.code)}
+              disabled={!editMode}
             />
           ))}
         </div>
       </div>
 
+      {/* 진료동물 */}
       <div className="w-full flex flex-col gap-2">
         <Label children="진료동물" />
         <div className="flex gap-2">
@@ -303,6 +341,7 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
             }))}
             onChange={handleAnimalTypeChange}
             selectedValues={selectedAnimalTypes}
+            disabled={!editMode}
           />
           <MultiSelectBox
             placeholder="품종"
@@ -312,7 +351,11 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
             }))}
             onChange={handleBreedChange}
             selectedValues={selectedBreeds}
-            disabled={selectedAnimalTypes.length === 0 || breeds.length === 0}
+            disabled={
+              !editMode ||
+              selectedAnimalTypes.length === 0 ||
+              breeds.length === 0
+            }
           />
         </div>
         <div className="flex flex-col gap-1">
@@ -341,45 +384,51 @@ function HospitalInfo({ onDataChange }: HospitalInfoProps) {
         </div>
       </div>
 
+      {/* 운영시간 */}
       <div className="flex flex-col gap-1">
         <Label children="운영시간" />
         <div className="flex gap-2">
           <SelectBox
             placeholder="시작시간"
             options={times.map((t) => ({ value: t, label: t }))}
-            value={startTime || ""}
+            value={startTime ?? undefined}
             onChange={(value) => {
+              if (!editMode) return;
               setStartTime(value);
               if (endTime && value && value >= endTime) setEndTime(null);
               setBreakTimes([]);
             }}
+            disabled={!editMode}
           />
-
           <SelectBox
             placeholder="종료시간"
             options={endTimes.map((t) => ({ value: t, label: t }))}
-            value={endTime || ""}
+            value={endTime ?? undefined}
             onChange={(value) => {
+              if (!editMode) return;
               setEndTime(value);
               setBreakTimes([]);
             }}
+            disabled={!editMode}
           />
-
           <MultiSelectBox
             placeholder="휴계시간"
             options={breakTimeOptions.map((t) => ({ value: t, label: t }))}
             selectedValues={breakTimes}
             onChange={(value) => {
+              if (!editMode) return;
               setBreakTimes((prev) =>
                 prev.includes(value)
                   ? prev.filter((v) => v !== value)
                   : [...prev, value]
               );
             }}
+            disabled={!editMode}
           />
         </div>
       </div>
 
+      {/* 휴무일 */}
       <div className="flex flex-col gap-1">
         <Label children="휴무일 등록" />
         <Calendar selectedDates={selectedDates} onSelectDate={toggleDate} />
