@@ -175,7 +175,7 @@ function HospitalReservation() {
             <h2 className="font-bold">예약 중 ({pendingList.length})</h2>
             <button
               onClick={toggleSortOrder}
-              className="flex items-center gap-1 text-xs text-gray-500 hover:text-black"
+              className="flex items-center gap-1 text-xs text-gray-6 hover:text-black"
             >
               {pendingSortOrder === "desc" ? "최신순" : "오래된순"}
               {pendingSortOrder === "desc" ? (
