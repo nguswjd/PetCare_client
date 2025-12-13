@@ -577,7 +577,9 @@ function Mypage() {
                     <div className="flex items-center flex-col gap-1">
                       <div className="text-sm w-37 text-center font-normal">
                         <p>날짜: {reservation.reservationDate}</p>
-                        <p>시간: {reservation.reservationTime}</p>
+                        <p>
+                          시간: {reservation.reservationTime.substring(0, 5)}
+                        </p>
                         <p>
                           품종:{" "}
                           {animalTypeMap[reservation.animalType] ||
