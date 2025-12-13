@@ -39,6 +39,19 @@ interface HospitalInfo {
   operatingStatus: string;
 }
 
+interface ReviewResponse {
+  reviewId: number;
+  hospitalId: number;
+  hospitalName: string;
+  username?: string;
+  department: string;
+  content: string;
+  visitDate?: string;
+  createdDate: string;
+  revisitIntention?: boolean;
+  isMyReview: boolean;
+}
+
 function Mypage() {
   const navigate = useNavigate();
 
@@ -68,6 +81,9 @@ function Mypage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [reservations, setReservations] = useState<Reservation[]>([]);
+
+  const [myReviews, setMyReviews] = useState<ReviewResponse[]>([]);
+
   const [hospitalsInfo, setHospitalsInfo] = useState<{
     [key: number]: HospitalInfo;
   }>({});
@@ -144,6 +160,39 @@ function Mypage() {
       }
     };
 
+    const fetchHospitalInfo = async (
+      hospitalIds: number[],
+      currentHospitalsMap: { [key: number]: HospitalInfo }
+    ) => {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const token = localStorage.getItem("token");
+      if (!token) return {};
+
+      const hospitalPromises = hospitalIds.map((id: number) =>
+        fetch(`${API_URL}/api/v1/hospital/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).then((res) => res.json())
+      );
+
+      const hospitalsData = await Promise.all(hospitalPromises);
+      const newHospitalsMap: { [key: number]: HospitalInfo } = {};
+      hospitalsData.forEach((hospital, index) => {
+        const id = hospitalIds[index];
+        if (hospital) {
+          newHospitalsMap[id] = {
+            id: id,
+            name: hospital.name,
+            address: hospital.address,
+            imageUrl: hospital.imageUrl,
+            operatingStatus: hospital.operatingStatus,
+          };
+        }
+      });
+      return { ...currentHospitalsMap, ...newHospitalsMap };
+    };
+
     const fetchReservations = async () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL;
@@ -164,26 +213,9 @@ function Mypage() {
         const hospitalIds = Array.from(
           new Set(activeReservations.map((r: Reservation) => r.hospitalId))
         ) as number[];
-        const hospitalPromises = hospitalIds.map((id: number) =>
-          fetch(`${API_URL}/api/v1/hospital/${id}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }).then((res) => res.json())
-        );
 
-        const hospitalsData = await Promise.all(hospitalPromises);
-        const hospitalsMap: { [key: number]: HospitalInfo } = {};
-        hospitalsData.forEach((hospital, index) => {
-          hospitalsMap[hospitalIds[index]] = {
-            id: hospitalIds[index],
-            name: hospital.name,
-            address: hospital.address,
-            imageUrl: hospital.imageUrl,
-            operatingStatus: hospital.operatingStatus,
-          };
-        });
-        setHospitalsInfo(hospitalsMap);
+        let updatedHospitalsMap = await fetchHospitalInfo(hospitalIds, {});
+        setHospitalsInfo(updatedHospitalsMap);
 
         const allAnimalTypes = new Set(
           activeReservations.map((r: Reservation) => r.animalType)
@@ -208,8 +240,45 @@ function Mypage() {
       }
     };
 
+    const fetchMyReviews = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/v1/reviews/my`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error("리뷰 목록 불러오기 실패");
+
+        const data: ReviewResponse[] = await res.json();
+        setMyReviews(data);
+
+        const reviewHospitalIds = Array.from(
+          new Set(data.map((r) => r.hospitalId))
+        ) as number[];
+
+        const existingIds = Object.keys(hospitalsInfo).map(Number);
+        const newHospitalIds = reviewHospitalIds.filter(
+          (id) => !existingIds.includes(id)
+        );
+
+        if (newHospitalIds.length > 0) {
+          const newHospitalsMap = await fetchHospitalInfo(
+            newHospitalIds,
+            hospitalsInfo
+          );
+          setHospitalsInfo((prev) => ({ ...prev, ...newHospitalsMap }));
+        }
+      } catch (err) {
+        console.error(err);
+        setMyReviews([]);
+      }
+    };
+
     fetchUserInfo();
     fetchReservations();
+    fetchMyReviews();
   }, [navigate]);
 
   useEffect(() => {
@@ -534,9 +603,37 @@ function Mypage() {
 
         <section className="flex flex-col gap-3 mx-6">
           <h3 className="font-bold">나의 리뷰</h3>
-          <div className="w-full h-31 flex items-center justify-center">
-            <p className="text-gray-5">등록된 리뷰가 없습니다.</p>
-          </div>
+          {myReviews.length === 0 ? (
+            <div className="w-full h-31 flex items-center justify-center">
+              <p className="text-gray-5">등록된 리뷰가 없습니다.</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {myReviews.map((review) => {
+                const matchedHospital = hospitalsInfo[review.hospitalId];
+
+                const handleCardClick = () => {
+                  if (matchedHospital) {
+                    navigate(`/hospital/${matchedHospital.id}`);
+                  }
+                };
+
+                return (
+                  <Card
+                    key={review.reviewId}
+                    size="sm"
+                    image={matchedHospital ? matchedHospital.imageUrl : ""}
+                    alt={review.hospitalName}
+                    name={review.hospitalName}
+                    address={matchedHospital ? matchedHospital.address : ""}
+                    content={review.content}
+                    onClick={handleCardClick}
+                    className="cursor-pointer"
+                  />
+                );
+              })}
+            </div>
+          )}
         </section>
 
         <section className="flex flex-col gap-3 mx-6">
