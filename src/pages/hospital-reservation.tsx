@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router";
 import { ArrowDownWideNarrow, ArrowUpNarrowWide } from "lucide-react";
 
-import Button from "@/components/ui/button";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import Popup from "@/components/popup";
+
 import StatusUserList from "@/components/status-userlist";
+import Button from "@/components/ui/button";
 
 interface ReservationData {
   reservationId: number;
@@ -26,48 +28,97 @@ function HospitalReservation() {
   const { hospitalData } = location.state || {};
 
   const [reservations, setReservations] = useState<ReservationData[]>([]);
-
   const [pendingSortOrder, setPendingSortOrder] = useState<"asc" | "desc">(
     "desc"
   );
-
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
+  const [popupState, setPopupState] = useState({
+    open: false,
+    type: "alert" as "alert" | "confirm",
+    title: "",
+    content: "",
+    onConfirm: () => {},
+  });
+
+  const closePopup = () => {
+    setPopupState((prev) => ({ ...prev, open: false }));
+  };
+
+  const fetchReservations = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/v1/reservations/hospital/management", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setReservations(data);
+      } else {
+        console.error("Failed to fetch reservations");
+      }
+    } catch (error) {
+      console.error("Error fetching reservations:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchReservations = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(
-          "/api/v1/reservations/hospital/management",
-          {
-            method: "GET",
+    fetchReservations();
+  }, []);
+
+  const executeCompleteReservations = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await Promise.all(
+        selectedIds.map((id) =>
+          fetch(`/api/v1/reservations/${id}/complete`, {
+            method: "PATCH",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-          }
-        );
+          })
+        )
+      );
 
-        if (response.ok) {
-          const data = await response.json();
-          setReservations(data);
-        } else {
-          console.error("Failed to fetch reservations");
-        }
-      } catch (error) {
-        console.error("Error fetching reservations:", error);
-      }
-    };
+      alert("진료 완료 처리되었습니다.");
+      setSelectedIds([]);
+      fetchReservations();
+    } catch (error) {
+      console.error("Error completing reservations:", error);
+      alert("처리 중 오류가 발생했습니다.");
+    }
+  };
 
-    fetchReservations();
-  }, []);
+  const handleCompleteReservations = () => {
+    if (selectedIds.length === 0) {
+      setPopupState({
+        open: true,
+        type: "alert",
+        title: "진료완료할 예약을 선택해주세요.",
+        content: "",
+        onConfirm: () => {},
+      });
+      return;
+    }
 
-  // 3. [핵심] sortReservations 함수의 매개변수 타입 지정
-  // list: ReservationData 배열
-  // order: "asc" 또는 "desc"만 가능
+    setPopupState({
+      open: true,
+      type: "confirm",
+      title: `${selectedIds.length}건을 진료 완료 처리하시겠습니까?`,
+      content: "",
+      onConfirm: executeCompleteReservations,
+    });
+  };
+
   const sortReservations = (list: ReservationData[], order: "asc" | "desc") => {
     return [...list].sort((a, b) => {
-      // TypeScript에서 Date 연산을 위해 .getTime() 사용 권장
       const dateA = new Date(`${a.date}T${a.time}`).getTime();
       const dateB = new Date(`${b.date}T${b.time}`).getTime();
       return order === "desc" ? dateB - dateA : dateA - dateB;
@@ -82,7 +133,9 @@ function HospitalReservation() {
   );
 
   const cancelledList = sortReservations(
-    reservations.filter((r) => r.status === "CANCELLED"),
+    reservations.filter(
+      (r) => r.status === "CANCELLED" || r.status === "NO_SHOW"
+    ),
     "desc"
   );
 
@@ -117,7 +170,6 @@ function HospitalReservation() {
       </section>
 
       <main className="py-4 flex flex-1 flex-col gap-6 px-6 md:flex-row md:justify-between overflow-auto">
-        {/* --- 1. 예약 중 섹션 --- */}
         <section className="w-full flex flex-col gap-4 lg:w-1/3">
           <div className="flex justify-between items-center">
             <h2 className="font-bold">예약 중 ({pendingList.length})</h2>
@@ -160,8 +212,8 @@ function HospitalReservation() {
             />
             <Button
               className="w-full max-w-[200px]"
-              label="방문 완료"
-              onClick={() => console.log("확정할 ID:", selectedIds)}
+              label="진료 완료"
+              onClick={handleCompleteReservations}
             />
           </div>
         </section>
@@ -189,7 +241,7 @@ function HospitalReservation() {
 
         <section className="w-full flex flex-col gap-4 lg:w-1/3">
           <h2 className="font-bold self-start">
-            방문 완료 ({visitedList.length})
+            진료 완료 ({visitedList.length})
           </h2>
           <div className="h-106 w-full overflow-y-auto scrollbar-thin pr-3 flex flex-col gap-2 items-center">
             {visitedList.length > 0 ? (
@@ -220,6 +272,16 @@ function HospitalReservation() {
           }}
         />
       </div>
+
+      <Popup
+        open={popupState.open}
+        type={popupState.type}
+        title={popupState.title}
+        onClose={closePopup}
+        onConfirm={popupState.onConfirm}
+      >
+        {popupState.type === "alert" && popupState.content}
+      </Popup>
     </div>
   );
 }
