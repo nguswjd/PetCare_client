@@ -25,15 +25,12 @@ function HospitalReservation() {
   const location = useLocation();
   const { hospitalData } = location.state || {};
 
-  // 2. useState에 제네릭 타입(<ReservationData[]>) 지정
   const [reservations, setReservations] = useState<ReservationData[]>([]);
 
-  // 정렬 순서 타입 지정 (문자열 리터럴 유니온)
   const [pendingSortOrder, setPendingSortOrder] = useState<"asc" | "desc">(
     "desc"
   );
 
-  // 선택된 ID 목록 타입 지정
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   useEffect(() => {

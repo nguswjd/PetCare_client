@@ -22,6 +22,24 @@ interface StatusUserListProps {
   showCheckbox?: boolean;
 }
 
+const statusMap: Record<string, string> = {
+  PENDING: "예약 대기",
+  CONFIRMED: "예약 확정",
+  CANCELLED: "예약 취소",
+  NO_SHOW: "노쇼 (미방문)",
+  VISITED: "방문 확인",
+  COMPLETED: "진료 완료",
+};
+
+const statusColorMap: Record<string, string> = {
+  PENDING: "text-blue-2",
+  CONFIRMED: "text-green-600",
+  CANCELLED: "text-gray-5",
+  NO_SHOW: "text-red font-bold",
+  VISITED: "text-gray-7",
+  COMPLETED: "text-gray-7",
+};
+
 const StatusUserList = ({
   data,
   isChecked = false,
@@ -31,8 +49,11 @@ const StatusUserList = ({
   const formattedDate = data.date.replace(/-/g, ".");
   const formattedTime = data.time.substring(0, 5);
 
+  const statusLabel = statusMap[data.status] || data.status;
+  const statusColor = statusColorMap[data.status] || "text-black";
+
   return (
-    <div className="flex gap-4 max-w-90 w-full border-b border-b-gray-5 pb-4 items-start">
+    <div className="flex gap-4 max-w-90 w-full border-b border-b-gray-5 pb-4">
       {showCheckbox && onToggle && (
         <Button
           variant="icon"
@@ -43,7 +64,10 @@ const StatusUserList = ({
       )}
 
       <div className="text-sm flex w-full flex-col gap-1">
-        <p className="self-end text-gray-500 text-xs mb-1">{formattedDate}</p>
+        <div className="flex justify-between items-center mb-1">
+          <span className={`text-xs ${statusColor}`}>{statusLabel}</span>
+        </div>
+
         <p>
           <span className="font-semibold">이름 :</span> {data.reserverName}
         </p>
@@ -54,7 +78,8 @@ const StatusUserList = ({
           <span className="font-semibold">진료대상 :</span> {data.animalType} (
           {data.breed})
         </p>
-        <p className="text-gray-600">
+        <p>
+          <span className="font-semibold">나이 / 무게 :</span>
           {data.age}살 / {data.weight}kg
         </p>
         <p>
