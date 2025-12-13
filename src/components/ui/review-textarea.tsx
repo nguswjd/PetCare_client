@@ -1,13 +1,13 @@
-import React, { useState, forwardRef } from "react";
+import React, { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface ReviewTextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  value?: string;
+}
 
 const ReviewTextarea = forwardRef<HTMLTextAreaElement, ReviewTextareaProps>(
-  ({ className, ...props }, ref) => {
-    const [value, setValue] = useState("");
-
+  ({ className, value = "", onChange, ...props }, ref) => {
     return (
       <div className="px-6 py-4 flex text-sm flex-col border-t border-b border-gray-3">
         <p className="text-right px-6 py-2">{value.length} / 300</p>
@@ -21,14 +21,12 @@ const ReviewTextarea = forwardRef<HTMLTextAreaElement, ReviewTextareaProps>(
             ref={ref}
             rows={4}
             value={value}
-            onChange={(e) => {
-              const newValue = e.target.value.slice(0, 300);
-              setValue(newValue);
-            }}
+            onChange={onChange}
+            maxLength={300}
           />
           {!value && (
-            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-gray-6 pointer-events-none text-center">
-              리뷰를 입력해주세요.
+            <span className="absolute top-4 left-6 text-gray-5 pointer-events-none">
+              {props.placeholder || "진료 후기를 남겨주세요 (최소 10자)."}
             </span>
           )}
         </div>

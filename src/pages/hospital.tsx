@@ -65,32 +65,28 @@ const reviews: ReviewType[] = [
     revisit: "없음",
     content: "리뷰".repeat(100),
   },
-  {
-    date: "2025.11.08",
-    animalType: "고양이 (코숏)",
-    department: "예방접종",
-    revisit: "있음",
-    content: "리뷰리뷰리뷰리뷰",
-  },
 ];
 
 function Hospital() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
   const [hospitalInfo, setHospitalInfo] = useState<HospitalInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [hasReview] = useState(true);
+
   const [activeReservation, setActiveReservation] =
     useState<ActiveReservation | null>(null);
   const [showCancelPopup, setShowCancelPopup] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
+  const BASE_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     if (!id) return;
 
     const token = localStorage.getItem("token");
-    const BASE_URL = import.meta.env.VITE_API_URL;
 
     fetch(`${BASE_URL}/api/v1/hospital/${id}`, {
       headers: {
@@ -151,9 +147,40 @@ function Hospital() {
           setActiveReservation(null);
         });
     }
-  }, [id]);
+  }, [id, BASE_URL]);
 
-  const handleGoReview = () => navigate(`/hospital/${id}/review`);
+  const handleGoReview = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("로그인이 필요한 서비스입니다.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `${BASE_URL}/api/v1/reviews/check-available?hospitalId=${id}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.ok) {
+        const reservationId = await res.json();
+        navigate(`/review/${reservationId}`);
+      } else {
+        const errData = await res.json();
+        alert(errData.message || "리뷰를 작성할 수 있는 진료 내역이 없습니다.");
+      }
+    } catch (err) {
+      console.error("리뷰 가능 여부 확인 실패:", err);
+      alert("서버 연결 중 오류가 발생했습니다.");
+    }
+  };
 
   const handleGoReservation = () => {
     if (!hospitalInfo) return;
@@ -166,7 +193,6 @@ function Hospital() {
     if (!activeReservation) return;
 
     const token = localStorage.getItem("token");
-    const BASE_URL = import.meta.env.VITE_API_URL;
 
     if (!token) {
       alert("로그인이 필요합니다.");
