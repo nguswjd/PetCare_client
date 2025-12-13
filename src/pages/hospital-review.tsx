@@ -4,19 +4,11 @@ import { useLocation } from "react-router";
 import Button from "@/components/ui/button";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import Review from "@/components/review";
+import Review, { type ReviewType } from "@/components/review";
 import LoadingPage from "@/components/loading";
 import { SelectBox, type SelectOption } from "@/components/ui/selectbox";
 
 import { ArrowDownWideNarrow, ArrowUpNarrowWide } from "lucide-react";
-
-interface ReviewType {
-  date: string;
-  animalType: string;
-  department: string;
-  revisit: string;
-  content: string;
-}
 
 interface ApiReviewType {
   reviewId: number;
@@ -64,11 +56,13 @@ function HospitalReview() {
         const data: ApiReviewType[] = await res.json();
 
         const formattedReviews: ReviewType[] = data.map((review) => ({
+          id: review.reviewId,
           date: review.createdDate.replace(/-/g, "."),
           animalType: review.username,
           department: review.department,
           revisit: review.revisitIntention ? "있음" : "없음",
           content: review.content,
+          isMyReview: false,
         }));
 
         setReviews(formattedReviews);
@@ -188,7 +182,7 @@ function HospitalReview() {
               {hospitalData.address.split(" ").slice(1, 3).join(" ")}
             </p>
           </div>
-          <div className="mx-6 text-xs flex flex-col gap-2 border-b border-gray-4 pb-4 mb-2">
+          <div className="mx-6 text-xs flex flex-col gap-2 border-b border-gray-4 :pb-4 mb-2">
             <p className="font-bold text-sm">병원 정보</p>
             <div className="ml-2">
               <p>진료 과목: {hospitalData.departments.join(", ")}</p>
@@ -253,7 +247,7 @@ function HospitalReview() {
 
           <div className="h-full min-h-100 overflow-y-auto scrollbar-thin">
             {sortedReviews.length > 0 ? (
-              <Review reviews={sortedReviews} />
+              <Review reviews={sortedReviews} onDelete={() => {}} />
             ) : (
               <p className="text-center text-gray-6 py-10">
                 {selectedYear !== "all" || selectedMonth !== "all"

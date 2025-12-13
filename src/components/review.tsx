@@ -1,32 +1,49 @@
 import Button from "./ui/button";
-import { PencilLine } from "lucide-react";
+import { PencilLine, Trash2 } from "lucide-react";
 
 export interface ReviewType {
+  id: number;
   date: string;
   animalType: string;
   department: string;
   revisit: string;
   content: string;
+  isMyReview: boolean;
 }
 
 interface ReviewProps {
   reviews: ReviewType[];
+  onDelete: (id: number) => void;
 }
 
-const Review = ({ reviews }: ReviewProps) => {
+const Review = ({ reviews, onDelete }: ReviewProps) => {
   return (
     <div className="flex flex-col justify-center items-center w-full">
       {reviews.length > 0 ? (
-        reviews.map((review, index) => (
+        reviews.map((review) => (
           <div
-            key={index}
-            className="w-full text-sm p-4 border-b border-b-gray-3 flex flex-col gap-1"
+            key={review.id}
+            className="w-full text-sm p-4 border-b border-b-gray-3 flex flex-col gap-1 relative"
           >
-            <p className="text-right">{review.date}</p>
+            <div className="flex justify-between items-center text-gray-6 text-xs mb-1">
+              <p>{review.date}</p>
+              {review.isMyReview && (
+                <Button
+                  variant="icon"
+                  icon={Trash2}
+                  iconSize="w-5 h-5"
+                  className="hover:text-black"
+                  onClick={() => onDelete(review.id)}
+                />
+              )}
+            </div>
+
             <p>진료대상 : {review.animalType}</p>
             <p>진료항목 : {review.department}</p>
             <p>재방문 의사 : {review.revisit}</p>
-            <p>{review.content}</p>
+            <p className="mt-2 whitespace-pre-wrap leading-relaxed">
+              {review.content}
+            </p>
           </div>
         ))
       ) : (
@@ -34,7 +51,7 @@ const Review = ({ reviews }: ReviewProps) => {
           icon={PencilLine}
           variant="outline"
           label="리뷰를 남겨주세요!"
-          className="text-gray-6 flex justify-center items-center w-[324px] gap-2"
+          className="text-gray-6 flex justify-center items-center w-[324px] gap-2 my-6"
         />
       )}
     </div>
