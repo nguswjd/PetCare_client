@@ -117,8 +117,7 @@ function Mypage() {
 
     const fetchUserInfo = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL;
-        const res = await fetch(`${API_URL}/api/v1/auth/me`, {
+        const res = await fetch("/api/v1/auth/me", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -164,12 +163,11 @@ function Mypage() {
       hospitalIds: number[],
       currentHospitalsMap: { [key: number]: HospitalInfo }
     ) => {
-      const API_URL = import.meta.env.VITE_API_URL;
       const token = localStorage.getItem("token");
       if (!token) return {};
 
       const hospitalPromises = hospitalIds.map((id: number) =>
-        fetch(`${API_URL}/api/v1/hospital/${id}`, {
+        fetch(`/api/v1/hospital/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -195,8 +193,7 @@ function Mypage() {
 
     const fetchReservations = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL;
-        const res = await fetch(`${API_URL}/api/v1/reservations`, {
+        const res = await fetch("/api/v1/reservations", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -221,7 +218,7 @@ function Mypage() {
           activeReservations.map((r: Reservation) => r.animalType)
         );
         const breedPromises = Array.from(allAnimalTypes).map((type: any) =>
-          fetch(`${API_URL}/api/v1/breeds/${type}`).then((res) => res.json())
+          fetch(`/api/v1/breeds/${type}`).then((res) => res.json())
         );
 
         const breedsData = await Promise.all(breedPromises);
@@ -242,8 +239,7 @@ function Mypage() {
 
     const fetchMyReviews = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL;
-        const res = await fetch(`${API_URL}/api/v1/reviews/my`, {
+        const res = await fetch("/api/v1/reviews/my", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -284,8 +280,7 @@ function Mypage() {
   useEffect(() => {
     const fetchAnimalTypes = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL;
-        const res = await fetch(`${API_URL}/api/v1/animal-types`);
+        const res = await fetch("/api/v1/animal-types");
         if (!res.ok) throw new Error("동물 종류 불러오기 실패");
         const data = await res.json();
 
@@ -319,8 +314,7 @@ function Mypage() {
 
     const fetchBreeds = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL;
-        const res = await fetch(`${API_URL}/api/v1/breeds/${form.animalType}`);
+        const res = await fetch(`/api/v1/breeds/${form.animalType}`);
         if (!res.ok) throw new Error("품종 불러오기 실패");
         const data = await res.json();
         const options: SelectOption[] = Array.isArray(data.breeds)
@@ -347,10 +341,7 @@ function Mypage() {
 
     const fetchDisplayBreeds = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL;
-        const res = await fetch(
-          `${API_URL}/api/v1/breeds/${displayUser.animalType}`
-        );
+        const res = await fetch(`/api/v1/breeds/${displayUser.animalType}`);
         if (!res.ok) throw new Error("품종 불러오기 실패");
         const data = await res.json();
         const options: SelectOption[] = Array.isArray(data.breeds)
@@ -385,10 +376,7 @@ function Mypage() {
     }
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL;
-      const res = await fetch(
-        `${API_URL}/api/v1/auth/check-phone?phone=${form.phone}`
-      );
+      const res = await fetch(`/api/v1/auth/check-phone?phone=${form.phone}`);
       const data = await res.json();
 
       if (res.status === 400 || res.status === 409) {
@@ -425,8 +413,7 @@ function Mypage() {
         return;
       }
 
-      const API_URL = import.meta.env.VITE_API_URL;
-      const res = await fetch(`${API_URL}/api/v1/auth/me`, {
+      const res = await fetch("/api/v1/auth/me", {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -463,7 +450,6 @@ function Mypage() {
     if (!selectedReservation) return;
 
     const token = localStorage.getItem("token");
-    const API_URL = import.meta.env.VITE_API_URL;
 
     if (!token) {
       alert("로그인이 필요합니다.");
@@ -472,7 +458,7 @@ function Mypage() {
 
     try {
       const res = await fetch(
-        `${API_URL}/api/v1/reservations/${selectedReservation.id}/cancel`,
+        `/api/v1/reservations/${selectedReservation.id}/cancel`,
         {
           method: "PATCH",
           headers: {
@@ -511,14 +497,12 @@ function Mypage() {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("token");
-      const API_URL = import.meta.env.VITE_API_URL;
-      const res = await fetch(`${API_URL}/api/v1/auth/logout`, {
+      const res = await fetch("/api/v1/auth/logout", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        credentials: "include",
       });
 
       if (!res.ok) {
@@ -747,15 +731,13 @@ function Mypage() {
 
             try {
               const token = localStorage.getItem("token");
-              const API_URL = import.meta.env.VITE_API_URL;
 
-              const res = await fetch(`${API_URL}/api/v1/auth/withdraw`, {
+              const res = await fetch("/api/v1/auth/withdraw", {
                 method: "DELETE",
                 headers: {
                   Authorization: `Bearer ${token}`,
                   "Content-Type": "application/json",
                 },
-                credentials: "include",
                 body: JSON.stringify({ password }),
               });
 

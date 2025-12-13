@@ -69,8 +69,6 @@ function HospitalMainPage() {
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState<any>(null);
 
-  const API_URL = import.meta.env.VITE_API_URL;
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -82,7 +80,7 @@ function HospitalMainPage() {
 
         const headers = { Authorization: `Bearer ${token}` };
 
-        const hospitalRes = await fetch(`${API_URL}/api/v1/hospital/auth/me`, {
+        const hospitalRes = await fetch("/api/v1/hospital/auth/me", {
           headers,
         });
         if (!hospitalRes.ok) throw new Error("병원 정보를 불러올 수 없습니다.");
@@ -90,7 +88,7 @@ function HospitalMainPage() {
         setHospitalData(hospitalData);
 
         const reservationRes = await fetch(
-          `${API_URL}/api/v1/reservations/hospital/management`,
+          "/api/v1/reservations/hospital/management",
           { headers }
         );
         if (reservationRes.ok) {
@@ -100,7 +98,7 @@ function HospitalMainPage() {
           console.error("예약 정보를 불러오는데 실패했습니다.");
         }
 
-        const reviewRes = await fetch(`${API_URL}/api/v1/reviews/hospital/my`, {
+        const reviewRes = await fetch("/api/v1/reviews/hospital/my", {
           headers,
         });
         if (reviewRes.ok) {
@@ -121,7 +119,7 @@ function HospitalMainPage() {
     };
 
     fetchData();
-  }, [API_URL, navigate]);
+  }, [navigate]);
 
   const pendingList = reservations
     .filter((r) => r.status === "PENDING" || r.status === "CONFIRMED")
@@ -174,14 +172,11 @@ function HospitalMainPage() {
         form.append("imageFile", formData.imageFile);
       }
 
-      const res = await fetch(
-        `${API_URL}/api/v1/hospital/auth/update-details`,
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${token}` },
-          body: form,
-        }
-      );
+      const res = await fetch("/api/v1/hospital/auth/update-details", {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
 
       if (!res.ok) {
         const errorData = await res.json();
@@ -359,18 +354,24 @@ function HospitalMainPage() {
             }
             try {
               const token = localStorage.getItem("token");
-              const res = await fetch(
-                `${API_URL}/api/v1/hospital/auth/withdraw`,
-                {
-                  method: "DELETE",
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({ password }),
+              const res = await fetch("/api/v1/hospital/auth/withdraw", {
+                method: "DELETE",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ password }),
+              });
+
+              if (!res.ok) {
+                const errorData = await res.json();
+                if (res.status === 401 || res.status === 400) {
+                  setPasswordError(true);
+                  return;
                 }
-              );
-              if (!res.ok) throw new Error("회원탈퇴 실패");
+                throw new Error(errorData.message || "회원탈퇴 실패");
+              }
+
               localStorage.removeItem("token");
               setShowPopup(false);
               navigate("/");
