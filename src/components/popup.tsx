@@ -89,7 +89,7 @@ export default function Popup({
           <div className="flex justify-center gap-4">
             <Button
               variant="primary"
-              className="w-20 bg-white text-black"
+              className="w-21 bg-white text-black"
               label={confirmLabel}
               onClick={() => {
                 onConfirm?.();
@@ -98,7 +98,7 @@ export default function Popup({
             />
             <Button
               variant="primary"
-              className="w-20"
+              className="w-21"
               label={cancelLabel}
               onClick={() => {
                 onCancel?.();

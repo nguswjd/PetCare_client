@@ -67,6 +67,7 @@ function Hospital() {
     useState<ActiveReservation | null>(null);
   const [showCancelPopup, setShowCancelPopup] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showNoReviewPopup, setShowNoReviewPopup] = useState(false);
 
   const BASE_URL = import.meta.env.VITE_API_URL;
   const hasReview = reviews.length > 0;
@@ -233,8 +234,7 @@ function Hospital() {
         const reservationId = await res.json();
         navigate(`/review/${reservationId}`);
       } else {
-        const errData = await res.json();
-        alert(errData.message || "리뷰를 작성할 수 있는 진료 내역이 없습니다.");
+        setShowNoReviewPopup(true);
       }
     } catch (err) {
       console.error(err);
@@ -377,6 +377,20 @@ function Hospital() {
       >
         감사합니다.
       </Popup>
+
+      <Popup
+        type="confirm"
+        open={showNoReviewPopup}
+        onClose={() => setShowNoReviewPopup(false)}
+        title="리뷰 작성은 진료 완료 후 작성 가능합니다."
+        confirmLabel="예약하기"
+        cancelLabel="취소"
+        onConfirm={() => {
+          handleGoReservation();
+          setShowNoReviewPopup(false);
+        }}
+        onCancel={() => setShowNoReviewPopup(false)}
+      />
     </div>
   );
 }
