@@ -98,6 +98,31 @@ function HospitalReservation() {
     }
   };
 
+  const executeCancelReservations = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await Promise.all(
+        selectedIds.map((id) =>
+          fetch(`/api/v1/reservations/hospital/${id}/cancel`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          })
+        )
+      );
+
+      alert("예약이 취소되었습니다.");
+      setSelectedIds([]);
+      fetchReservations();
+    } catch (error) {
+      console.error("Error cancelling reservations:", error);
+      alert("처리 중 오류가 발생했습니다.");
+    }
+  };
+
   const handleCompleteReservations = () => {
     if (selectedIds.length === 0) {
       setPopupState({
@@ -116,6 +141,27 @@ function HospitalReservation() {
       title: `${selectedIds.length}건을 진료 완료 처리하시겠습니까?`,
       content: "",
       onConfirm: executeCompleteReservations,
+    });
+  };
+
+  const handleCancelReservations = () => {
+    if (selectedIds.length === 0) {
+      setPopupState({
+        open: true,
+        type: "alert",
+        title: "취소할 예약을 선택해주세요.",
+        content: "",
+        onConfirm: () => {},
+      });
+      return;
+    }
+
+    setPopupState({
+      open: true,
+      type: "confirm",
+      title: `${selectedIds.length}건의 예약을 취소하시겠습니까?`,
+      content: "",
+      onConfirm: executeCancelReservations,
     });
   };
 
@@ -307,7 +353,7 @@ function HospitalReservation() {
             <Button
               className="w-full max-w-[200px] bg-main-2"
               label="예약 거절"
-              onClick={() => console.log("거절할 ID:", selectedIds)}
+              onClick={handleCancelReservations}
             />
             <Button
               className="w-full max-w-[200px]"
