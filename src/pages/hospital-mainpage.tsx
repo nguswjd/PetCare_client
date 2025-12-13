@@ -29,6 +29,16 @@ interface HospitalData {
   breakTimes: string[];
 }
 
+interface ReservationData {
+  reservationId: number;
+  reserverName: string;
+  animalType: string;
+  breed: string;
+  date: string;
+  time: string;
+  status: string;
+}
+
 function HospitalMainPage() {
   const navigate = useNavigate();
   const [showPopup, setShowPopup] = useState(false);
@@ -41,14 +51,16 @@ function HospitalMainPage() {
   });
   const [passwordError, setPasswordError] = useState(false);
   const [editMode, setEditMode] = useState(false);
+
   const [hospitalData, setHospitalData] = useState<HospitalData | null>(null);
+  const [reservations, setReservations] = useState<ReservationData[]>([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState<any>(null);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    const fetchHospitalData = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -56,31 +68,46 @@ function HospitalMainPage() {
           return;
         }
 
-        const res = await fetch(`${API_URL}/api/v1/hospital/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const headers = { Authorization: `Bearer ${token}` };
+
+        const hospitalRes = await fetch(`${API_URL}/api/v1/hospital/auth/me`, {
+          headers,
         });
+        if (!hospitalRes.ok) throw new Error("병원 정보를 불러올 수 없습니다.");
+        const hospitalData = await hospitalRes.json();
+        setHospitalData(hospitalData);
 
-        if (!res.ok) {
-          throw new Error("병원 정보를 불러올 수 없습니다.");
+        const reservationRes = await fetch(
+          `${API_URL}/api/v1/reservations/hospital/management`,
+          { headers }
+        );
+        if (reservationRes.ok) {
+          const reservationData = await reservationRes.json();
+          setReservations(reservationData);
+        } else {
+          console.error("예약 정보를 불러오는데 실패했습니다.");
         }
-
-        const data = await res.json();
-        setHospitalData(data);
       } catch (err: any) {
         console.error(err);
         setAlertPopup({
           open: true,
-          message: err.message || "병원 정보를 불러올 수 없습니다.",
+          message: err.message || "정보를 불러올 수 없습니다.",
         });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHospitalData();
+    fetchData();
   }, [API_URL, navigate]);
+
+  const pendingList = reservations
+    .filter((r) => r.status === "PENDING" || r.status === "CONFIRMED")
+    .sort((a, b) => {
+      const dateA = new Date(`${a.date}T${a.time}`).getTime();
+      const dateB = new Date(`${b.date}T${b.time}`).getTime();
+      return dateA - dateB;
+    });
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -93,10 +120,7 @@ function HospitalMainPage() {
 
   const handleSave = async () => {
     if (!formData) {
-      setAlertPopup({
-        open: true,
-        message: "변경된 내용이 없습니다.",
-      });
+      setAlertPopup({ open: true, message: "변경된 내용이 없습니다." });
       return;
     }
 
@@ -117,12 +141,10 @@ function HospitalMainPage() {
       form.append("breeds", JSON.stringify(formData.breeds));
       form.append("holidays", JSON.stringify(formData.holidays));
 
-      if (formData.operatingStartTime) {
+      if (formData.operatingStartTime)
         form.append("operatingStartTime", formData.operatingStartTime);
-      }
-      if (formData.operatingEndTime) {
+      if (formData.operatingEndTime)
         form.append("operatingEndTime", formData.operatingEndTime);
-      }
 
       form.append("breakTimes", JSON.stringify(formData.breakTimes));
 
@@ -134,9 +156,7 @@ function HospitalMainPage() {
         `${API_URL}/api/v1/hospital/auth/update-details`,
         {
           method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
           body: form,
         }
       );
@@ -176,7 +196,7 @@ function HospitalMainPage() {
   if (!hospitalData) {
     return (
       <div className="h-dvh flex items-center justify-center">
-        <p className="text-gray-6">병원 정보를 불러올 수 없습니다.</p>
+        <p className="text-gray-6">정보를 불러올 수 없습니다.</p>
       </div>
     );
   }
@@ -195,79 +215,59 @@ function HospitalMainPage() {
           />
         </section>
 
-        <section className="flex flex-col gap-2">
-          <div className="px-6 flex w-full justify-between">
+        <section
+          className="flex flex-col gap-2 border-b border-gray-4 mx-6 pb-6 cursor-pointer"
+          onClick={handleGoReservation}
+        >
+          <div className="flex w-full justify-between">
             <h2 className="font-bold">예약내역</h2>
-            <Button
-              variant="icon"
-              icon={ChevronLast}
-              className="w-4 h-4"
-              onClick={handleGoReservation}
-            />
+            <Button variant="icon" icon={ChevronLast} className="w-4 h-4" />
           </div>
-          <div className="flex gap-2 px-6 overflow-x-auto scrollbar-hide">
-            <Card
-              size="sm"
-              image=""
-              name="예약자명"
-              animalType="육지동물 / 고양이"
-              className="[&>div]:gap-y-0.5"
-            />
-            <Card
-              size="sm"
-              image=""
-              name="예약자명"
-              animalType="육지동물 / 고양이"
-              className="[&>div]:gap-y-0.5"
-            />
-            <Card
-              size="sm"
-              image=""
-              name="예약자명"
-              animalType="육지동물 / 고양이"
-              className="[&>div]:gap-y-0.5"
-            />
+
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            {pendingList.length > 0 ? (
+              pendingList.map((res) => (
+                <Card
+                  key={res.reservationId}
+                  size="sm"
+                  image={hospitalData.imageUrl || ""}
+                  name={res.reserverName}
+                  content={`${res.animalType} / ${res.breed}`}
+                />
+              ))
+            ) : (
+              <p className="text-sm w-full text-gray-5 text-center py-10">
+                진행 중인 예약이 없습니다.
+              </p>
+            )}
           </div>
         </section>
 
-        <section className="flex flex-col gap-2">
-          <div className="px-6 flex w-full justify-between">
+        <section
+          className="flex flex-col gap-2 border-b border-gray-4 mx-6 pb-6 cursor-pointer mb-4"
+          onClick={handleGoReview}
+        >
+          <div className="flex w-full justify-between">
             <h2 className="font-bold">병원 리뷰</h2>
-            <Button
-              variant="icon"
-              icon={ChevronLast}
-              className="w-4 h-4"
-              onClick={handleGoReview}
-            />
+            <Button variant="icon" icon={ChevronLast} className="w-4 h-4" />
           </div>
 
-          <div className="flex gap-2 px-6 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 pb-6 overflow-x-auto scrollbar-hide">
             <Card
               size="sm"
-              image=""
+              image={hospitalData.imageUrl || ""}
               alt="병원 이미지"
-              name="예약자명"
+              name="사용자1"
               animalType="육지동물 / 고양이"
-              content="리뷰리뷰리뷰리뷰"
-              className="[&>div]:gap-y-0.5"
+              content="친절해요!"
             />
             <Card
               size="sm"
-              image=""
+              image={hospitalData.imageUrl || ""}
               alt="병원 이미지"
-              name="예약자명"
+              name="사용자2"
               animalType="육지동물 / 개(대형)"
-              content="리뷰리뷰리뷰리뷰리뷰리뷰리뷰리뷰리뷰리뷰"
-              className="[&>div]:gap-y-0.5"
-            />
-            <Card
-              size="sm"
-              image=""
-              alt="병원 이미지"
-              name="예약자명"
-              animalType="조류 / 앵무새"
-              content="리뷰리뷰리뷰리뷰리뷰리뷰리뷰리뷰리뷰리뷰"
-              className="[&>div]:gap-y-0.5"
+              content="시설이 깨끗해요"
             />
           </div>
         </section>
@@ -332,10 +332,8 @@ function HospitalMainPage() {
               setPasswordError(true);
               return;
             }
-
             try {
               const token = localStorage.getItem("token");
-
               const res = await fetch(
                 `${API_URL}/api/v1/hospital/auth/withdraw`,
                 {
@@ -344,20 +342,10 @@ function HospitalMainPage() {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
                   },
-                  credentials: "include",
                   body: JSON.stringify({ password }),
                 }
               );
-
-              if (!res.ok) {
-                const errorData = await res.json();
-                if (res.status === 401 || res.status === 400) {
-                  setPasswordError(true);
-                  return;
-                }
-                throw new Error(errorData.message || "회원탈퇴 실패");
-              }
-
+              if (!res.ok) throw new Error("회원탈퇴 실패");
               localStorage.removeItem("token");
               setShowPopup(false);
               navigate("/");
@@ -388,9 +376,7 @@ function HospitalMainPage() {
           title={alertPopup.message}
           onClose={() => {
             setAlertPopup({ open: false, message: "" });
-            if (alertPopup.message === "로그아웃 되었습니다.") {
-              navigate("/");
-            }
+            if (alertPopup.message === "로그아웃 되었습니다.") navigate("/");
           }}
         />
       )}
