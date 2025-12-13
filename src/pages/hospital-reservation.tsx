@@ -5,9 +5,9 @@ import { ArrowDownWideNarrow, ArrowUpNarrowWide } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import Popup from "@/components/popup";
-
 import StatusUserList from "@/components/status-userlist";
 import Button from "@/components/ui/button";
+import { SelectBox, type SelectOption } from "@/components/ui/selectbox";
 
 interface ReservationData {
   reservationId: number;
@@ -32,6 +32,8 @@ function HospitalReservation() {
     "desc"
   );
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedYear, setSelectedYear] = useState<string>("all");
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
 
   const [popupState, setPopupState] = useState({
     open: false,
@@ -117,6 +119,58 @@ function HospitalReservation() {
     });
   };
 
+  const getYearOptions = (): SelectOption[] => {
+    const years = reservations.map(
+      (reservation) => reservation.date.split("-")[0]
+    );
+    const uniqueYears = Array.from(new Set(years)).sort(
+      (a, b) => Number(b) - Number(a)
+    );
+
+    return [
+      { value: "all", label: "전체 년도" },
+      ...uniqueYears.map((year) => ({ value: year, label: `${year}년` })),
+    ];
+  };
+
+  const getMonthOptions = (): SelectOption[] => {
+    if (selectedYear === "all") {
+      return [{ value: "all", label: "전체 월" }];
+    }
+
+    const months = reservations
+      .filter((reservation) => reservation.date.startsWith(selectedYear))
+      .map((reservation) => reservation.date.split("-")[1]);
+
+    const uniqueMonths = Array.from(new Set(months)).sort(
+      (a, b) => Number(a) - Number(b)
+    );
+
+    return [
+      { value: "all", label: "전체 월" },
+      ...uniqueMonths.map((month) => ({ value: month, label: `${month}월` })),
+    ];
+  };
+
+  const filterReservationsByDate = (list: ReservationData[]) => {
+    let filtered = [...list];
+
+    if (selectedYear !== "all") {
+      filtered = filtered.filter((reservation) =>
+        reservation.date.startsWith(selectedYear)
+      );
+    }
+
+    if (selectedMonth !== "all") {
+      filtered = filtered.filter((reservation) => {
+        const [year, month] = reservation.date.split("-");
+        return year === selectedYear && month === selectedMonth;
+      });
+    }
+
+    return filtered;
+  };
+
   const sortReservations = (list: ReservationData[], order: "asc" | "desc") => {
     return [...list].sort((a, b) => {
       const dateA = new Date(`${a.date}T${a.time}`).getTime();
@@ -125,22 +179,29 @@ function HospitalReservation() {
     });
   };
 
+  const handleYearChange = (year: string) => {
+    setSelectedYear(year);
+    setSelectedMonth("all");
+  };
+
+  const filteredReservations = filterReservationsByDate(reservations);
+
   const pendingList = sortReservations(
-    reservations.filter(
+    filteredReservations.filter(
       (r) => r.status === "PENDING" || r.status === "CONFIRMED"
     ),
     pendingSortOrder
   );
 
   const cancelledList = sortReservations(
-    reservations.filter(
+    filteredReservations.filter(
       (r) => r.status === "CANCELLED" || r.status === "NO_SHOW"
     ),
     "desc"
   );
 
   const visitedList = sortReservations(
-    reservations.filter(
+    filteredReservations.filter(
       (r) => r.status === "VISITED" || r.status === "COMPLETED"
     ),
     "desc"
@@ -156,6 +217,9 @@ function HospitalReservation() {
     setPendingSortOrder((prev) => (prev === "desc" ? "asc" : "desc"));
   };
 
+  const yearOptions = getYearOptions();
+  const monthOptions = getMonthOptions();
+
   return (
     <div className="h-dvh flex flex-col">
       <Header label="예약 관리" variant="label" showBackButton={true} />
@@ -168,6 +232,39 @@ function HospitalReservation() {
           showBackButton={false}
         />
       </section>
+
+      <div className="px-6 pt-4 flex gap-2 justify-end items-center">
+        <div className="w-30">
+          <SelectBox
+            placeholder="년도 선택"
+            options={yearOptions}
+            value={selectedYear}
+            onChange={handleYearChange}
+          />
+        </div>
+
+        <div className="w-30">
+          <SelectBox
+            placeholder="월 선택"
+            options={monthOptions}
+            value={selectedMonth}
+            onChange={setSelectedMonth}
+            disabled={selectedYear === "all"}
+          />
+        </div>
+
+        {(selectedYear !== "all" || selectedMonth !== "all") && (
+          <button
+            onClick={() => {
+              setSelectedYear("all");
+              setSelectedMonth("all");
+            }}
+            className="text-xs text-gray-6 hover:text-black underline"
+          >
+            초기화
+          </button>
+        )}
+      </div>
 
       <main className="py-4 flex flex-1 flex-col gap-6 px-6 md:flex-row md:justify-between overflow-auto">
         <section className="w-full flex flex-col gap-4 lg:w-1/3">
@@ -199,7 +296,9 @@ function HospitalReservation() {
               ))
             ) : (
               <p className="text-gray-400 text-sm mt-10">
-                예약 대기 내역이 없습니다.
+                {selectedYear !== "all" || selectedMonth !== "all"
+                  ? "해당 기간의 예약이 없습니다."
+                  : "예약 대기 내역이 없습니다."}
               </p>
             )}
           </div>
@@ -233,7 +332,9 @@ function HospitalReservation() {
               ))
             ) : (
               <p className="text-gray-400 text-sm mt-10">
-                취소된 내역이 없습니다.
+                {selectedYear !== "all" || selectedMonth !== "all"
+                  ? "해당 기간의 취소 내역이 없습니다."
+                  : "취소된 내역이 없습니다."}
               </p>
             )}
           </div>
@@ -254,7 +355,9 @@ function HospitalReservation() {
               ))
             ) : (
               <p className="text-gray-400 text-sm mt-10">
-                방문 완료 내역이 없습니다.
+                {selectedYear !== "all" || selectedMonth !== "all"
+                  ? "해당 기간의 완료 내역이 없습니다."
+                  : "방문 완료 내역이 없습니다."}
               </p>
             )}
           </div>
