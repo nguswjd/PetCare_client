@@ -68,6 +68,7 @@ function Hospital() {
   const [showCancelPopup, setShowCancelPopup] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showNoReviewPopup, setShowNoReviewPopup] = useState(false);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
 
   const BASE_URL = import.meta.env.VITE_API_URL;
   const hasReview = reviews.length > 0;
@@ -183,7 +184,7 @@ function Hospital() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      alert("로그인이 필요합니다.");
+      setShowLoginPopup(true);
       return;
     }
 
@@ -214,8 +215,7 @@ function Hospital() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      alert("로그인이 필요한 서비스입니다.");
-      navigate("/login");
+      setShowLoginPopup(true);
       return;
     }
 
@@ -255,7 +255,7 @@ function Hospital() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      alert("로그인이 필요합니다.");
+      setShowLoginPopup(true);
       return;
     }
 
@@ -390,6 +390,20 @@ function Hospital() {
           setShowNoReviewPopup(false);
         }}
         onCancel={() => setShowNoReviewPopup(false)}
+      />
+
+      <Popup
+        type="confirm"
+        open={showLoginPopup}
+        onClose={() => setShowLoginPopup(false)}
+        title="로그인 후 이용 가능합니다."
+        confirmLabel="로그인"
+        cancelLabel="취소"
+        onConfirm={() => {
+          navigate("/login");
+          setShowLoginPopup(false);
+        }}
+        onCancel={() => setShowLoginPopup(false)}
       />
     </div>
   );
