@@ -199,7 +199,7 @@ function MainPage() {
 
         <div className="grid px-6 mb-5 gap-3 grid-cols-2">
           <section className="flex flex-col gap-2">
-            <h2 className="text-base font-bold">가까운 병원</h2>
+            <h2 className="text-base font-bold">추천 병원</h2>
             <Card
               size="lg"
               image={closestHospital.image}
@@ -213,7 +213,7 @@ function MainPage() {
             />
           </section>
           <section className="flex flex-col gap-2">
-            <h2 className="text-base font-bold">이달의 추천</h2>
+            <h2 className="text-base font-bold">이달의 리뷰왕</h2>
             <Card
               size="lg"
               image={reviewKingHospital.image}

@@ -39,6 +39,17 @@ interface ReservationData {
   status: string;
 }
 
+interface ReviewData {
+  reviewId: number;
+  hospitalName: string;
+  username: string;
+  department: string;
+  content: string;
+  visitDate: string;
+  createdDate: string;
+  revisitIntention: boolean;
+}
+
 function HospitalMainPage() {
   const navigate = useNavigate();
   const [showPopup, setShowPopup] = useState(false);
@@ -54,6 +65,7 @@ function HospitalMainPage() {
 
   const [hospitalData, setHospitalData] = useState<HospitalData | null>(null);
   const [reservations, setReservations] = useState<ReservationData[]>([]);
+  const [reviews, setReviews] = useState<ReviewData[]>([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState<any>(null);
 
@@ -86,6 +98,16 @@ function HospitalMainPage() {
           setReservations(reservationData);
         } else {
           console.error("예약 정보를 불러오는데 실패했습니다.");
+        }
+
+        const reviewRes = await fetch(`${API_URL}/api/v1/reviews/hospital/my`, {
+          headers,
+        });
+        if (reviewRes.ok) {
+          const reviewData = await reviewRes.json();
+          setReviews(reviewData);
+        } else {
+          console.error("리뷰 정보를 불러오는데 실패했습니다.");
         }
       } catch (err: any) {
         console.error(err);
@@ -248,27 +270,30 @@ function HospitalMainPage() {
           onClick={handleGoReview}
         >
           <div className="flex w-full justify-between">
-            <h2 className="font-bold">병원 리뷰</h2>
+            <h2 className="font-bold">병원 리뷰 ({reviews.length})</h2>
             <Button variant="icon" icon={ChevronLast} className="w-4 h-4" />
           </div>
 
           <div className="flex gap-2 pb-6 overflow-x-auto scrollbar-hide">
-            <Card
-              size="sm"
-              image={hospitalData.imageUrl || ""}
-              alt="병원 이미지"
-              name="사용자1"
-              animalType="육지동물 / 고양이"
-              content="친절해요!"
-            />
-            <Card
-              size="sm"
-              image={hospitalData.imageUrl || ""}
-              alt="병원 이미지"
-              name="사용자2"
-              animalType="육지동물 / 개(대형)"
-              content="시설이 깨끗해요"
-            />
+            {reviews.length > 0 ? (
+              reviews
+                .slice(0, 3)
+                .map((review) => (
+                  <Card
+                    key={review.reviewId}
+                    size="sm"
+                    image={hospitalData.imageUrl || ""}
+                    alt="병원 이미지"
+                    name={review.username}
+                    animalType={review.department}
+                    content={review.content}
+                  />
+                ))
+            ) : (
+              <p className="text-sm w-full text-gray-5 text-center py-10">
+                아직 리뷰가 없습니다.
+              </p>
+            )}
           </div>
         </section>
 

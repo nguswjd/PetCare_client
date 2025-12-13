@@ -4,7 +4,7 @@ import LoadingPage from "../components/loading";
 import ErrorPage from "@/components/error";
 import Footer from "@/components/footer";
 import Header from "@/components/header";
-import Review from "@/components/review";
+import Review, { type ReviewType } from "@/components/review";
 import Button from "@/components/ui/button";
 import Popup from "@/components/popup";
 import { PencilLine } from "lucide-react";
@@ -25,12 +25,16 @@ interface HospitalInfo {
   holidays?: string[];
 }
 
-interface ReviewType {
-  date: string;
-  animalType: string;
+interface ReviewApiResponse {
+  reviewId: number;
+  hospitalName: string;
+  username: string;
   department: string;
-  revisit: string;
   content: string;
+  visitDate: string;
+  createdDate: string;
+  revisitIntention: boolean;
+  isMyReview: boolean;
 }
 
 interface ActiveReservation {
@@ -50,110 +54,193 @@ interface ActiveReservation {
   createdAt: string;
 }
 
-const reviews: ReviewType[] = [
-  {
-    date: "2025.11.10",
-    animalType: "개 (말티즈)",
-    department: "예방접종",
-    revisit: "있음",
-    content: "리뷰리뷰",
-  },
-  {
-    date: "2025.11.09",
-    animalType: "개 (포메라니안)",
-    department: "건강검진",
-    revisit: "없음",
-    content: "리뷰".repeat(100),
-  },
-  {
-    date: "2025.11.08",
-    animalType: "고양이 (코숏)",
-    department: "예방접종",
-    revisit: "있음",
-    content: "리뷰리뷰리뷰리뷰",
-  },
-];
-
 function Hospital() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
   const [hospitalInfo, setHospitalInfo] = useState<HospitalInfo | null>(null);
+  const [reviews, setReviews] = useState<ReviewType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [hasReview] = useState(true);
+
   const [activeReservation, setActiveReservation] =
     useState<ActiveReservation | null>(null);
   const [showCancelPopup, setShowCancelPopup] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
+  const BASE_URL = import.meta.env.VITE_API_URL;
+  const hasReview = reviews.length > 0;
+
   useEffect(() => {
     if (!id) return;
 
-    const token = localStorage.getItem("token");
-    const BASE_URL = import.meta.env.VITE_API_URL;
+    const fetchAllData = async () => {
+      const token = localStorage.getItem("token");
 
-    fetch(`${BASE_URL}/api/v1/hospital/${id}`, {
-      headers: {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
-      .then(async (data) => {
+      try {
+        const hospitalRes = await fetch(`${BASE_URL}/api/v1/hospital/${id}`, {
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+        });
+
+        if (!hospitalRes.ok) throw new Error("Hospital fetch failed");
+        const hospitalData = await hospitalRes.json();
+
         const hospital = {
           id: Number(id),
-          name: data.name,
-          address: data.address,
-          operatingStatus: data.operatingStatus,
-          image: data.imageUrl,
-          alt: data.description,
-          hasParking: data.hasParking,
-          animalTypes: data.animalTypes || [],
-          departments: data.departments || [],
-          breeds: data.breeds || [],
-          holidays: data.holidays || [],
+          name: hospitalData.name,
+          address: hospitalData.address,
+          operatingStatus: hospitalData.operatingStatus,
+          image: hospitalData.imageUrl,
+          alt: hospitalData.description,
+          hasParking: hospitalData.hasParking,
+          animalTypes: hospitalData.animalTypes || [],
+          departments: hospitalData.departments || [],
+          breeds: hospitalData.breeds || [],
+          holidays: hospitalData.holidays || [],
         };
 
         setHospitalInfo(hospital);
-
-        await addRecentHospitalUnified({
+        addRecentHospitalUnified({
           id: hospital.id,
           name: hospital.name,
           address: hospital.address,
           imageUrl: hospital.image,
           operatingStatus: hospital.operatingStatus,
-        });
-
-        setLoading(false);
-      })
-      .catch(() => {
+        }).catch(() => {});
+      } catch (err) {
+        console.error("Hospital info error:", err);
         setError(true);
         setLoading(false);
-      });
+        return;
+      }
 
-    if (token) {
-      fetch(`${BASE_URL}/api/v1/reservations/hospital/${id}`, {
+      try {
+        const reviewRes = await fetch(
+          `${BASE_URL}/api/v1/reviews/hospital/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              ...(token && { Authorization: `Bearer ${token}` }),
+            },
+          }
+        );
+
+        if (reviewRes.ok) {
+          const reviewData: ReviewApiResponse[] = await reviewRes.json();
+
+          const mappedReviews: ReviewType[] = reviewData.map((review) => ({
+            id: review.reviewId,
+            date: review.visitDate,
+            animalType: review.username,
+            department: review.department,
+            revisit: review.revisitIntention ? "있음" : "없음",
+            content: review.content,
+            isMyReview: review.isMyReview,
+          }));
+          setReviews(mappedReviews);
+        } else {
+          setReviews([]);
+        }
+      } catch (err) {
+        console.error("Review fetch error:", err);
+        setReviews([]);
+      }
+
+      if (token) {
+        try {
+          const resRes = await fetch(
+            `${BASE_URL}/api/v1/reservations/hospital/${id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          if (resRes.ok) {
+            const text = await resRes.text();
+            if (text) {
+              const resData = JSON.parse(text);
+              setActiveReservation(resData);
+            } else {
+              setActiveReservation(null);
+            }
+          }
+        } catch (err) {
+          console.error("Reservation fetch error:", err);
+        }
+      }
+
+      setLoading(false);
+    };
+
+    fetchAllData();
+  }, [id, BASE_URL]);
+
+  const handleDeleteReview = async (reviewId: number) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    if (!confirm("정말 이 리뷰를 삭제하시겠습니까?")) return;
+
+    try {
+      const res = await fetch(`${BASE_URL}/api/v1/reviews/${reviewId}`, {
+        method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error();
-          return res.json();
-        })
-        .then((data) => {
-          setActiveReservation(data);
-        })
-        .catch(() => {
-          setActiveReservation(null);
-        });
-    }
-  }, [id]);
+      });
 
-  const handleGoReview = () => navigate(`/hospital/${id}/review`);
+      if (res.ok) {
+        setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+        alert("리뷰가 삭제되었습니다.");
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.message || "리뷰 삭제에 실패했습니다.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("오류가 발생했습니다.");
+    }
+  };
+
+  const handleGoReview = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("로그인이 필요한 서비스입니다.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `${BASE_URL}/api/v1/reviews/check-available?hospitalId=${id}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.ok) {
+        const reservationId = await res.json();
+        navigate(`/review/${reservationId}`);
+      } else {
+        const errData = await res.json();
+        alert(errData.message || "리뷰를 작성할 수 있는 진료 내역이 없습니다.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("서버 연결 중 오류가 발생했습니다.");
+    }
+  };
 
   const handleGoReservation = () => {
     if (!hospitalInfo) return;
@@ -166,7 +253,6 @@ function Hospital() {
     if (!activeReservation) return;
 
     const token = localStorage.getItem("token");
-    const BASE_URL = import.meta.env.VITE_API_URL;
 
     if (!token) {
       alert("로그인이 필요합니다.");
@@ -185,14 +271,14 @@ function Hospital() {
       );
 
       if (!res.ok) {
-        throw new Error("예약 취소에 실패했습니다.");
+        throw new Error();
       }
 
       setActiveReservation(null);
       setShowCancelPopup(false);
       setShowSuccessPopup(true);
     } catch (err) {
-      console.error("예약 취소 에러:", err);
+      console.error(err);
       alert("예약 취소 중 오류가 발생했습니다.");
     }
   };
@@ -239,16 +325,16 @@ function Hospital() {
         </div>
       </div>
 
-      <main className="flex-1 overflow-y-auto scrollbar-hide flex items-center justify-center">
+      <main className="flex-1 overflow-y-auto scrollbar-hide flex justify-center">
         {hasReview ? (
           <div className="w-full">
-            <Review reviews={reviews} />
+            <Review reviews={reviews} onDelete={handleDeleteReview} />
           </div>
         ) : (
           <Button
             variant="outline"
             label="리뷰를 남겨주세요!"
-            className="text-gray-6 border-gray-6 flex gap-2 items-center w-82"
+            className="text-gray-6 self-center h-10 border-gray-6 flex gap-2 items-center w-82"
             icon={PencilLine}
             onClick={handleGoReview}
           />
