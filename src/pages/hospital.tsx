@@ -67,6 +67,15 @@ function Hospital() {
     useState<ActiveReservation | null>(null);
   const [showCancelPopup, setShowCancelPopup] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showNoReviewPopup, setShowNoReviewPopup] = useState(false);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const [showReviewDeleteSuccessPopup, setShowReviewDeleteSuccessPopup] =
+    useState(false);
+  const [showReviewDeleteErrorPopup, setShowReviewDeleteErrorPopup] =
+    useState(false);
+  const [reviewDeleteErrorMessage, setReviewDeleteErrorMessage] = useState("");
+  const [showDeleteConfirmPopup, setShowDeleteConfirmPopup] = useState(false);
+  const [reviewIdToDelete, setReviewIdToDelete] = useState<number | null>(null);
 
   const BASE_URL = import.meta.env.VITE_API_URL;
   const hasReview = reviews.length > 0;
@@ -178,15 +187,16 @@ function Hospital() {
     fetchAllData();
   }, [id, BASE_URL]);
 
-  const handleDeleteReview = async (reviewId: number) => {
+  const confirmDeleteReview = async () => {
+    if (!reviewIdToDelete) return;
+
     const token = localStorage.getItem("token");
+    const reviewId = reviewIdToDelete;
 
-    if (!token) {
-      alert("로그인이 필요합니다.");
-      return;
-    }
+    setShowDeleteConfirmPopup(false);
+    setReviewIdToDelete(null);
 
-    if (!confirm("정말 이 리뷰를 삭제하시겠습니까?")) return;
+    if (!token) return;
 
     try {
       const res = await fetch(`${BASE_URL}/api/v1/reviews/${reviewId}`, {
@@ -198,10 +208,13 @@ function Hospital() {
 
       if (res.ok) {
         setReviews((prev) => prev.filter((r) => r.id !== reviewId));
-        alert("리뷰가 삭제되었습니다.");
+        setShowReviewDeleteSuccessPopup(true);
       } else {
         const errData = await res.json().catch(() => ({}));
-        alert(errData.message || "리뷰 삭제에 실패했습니다.");
+        setReviewDeleteErrorMessage(
+          errData.message || "리뷰 삭제에 실패했습니다."
+        );
+        setShowReviewDeleteErrorPopup(true);
       }
     } catch (err) {
       console.error(err);
@@ -209,12 +222,23 @@ function Hospital() {
     }
   };
 
+  const handleDeleteReview = (reviewId: number) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setShowLoginPopup(true);
+      return;
+    }
+
+    setReviewIdToDelete(reviewId);
+    setShowDeleteConfirmPopup(true);
+  };
+
   const handleGoReview = async () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      alert("로그인이 필요한 서비스입니다.");
-      navigate("/login");
+      setShowLoginPopup(true);
       return;
     }
 
@@ -233,8 +257,7 @@ function Hospital() {
         const reservationId = await res.json();
         navigate(`/review/${reservationId}`);
       } else {
-        const errData = await res.json();
-        alert(errData.message || "리뷰를 작성할 수 있는 진료 내역이 없습니다.");
+        setShowNoReviewPopup(true);
       }
     } catch (err) {
       console.error(err);
@@ -255,7 +278,7 @@ function Hospital() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      alert("로그인이 필요합니다.");
+      setShowLoginPopup(true);
       return;
     }
 
@@ -376,6 +399,71 @@ function Hospital() {
         title="예약취소가 완료되었습니다."
       >
         감사합니다.
+      </Popup>
+
+      <Popup
+        type="confirm"
+        open={showNoReviewPopup}
+        onClose={() => setShowNoReviewPopup(false)}
+        title="리뷰 작성은 진료 완료 후 작성 가능합니다."
+        confirmLabel="예약하기"
+        cancelLabel="취소"
+        onConfirm={() => {
+          handleGoReservation();
+          setShowNoReviewPopup(false);
+        }}
+        onCancel={() => setShowNoReviewPopup(false)}
+      />
+
+      <Popup
+        type="confirm"
+        open={showLoginPopup}
+        onClose={() => setShowLoginPopup(false)}
+        title="로그인 후 이용 가능합니다."
+        confirmLabel="로그인"
+        cancelLabel="취소"
+        onConfirm={() => {
+          navigate("/login");
+          setShowLoginPopup(false);
+        }}
+        onCancel={() => setShowLoginPopup(false)}
+      />
+
+      <Popup
+        type="confirm"
+        open={showDeleteConfirmPopup}
+        onClose={() => {
+          setShowDeleteConfirmPopup(false);
+          setReviewIdToDelete(null);
+        }}
+        title="리뷰를 삭제하시겠습니까?"
+        confirmLabel="삭제"
+        cancelLabel="취소"
+        onConfirm={confirmDeleteReview}
+        onCancel={() => {
+          setShowDeleteConfirmPopup(false);
+          setReviewIdToDelete(null);
+        }}
+      />
+
+      <Popup
+        type="alert"
+        open={showReviewDeleteSuccessPopup}
+        onClose={() => setShowReviewDeleteSuccessPopup(false)}
+        title="리뷰 삭제 완료"
+      >
+        리뷰가 삭제되었습니다.
+        <br />
+        리뷰는 재작성할 수 있습니다.
+      </Popup>
+
+      <Popup
+        type="alert"
+        open={showReviewDeleteErrorPopup}
+        onClose={() => setShowReviewDeleteErrorPopup(false)}
+        title="리뷰 삭제 실패"
+      >
+        {reviewDeleteErrorMessage}
       </Popup>
     </div>
   );
