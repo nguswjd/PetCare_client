@@ -365,30 +365,42 @@ function Reservation() {
   };
 
   return (
-    <div className="h-dvh">
-      <div className="sticky top-0 z-10 bg-white">
+    <div className="flex flex-col relative min-h-screen bg-white">
+      <div className="top-0 z-20 bg-white relative">
         <Header
           label={hospitalInfo.name}
           variant="label"
           showBackButton={true}
         />
+        <div className="hidden md:block absolute top-1/2 right-6 -translate-y-1/2">
+          <Button
+            label="예약하기"
+            className="w-21 p-0 h-9 text-sm"
+            disabled={!isFormComplete}
+            onClick={handleReservation}
+          />
+        </div>
       </div>
 
-      <div>
-        <HospitalInfoSection
-          image={hospitalInfo.image}
-          alt={hospitalInfo.alt}
-          name={hospitalInfo.name}
-          address={hospitalInfo.address}
-          businessStatus={hospitalInfo.businessStatus}
-          distance={hospitalInfo.distance}
-          hasParking={hospitalInfo.hasParking}
-          breeds={hospitalInfo.breeds}
-          reviewCount={reviewCount}
-          departments={hospitalInfo.departments}
-        />
+      <div className="flex flex-col md:flex-row md:max-w-7xl md:w-full md:pr-6 md:gap-8 flex-1">
+        <section className="md:w-1/3 md:min-w-120">
+          <div className="md:sticky md:top-20">
+            <HospitalInfoSection
+              image={hospitalInfo.image}
+              alt={hospitalInfo.alt}
+              name={hospitalInfo.name}
+              address={hospitalInfo.address}
+              businessStatus={hospitalInfo.businessStatus}
+              distance={hospitalInfo.distance}
+              hasParking={hospitalInfo.hasParking}
+              breeds={hospitalInfo.breeds}
+              reviewCount={reviewCount}
+              departments={hospitalInfo.departments}
+            />
+          </div>
+        </section>
 
-        <section className="px-6 flex flex-col gap-3 mt-4 pb-24">
+        <main className="flex-1 px-6 md:px-0 flex flex-col gap-6 mt-4 pb-24 md:pb-10 overflow-y-auto">
           <h2 className="hidden">병원 예약 폼</h2>
 
           <Input
@@ -472,8 +484,8 @@ function Reservation() {
             }}
           />
 
-          <div className="flex flex-col items-center gap-3 mt-4 md:flex-row md:items-center md:justify-center md:gap-6">
-            <div className="w-full max-w-sm">
+          <div className="flex flex-col items-center gap-3 mt-4 xl:flex-row xl:items-start xl:gap-6">
+            <div className="w-full xl:max-w-sm flex-none">
               <Calendar
                 selectedDates={selectedDate ? [selectedDate] : []}
                 onSelectDate={(date: Date) => setSelectedDate(date)}
@@ -481,7 +493,7 @@ function Reservation() {
               />
             </div>
 
-            <div className="grid grid-cols-4 grid-rows-3 gap-2 w-full max-w-100">
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-4 gap-2 w-full max-w-120 xl:flex-1">
               {BASE_TIMES.map((time) => {
                 const isAvailable = availableServerTimes.some((serverTime) =>
                   serverTime.startsWith(time)
@@ -515,16 +527,16 @@ function Reservation() {
                     active={selectedTime === time}
                     disabled={isDisabled}
                     onClick={() => setSelectedTime(time)}
-                    className="w-full"
+                    className="w-full h-10 px-0"
                   />
                 );
               })}
             </div>
           </div>
-        </section>
+        </main>
       </div>
 
-      <footer className="fixed bottom-0 left-0 w-full px-6 pt-3 pb-6 bg-white">
+      <footer className="fixed bottom-0 left-0 w-full px-6 pt-3 pb-6 bg-white md:hidden border-t border-gray-100">
         <Button
           label="예약하기"
           className="w-full"
