@@ -76,7 +76,11 @@ const Card = ({
               animalType ? "grid-cols-[1fr_auto]" : "grid-cols-2"
             )}
           >
-            {name && <p className="text-md font-semibold text-black">{name}</p>}
+            {name && (
+              <p className="text-md w-20 truncate font-semibold text-black">
+                {name}
+              </p>
+            )}
             {(animalType || address) && (
               <p
                 className={cn(

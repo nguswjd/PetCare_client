@@ -254,7 +254,7 @@ function MainPage() {
                 className="cursor-pointer"
               />
             ) : (
-              <div className="flex items-center justify-center h-full">
+              <div className="flex mt-17 justify-center h-full">
                 <p className="text-gray-5 text-sm">리뷰가 없습니다</p>
               </div>
             )}
