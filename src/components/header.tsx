@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import { useNavigate } from "react-router";
 
 import Button from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
@@ -28,6 +29,7 @@ const headerVariants = cva("relative flex w-full px-4 items-center", {
 interface HeaderProps extends VariantProps<typeof headerVariants> {
   label?: string;
   hospitalData?: HospitalData;
+  onBackClick?: () => void;
 }
 
 function Header({
@@ -35,15 +37,22 @@ function Header({
   showBackButton = true,
   label,
   hospitalData,
+  onBackClick,
 }: HeaderProps) {
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (onBackClick) {
+      onBackClick();
+    } else {
+      navigate(-1);
+    }
+  };
+
   return (
     <header className={headerVariants({ variant, showBackButton })}>
       {showBackButton && variant === "label" && (
-        <Button
-          variant="icon"
-          icon={ChevronLeft}
-          onClick={() => window.history.back()}
-        />
+        <Button variant="icon" icon={ChevronLeft} onClick={handleBack} />
       )}
 
       {variant === "hospital" && hospitalData ? (
