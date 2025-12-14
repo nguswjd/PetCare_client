@@ -10,7 +10,8 @@ const buttonVariants = cva(
         primary: "bg-main-1 text-white border disabled:bg-main-2",
         secondary:
           "bg-white border-main-1 border text-main-1 w-18 disabled:bg-main-2 disabled:bg-white disabled:text-gray-3 disabled:border-gray-3",
-        outline: "bg-white border text-main-1 border-gray-3",
+        outline:
+          "bg-white border text-main-1 border-main-1 disabled:text-gray-3 disabled:border-gray-3",
         user: "rounded-none w-40 p-3 border-b",
         icon: "px-0 py-0",
       },

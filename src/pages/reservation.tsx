@@ -39,6 +39,22 @@ interface Department {
   description: string;
 }
 
+const BASE_TIMES = [
+  "08:00",
+  "09:00",
+  "10:00",
+  "11:00",
+  "12:00",
+  "13:00",
+  "14:00",
+  "15:00",
+  "16:00",
+  "17:00",
+  "18:00",
+  "19:00",
+  "20:00",
+];
+
 function Reservation() {
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -61,6 +77,9 @@ function Reservation() {
   const [selectedDepartmentCode, setSelectedDepartmentCode] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [availableServerTimes, setAvailableServerTimes] = useState<string[]>(
+    []
+  );
   const [selectedAge, setSelectedAge] = useState("");
   const [selectedWeight, setSelectedWeight] = useState("");
   const [reviewCount, setReviewCount] = useState<number>(0);
@@ -209,20 +228,42 @@ function Reservation() {
     if (found) setSelectedBreed(found.description);
   }, [filteredBreeds, selectedBreedCode]);
 
-  const times = [
-    "08:00",
-    "09:00",
-    "10:00",
-    "11:00",
-    "12:00",
-    "13:00",
-    "14:00",
-    "15:00",
-    "16:00",
-    "17:00",
-    "18:00",
-    "19:00",
-  ];
+  useEffect(() => {
+    setSelectedTime(null);
+    setAvailableServerTimes([]);
+
+    if (!selectedDate || !selectedDepartmentCode || !hospitalInfo.id) {
+      return;
+    }
+
+    const fetchAvailableTimes = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+
+        const formattedDate = `${selectedDate.getFullYear()}-${String(
+          selectedDate.getMonth() + 1
+        ).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+
+        const queryParams = new URLSearchParams({
+          date: formattedDate,
+          department: selectedDepartmentCode,
+        }).toString();
+
+        const res = await fetch(
+          `${API_URL}/api/v1/reservations/${hospitalInfo.id}/available-times?${queryParams}`
+        );
+
+        if (!res.ok) throw new Error("");
+
+        const data = await res.json();
+        setAvailableServerTimes(data.availableTimes || []);
+      } catch {
+        setAvailableServerTimes([]);
+      }
+    };
+
+    fetchAvailableTimes();
+  }, [selectedDate, selectedDepartmentCode, hospitalInfo.id]);
 
   const ageOptions = Array.from({ length: 21 }, (_, i) => ({
     label: `${i}살`,
@@ -432,17 +473,26 @@ function Reservation() {
             </div>
 
             <div className="grid grid-cols-4 grid-rows-3 gap-2 w-full max-w-100">
-              {times.map((time) => (
-                <Button
-                  key={time}
-                  variant="outline"
-                  label={time}
-                  toggleable
-                  active={selectedTime === time}
-                  onClick={() => setSelectedTime(time)}
-                  className="w-full"
-                />
-              ))}
+              {BASE_TIMES.map((time) => {
+                const isAvailable = availableServerTimes.some((serverTime) =>
+                  serverTime.startsWith(time)
+                );
+                const isDisabled =
+                  !selectedDate || !selectedDepartmentCode || !isAvailable;
+
+                return (
+                  <Button
+                    key={time}
+                    variant="outline"
+                    label={time}
+                    toggleable
+                    active={selectedTime === time}
+                    disabled={isDisabled}
+                    onClick={() => setSelectedTime(time)}
+                    className="w-full"
+                  />
+                );
+              })}
             </div>
           </div>
         </section>
