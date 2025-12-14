@@ -522,7 +522,7 @@ function Mypage() {
     return <LoadingPage message="로딩중..." />;
 
   return (
-    <div className="h-dvh bg-white flex flex-col">
+    <div className="h-dvh bg-white flex flex-col relative">
       <Header label="마이페이지" variant="label" showBackButton={true} />
 
       <section className="border-y border-gray-3 p-4">
@@ -705,16 +705,20 @@ function Mypage() {
         </section>
       </main>
 
-      <div className="flex w-full py-2 px-6 gap-1">
+      <div className="flex w-full py-2 px-6 gap-1 lg:absolute lg:top-2.5 lg:right-6 lg:w-auto lg:p-0">
         <Button
-          className="w-full bg-main-2"
+          className="w-full max-w-60 lg:w-22 bg-main-2"
           label="회원탈퇴"
           onClick={() => {
             setShowPopup(true);
             setPasswordError(false);
           }}
         />
-        <Button className="w-full" label="로그아웃" onClick={handleLogout} />
+        <Button
+          className="w-full max-w-60 lg:w-22"
+          label="로그아웃"
+          onClick={handleLogout}
+        />
       </div>
 
       {showPopup && (
