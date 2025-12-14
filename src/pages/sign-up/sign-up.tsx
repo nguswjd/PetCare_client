@@ -191,8 +191,14 @@ function SignUp() {
     }
   };
 
+  const isWideLayout = !signupForm.isUser && step === 3;
+
   return (
-    <div className="bg-white max-w-120 mx-auto flex flex-col h-dvh">
+    <div
+      className={`bg-white mx-auto flex flex-col h-dvh transition-all duration-300 ${
+        isWideLayout ? "max-w-220" : "max-w-120"
+      }`}
+    >
       <header
         className="mt-[10vh] flex justify-center cursor-pointer"
         onClick={handleLogoClick}
@@ -204,40 +210,44 @@ function SignUp() {
         {step === 1 && <TermsSection terms={terms} />}
         {step === 2 && <UserForm signupForm={signupForm} />}
         {step === 3 && !signupForm.isUser && (
-          <HospitalTermsSection signupForm={signupForm} />
+          <div className="w-full">
+            <HospitalTermsSection signupForm={signupForm} />
+          </div>
         )}
       </main>
 
-      <footer className="flex flex-col gap-2 px-6 mb-6">
-        {step === 1 && (
+      <footer className="w-full px-6 mb-6">
+        <div className="max-w-120 mx-auto flex flex-col gap-2">
+          {step === 1 && (
+            <Button
+              className="w-full"
+              label="다음"
+              disabled={!terms.canProceed}
+              onClick={handleNext}
+            />
+          )}
+          {step === 2 && (
+            <Button
+              className="w-full"
+              label={signupForm.isUser ? "회원가입" : "다음"}
+              disabled={!signupForm.isValid}
+              onClick={handleFormNext}
+            />
+          )}
+          {step === 3 && !signupForm.isUser && (
+            <Button
+              className="w-full"
+              label="병원 등록 요청하기"
+              onClick={handleSignup}
+            />
+          )}
           <Button
-            className="w-full"
-            label="다음"
-            disabled={!terms.canProceed}
-            onClick={handleNext}
+            className="w-full border-gray-3"
+            label="로그인"
+            variant="outline"
+            onClick={handleGoLogin}
           />
-        )}
-        {step === 2 && (
-          <Button
-            className="w-full"
-            label={signupForm.isUser ? "회원가입" : "다음"}
-            disabled={!signupForm.isValid}
-            onClick={handleFormNext}
-          />
-        )}
-        {step === 3 && !signupForm.isUser && (
-          <Button
-            className="w-full"
-            label="병원 등록 요청하기"
-            onClick={handleSignup}
-          />
-        )}
-        <Button
-          className="w-full border-gray-3"
-          label="로그인"
-          variant="outline"
-          onClick={handleGoLogin}
-        />
+        </div>
       </footer>
     </div>
   );
