@@ -233,7 +233,7 @@ function SignUp() {
           />
         )}
         <Button
-          className="w-full"
+          className="w-full border-gray-3"
           label="로그인"
           variant="outline"
           onClick={handleGoLogin}

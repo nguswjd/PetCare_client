@@ -129,7 +129,7 @@ function Login() {
       <footer className="flex px-6 justify-center mb-6">
         <Button
           variant="outline"
-          className="w-full"
+          className="w-full border-gray-3"
           label="회원가입"
           onClick={handleSignupClick}
         />
