@@ -7,6 +7,7 @@ import Header from "@/components/header";
 import Review, { type ReviewType } from "@/components/review";
 import Button from "@/components/ui/button";
 import Popup from "@/components/popup";
+import HospitalInfoSection from "@/components/hospital-section";
 import { PencilLine } from "lucide-react";
 import { addRecentHospitalUnified } from "@/utils/recentHospitals";
 
@@ -62,6 +63,7 @@ function Hospital() {
   const [reviews, setReviews] = useState<ReviewType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [reviewCount, setReviewCount] = useState<number>(0);
 
   const [activeReservation, setActiveReservation] =
     useState<ActiveReservation | null>(null);
@@ -112,6 +114,7 @@ function Hospital() {
         };
 
         setHospitalInfo(hospital);
+        setReviewCount(hospitalData.reviewCount || 0);
         addRecentHospitalUnified({
           id: hospital.id,
           name: hospital.name,
@@ -208,6 +211,7 @@ function Hospital() {
 
       if (res.ok) {
         setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+        setReviewCount((prev) => Math.max(0, prev - 1));
         setShowReviewDeleteSuccessPopup(true);
       } else {
         const errData = await res.json().catch(() => ({}));
@@ -317,35 +321,25 @@ function Hospital() {
           variant="label"
           showBackButton={true}
         />
-        <div>
-          <img
-            src={hospitalInfo.image}
-            alt={hospitalInfo.alt || "병원 이미지"}
-            className="w-full min-h-40 h-[15vh] max-h-60 bg-gray-4 object-cover"
-          />
-          <section className="flex justify-between mt-4 mx-4 pb-4 border-b border-b-gray-2">
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-xl">{hospitalInfo.name}</h3>
-                <p className="flex gap-2 text-gray-6 font-medium text-sm">
-                  {hospitalInfo.address.split(" ").slice(1, 3).join(" ")}
-                </p>
-              </div>
-              <div className="flex gap-2 text-gray-6 font-medium text-sm">
-                <p>{hospitalInfo.operatingStatus}</p>
-                {hospitalInfo.distance && <p>{hospitalInfo.distance}</p>}
-              </div>
-            </div>
-            {activeReservation ? (
-              <Button
-                label="예약취소"
-                onClick={() => setShowCancelPopup(true)}
-              />
-            ) : (
-              <Button label="예약하기" onClick={handleGoReservation} />
-            )}
-          </section>
-        </div>
+        <HospitalInfoSection
+          image={hospitalInfo.image}
+          alt={hospitalInfo.alt}
+          name={hospitalInfo.name}
+          address={hospitalInfo.address}
+          businessStatus={hospitalInfo.operatingStatus}
+          distance={hospitalInfo.distance}
+          hasParking={hospitalInfo.hasParking}
+          breeds={hospitalInfo.breeds}
+          reviewCount={reviewCount}
+          departments={hospitalInfo.departments}
+          showButton={true}
+          buttonLabel={activeReservation ? "예약취소" : "예약하기"}
+          onButtonClick={
+            activeReservation
+              ? () => setShowCancelPopup(true)
+              : handleGoReservation
+          }
+        />
       </div>
 
       <main className="flex-1 overflow-y-auto scrollbar-hide flex justify-center">
