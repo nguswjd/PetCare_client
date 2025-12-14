@@ -237,7 +237,7 @@ function HospitalMainPage() {
               className="flex flex-col gap-2 border-b border-gray-4 mx-6 md:mx-0 pb-6 cursor-pointer"
               onClick={handleGoReservation}
             >
-              <div className="flex w-full justify-between md:pl-6">
+              <div className="flex w-full justify-between md:pl-6 mt-4 md:mt-0">
                 <h2 className="font-bold">예약내역</h2>
                 <Button variant="icon" icon={ChevronLast} className="w-4 h-4" />
               </div>
