@@ -156,7 +156,7 @@ function Review() {
   }
 
   return (
-    <div className="flex flex-col h-dvh">
+    <div className="flex flex-col h-dvh relative">
       <Header label="리뷰 등록하기" variant="label" showBackButton={true} />
 
       <div className="flex-1 flex flex-col lg:flex-row lg:max-w-7xl lg:mx-auto lg:w-full lg:overflow-hidden">
@@ -208,7 +208,7 @@ function Review() {
           <div className="hidden lg:block mt-4">
             <Button
               variant="primary"
-              className="w-full"
+              className="w-full lg:w-21 lg:absolute lg:top-2.5 lg:right-6"
               label="등록하기"
               onClick={handleSubmit}
               disabled={!isValid}
