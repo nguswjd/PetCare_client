@@ -319,6 +319,7 @@ function Hospital() {
         <Header
           label={hospitalInfo.name}
           variant="label"
+          onBackClick={() => navigate("/")}
           showBackButton={true}
         />
         <HospitalInfoSection
