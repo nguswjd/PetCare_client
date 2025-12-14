@@ -83,6 +83,9 @@ function Reservation() {
   const [selectedAge, setSelectedAge] = useState("");
   const [selectedWeight, setSelectedWeight] = useState("");
   const [reviewCount, setReviewCount] = useState<number>(0);
+  const [breakTimes, setBreakTimes] = useState<string[]>([]);
+  const [operatingStartTime, setOperatingStartTime] = useState<string>("");
+  const [operatingEndTime, setOperatingEndTime] = useState<string>("");
 
   useEffect(() => {
     const token =
@@ -136,8 +139,14 @@ function Reservation() {
         if (!res.ok) throw new Error("");
         const data = await res.json();
         setReviewCount(data.reviewCount || 0);
+        setBreakTimes(data.breakTimes || []);
+        setOperatingStartTime(data.operatingStartTime || "");
+        setOperatingEndTime(data.operatingEndTime || "");
       } catch {
         setReviewCount(0);
+        setBreakTimes([]);
+        setOperatingStartTime("");
+        setOperatingEndTime("");
       }
     };
 
@@ -477,8 +486,25 @@ function Reservation() {
                 const isAvailable = availableServerTimes.some((serverTime) =>
                   serverTime.startsWith(time)
                 );
+                const isBreakTime = breakTimes.some((bt) =>
+                  bt.startsWith(time)
+                );
+
+                const isBeforeOpen =
+                  !!operatingStartTime &&
+                  time < operatingStartTime.substring(0, 5);
+
+                const isAfterClose =
+                  !!operatingEndTime &&
+                  time >= operatingEndTime.substring(0, 5);
+
                 const isDisabled =
-                  !selectedDate || !selectedDepartmentCode || !isAvailable;
+                  !selectedDate ||
+                  !selectedDepartmentCode ||
+                  !isAvailable ||
+                  isBreakTime ||
+                  isBeforeOpen ||
+                  isAfterClose;
 
                 return (
                   <Button
