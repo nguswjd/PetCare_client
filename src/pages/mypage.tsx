@@ -535,94 +535,96 @@ function Mypage() {
       </section>
 
       <main className="py-4 flex flex-col scrollbar-hide gap-4 flex-1 overflow-auto">
-        <section className="flex flex-col gap-3">
-          <h3 className="font-bold mx-6">예약내역</h3>
-          {reservations.length === 0 ? (
-            <div className="w-full h-31 flex items-center justify-center">
-              <p className="text-gray-5">예약 내역이 없습니다.</p>
-            </div>
-          ) : (
-            <div className="flex px-6 overflow-x-auto scrollbar-hide">
-              {reservations.map((reservation) => {
-                const hospital = hospitalsInfo[reservation.hospitalId];
-                if (!hospital) return null;
+        <div className="flex flex-col gap-6 lg:flex-row lg:px-6 w-full">
+          <section className="flex flex-col gap-3 flex-1 min-w-0">
+            <h3 className="font-bold mx-6 lg:mx-0">예약내역</h3>
+            {reservations.length === 0 ? (
+              <div className="w-full h-31 flex items-center justify-center">
+                <p className="text-gray-5">예약 내역이 없습니다.</p>
+              </div>
+            ) : (
+              <div className="flex px-6 lg:px-0 overflow-x-auto scrollbar-hide">
+                {reservations.map((reservation) => {
+                  const hospital = hospitalsInfo[reservation.hospitalId];
+                  if (!hospital) return null;
 
-                return (
-                  <div key={reservation.id} className="flex px-2 gap-1">
+                  return (
+                    <div key={reservation.id} className="flex px-2 gap-1">
+                      <Card
+                        size="sm"
+                        image={hospital.imageUrl}
+                        alt={hospital.name}
+                        name={hospital.name}
+                        address={hospital.address}
+                        onClick={() => navigate(`/hospital/${hospital.id}`)}
+                        className="cursor-pointer"
+                      />
+                      <div className="flex items-center flex-col gap-1">
+                        <div className="text-sm w-37 text-center font-normal">
+                          <p>날짜: {reservation.reservationDate}</p>
+                          <p>
+                            시간: {reservation.reservationTime.substring(0, 5)}
+                          </p>
+                          <p>
+                            품종:{" "}
+                            {animalTypeMap[reservation.animalType] ||
+                              reservation.animalType}{" "}
+                            ({breedMap[reservation.breed] || reservation.breed})
+                          </p>
+                        </div>
+                        <Button
+                          label="예약취소"
+                          className="font-medium text-sm w-25"
+                          onClick={() => {
+                            setSelectedReservation(reservation);
+                            setShowCancelPopup(true);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          <section className="flex flex-col gap-3 mx-6 lg:mx-0 flex-1">
+            <h3 className="font-bold">나의 리뷰</h3>
+            {myReviews.length === 0 ? (
+              <div className="w-full h-31 flex items-center justify-center">
+                <p className="text-gray-5">등록된 리뷰가 없습니다.</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {myReviews.map((review) => {
+                  const matchedHospital = hospitalsInfo[review.hospitalId];
+
+                  const handleCardClick = () => {
+                    if (matchedHospital) {
+                      navigate(`/hospital/${matchedHospital.id}`);
+                    }
+                  };
+
+                  return (
                     <Card
+                      key={review.reviewId}
                       size="sm"
-                      image={hospital.imageUrl}
-                      alt={hospital.name}
-                      name={hospital.name}
-                      address={hospital.address}
-                      onClick={() => navigate(`/hospital/${hospital.id}`)}
+                      image={matchedHospital ? matchedHospital.imageUrl : ""}
+                      alt={review.hospitalName}
+                      name={review.hospitalName}
+                      address={matchedHospital ? matchedHospital.address : ""}
+                      content={review.content}
+                      onClick={handleCardClick}
                       className="cursor-pointer"
                     />
-                    <div className="flex items-center flex-col gap-1">
-                      <div className="text-sm w-37 text-center font-normal">
-                        <p>날짜: {reservation.reservationDate}</p>
-                        <p>
-                          시간: {reservation.reservationTime.substring(0, 5)}
-                        </p>
-                        <p>
-                          품종:{" "}
-                          {animalTypeMap[reservation.animalType] ||
-                            reservation.animalType}{" "}
-                          ({breedMap[reservation.breed] || reservation.breed})
-                        </p>
-                      </div>
-                      <Button
-                        label="예약취소"
-                        className="font-medium text-sm w-25"
-                        onClick={() => {
-                          setSelectedReservation(reservation);
-                          setShowCancelPopup(true);
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </div>
 
-        <section className="flex flex-col gap-3 mx-6">
-          <h3 className="font-bold">나의 리뷰</h3>
-          {myReviews.length === 0 ? (
-            <div className="w-full h-31 flex items-center justify-center">
-              <p className="text-gray-5">등록된 리뷰가 없습니다.</p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {myReviews.map((review) => {
-                const matchedHospital = hospitalsInfo[review.hospitalId];
-
-                const handleCardClick = () => {
-                  if (matchedHospital) {
-                    navigate(`/hospital/${matchedHospital.id}`);
-                  }
-                };
-
-                return (
-                  <Card
-                    key={review.reviewId}
-                    size="sm"
-                    image={matchedHospital ? matchedHospital.imageUrl : ""}
-                    alt={review.hospitalName}
-                    name={review.hospitalName}
-                    address={matchedHospital ? matchedHospital.address : ""}
-                    content={review.content}
-                    onClick={handleCardClick}
-                    className="cursor-pointer"
-                  />
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        <section className="flex flex-col gap-3 mx-6">
+        <section className="flex flex-col max-w-120 gap-3 mx-6">
           <div className="flex justify-between items-center">
             <h3 className="font-bold">내 정보 수정</h3>
             <div className="flex gap-2">
