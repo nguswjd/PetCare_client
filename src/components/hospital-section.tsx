@@ -24,7 +24,6 @@ function HospitalInfoSection({
   name,
   address,
   businessStatus,
-  distance,
   hasParking,
   breeds,
   reviewCount,
