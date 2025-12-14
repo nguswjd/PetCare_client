@@ -159,47 +159,65 @@ function Review() {
     <div className="flex flex-col h-dvh">
       <Header label="리뷰 등록하기" variant="label" showBackButton={true} />
 
-      <div className="p-4 border-b border-t border-b-gray-3 border-t-gray-3">
-        <div className="flex items-center gap-2">
-          <h3 className="font-semibold text-xl">{formData.hospitalName}</h3>
-          <p className="flex gap-2 text-gray-6 font-medium text-sm">
-            {formData.hospitalAddress.split(" ").slice(0, 3).join(" ")}
-          </p>
+      <div className="flex-1 flex flex-col lg:flex-row lg:max-w-7xl lg:mx-auto lg:w-full lg:overflow-hidden">
+        <div className="flex flex-col lg:w-1/2 lg:h-full lg:overflow-y-auto">
+          <div className="p-4 border-b border-t border-b-gray-3 border-t-gray-3 lg:border-none lg:p-6 lg:pb-0">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-xl">{formData.hospitalName}</h3>
+              <p className="flex gap-2 text-gray-6 font-medium text-sm">
+                {formData.hospitalAddress.split(" ").slice(0, 3).join(" ")}
+              </p>
+            </div>
+          </div>
+
+          <div className="px-6 py-4 flex flex-col gap-4">
+            <Field label="방문날짜" placeholder={formData.visitDate} />
+            <Field label="진료대상 동물" placeholder={formData.animalType} />
+            <Field label="품종" placeholder={formData.breed} />
+
+            <SelectBox
+              label="진료항목"
+              placeholder="진료 항목을 선택해주세요."
+              options={departmentOptions}
+              value={selectedDepartment}
+              onChange={(value) => setSelectedDepartment(value)}
+            />
+
+            <div className="flex flex-col gap-1 mb-4">
+              <h3 className="text-sm font-medium text-black">재방문 의사</h3>
+              <Radio
+                value={visitIntent}
+                onChange={setVisitIntent}
+                options={[
+                  { value: "yes", label: "있음" },
+                  { value: "no", label: "없음" },
+                ]}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 px-6 py-4 flex flex-col gap-4 lg:w-1/2 lg:h-full lg:p-6 lg:bg-gray-50/30">
+          <div className="flex-1 flex flex-col h-full">
+            <ReviewTextarea
+              value={content}
+              onChange={(e: any) => setContent(e.target.value)}
+            />
+          </div>
+
+          <div className="hidden lg:block mt-4">
+            <Button
+              variant="primary"
+              className="w-full"
+              label="등록하기"
+              onClick={handleSubmit}
+              disabled={!isValid}
+            />
+          </div>
         </div>
       </div>
 
-      <main className="px-6 flex flex-col gap-4 py-4 flex-1 overflow-y-auto">
-        <Field label="방문날짜" placeholder={formData.visitDate} />
-        <Field label="진료대상 동물" placeholder={formData.animalType} />
-        <Field label="품종" placeholder={formData.breed} />
-
-        <SelectBox
-          label="진료항목"
-          placeholder="진료 항목을 선택해주세요."
-          options={departmentOptions}
-          value={selectedDepartment}
-          onChange={(value) => setSelectedDepartment(value)}
-        />
-
-        <div className="flex flex-col gap-1 mb-4">
-          <h3 className="text-sm font-medium text-black">재방문 의사</h3>
-          <Radio
-            value={visitIntent}
-            onChange={setVisitIntent}
-            options={[
-              { value: "yes", label: "있음" },
-              { value: "no", label: "없음" },
-            ]}
-          />
-        </div>
-
-        <ReviewTextarea
-          value={content}
-          onChange={(e: any) => setContent(e.target.value)}
-        />
-      </main>
-
-      <footer className="px-6 py-4">
+      <footer className="px-6 py-4 lg:hidden mt-auto border-t border-gray-100">
         <Button
           variant="primary"
           className="w-full"
