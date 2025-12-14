@@ -85,7 +85,13 @@ function SignUp() {
           "businessRegistrationNumber",
           signupForm.form.businessNumber
         );
-        formData.append("address", signupForm.form.address);
+
+        const fullAddress =
+          signupForm.form.address +
+          (signupForm.form.detailAddress
+            ? ` ${signupForm.form.detailAddress}`
+            : "");
+        formData.append("address", fullAddress);
 
         if (signupForm.form.hasParking) {
           formData.append("hasParking", signupForm.form.hasParking);
