@@ -6,7 +6,7 @@ const imageVariants = cva("", {
     size: {
       sm: "h-19 w-41",
       md: "h-40 w-41",
-      lg: "h-40 w-full",
+      lg: "h-40 md:h-50 w-full",
     },
   },
   defaultVariants: {

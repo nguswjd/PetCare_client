@@ -314,54 +314,63 @@ function Hospital() {
   if (error || !hospitalInfo) return <ErrorPage onRetry={() => navigate(-1)} />;
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="sticky top-0 z-10 bg-white">
+    <div className="flex flex-col min-h-screen bg-white">
+      <div className="sticky top-0 z-20 bg-white">
         <Header
           label={hospitalInfo.name}
           variant="label"
           onBackClick={() => navigate("/")}
           showBackButton={true}
         />
-        <HospitalInfoSection
-          image={hospitalInfo.image}
-          alt={hospitalInfo.alt}
-          name={hospitalInfo.name}
-          address={hospitalInfo.address}
-          businessStatus={hospitalInfo.operatingStatus}
-          distance={hospitalInfo.distance}
-          hasParking={hospitalInfo.hasParking}
-          breeds={hospitalInfo.breeds}
-          reviewCount={reviewCount}
-          departments={hospitalInfo.departments}
-          showButton={true}
-          buttonLabel={activeReservation ? "예약취소" : "예약하기"}
-          onButtonClick={
-            activeReservation
-              ? () => setShowCancelPopup(true)
-              : handleGoReservation
-          }
-        />
       </div>
 
-      <main className="flex-1 overflow-y-auto scrollbar-hide flex justify-center">
-        {hasReview ? (
-          <div className="w-full">
-            <Review reviews={reviews} onDelete={handleDeleteReview} />
+      <div className="flex flex-col md:flex-row  md:mx-auto md:w-full md:gap-8 flex-1">
+        <section className="md:w-1/3 md:min-w-120">
+          <div className="md:sticky">
+            <HospitalInfoSection
+              image={hospitalInfo.image}
+              alt={hospitalInfo.alt}
+              name={hospitalInfo.name}
+              address={hospitalInfo.address}
+              businessStatus={hospitalInfo.operatingStatus}
+              distance={hospitalInfo.distance}
+              hasParking={hospitalInfo.hasParking}
+              breeds={hospitalInfo.breeds}
+              reviewCount={reviewCount}
+              departments={hospitalInfo.departments}
+              showButton={true}
+              buttonLabel={activeReservation ? "예약취소" : "예약하기"}
+              onButtonClick={
+                activeReservation
+                  ? () => setShowCancelPopup(true)
+                  : handleGoReservation
+              }
+            />
           </div>
-        ) : (
-          <Button
-            variant="outline"
-            label="리뷰를 남겨주세요!"
-            className="text-gray-6 self-center h-10 border-gray-6 flex gap-2 items-center w-82"
-            icon={PencilLine}
-            onClick={handleGoReview}
-          />
-        )}
-      </main>
+        </section>
 
-      <div className="sticky bottom-0 z-10 bg-white">
+        <main className="flex-1 overflow-y-auto scrollbar-hide flex flex-col">
+          {hasReview ? (
+            <div className="w-full">
+              <Review reviews={reviews} onDelete={handleDeleteReview} />
+            </div>
+          ) : (
+            <div className="flex flex-1 items-center justify-center py-10">
+              <Button
+                variant="outline"
+                label="리뷰를 남겨주세요!"
+                className="text-gray-6 h-10 border-gray-6 flex gap-2 items-center w-82"
+                icon={PencilLine}
+                onClick={handleGoReview}
+              />
+            </div>
+          )}
+        </main>
+      </div>
+
+      <div className="sticky bottom-0 z-10 bg-white border-t border-gray-2 md:border-none">
         {hasReview ? (
-          <div className="flex flex-col items-center w-full">
+          <div className="flex flex-col items-center w-full md:hidden">
             <Button
               variant="outline"
               label="리뷰를 남겨주세요!"
@@ -370,9 +379,7 @@ function Hospital() {
               onClick={handleGoReview}
             />
           </div>
-        ) : (
-          <div />
-        )}
+        ) : null}
         <Footer />
       </div>
 

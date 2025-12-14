@@ -32,22 +32,23 @@ function HospitalTermsSection({ signupForm }: HospitalTermsSectionProps) {
 
   return (
     <div className="w-full flex flex-col">
-      <div>
+      <div className="w-full max-w-120 mx-auto flex">
         <Button
           variant="user"
-          className="w-[50%]"
+          className="w-1/2"
           active={signupForm.isUser}
           onClick={() => signupForm.setUserType(true)}
           label="사용자"
         />
         <Button
           variant="user"
-          className="w-[50%]"
+          className="w-1/2"
           active={!signupForm.isUser}
           onClick={() => signupForm.setUserType(false)}
           label="관리자"
         />
       </div>
+
       <div className="py-5">
         <HospitalInfo onDataChange={handleHospitalDataChange} />
       </div>

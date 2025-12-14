@@ -5,11 +5,10 @@ import Header from "@/components/header";
 import Popup from "@/components/popup";
 import Button from "@/components/ui/button";
 import Card from "@/components/ui/card";
-import Field from "@/components/ui/field";
 
 import HospitalInfo from "@/components/hospital-detail-info";
 
-import { PencilLine, CheckLine, ChevronLast } from "lucide-react";
+import { PencilLine, Check, ChevronLast } from "lucide-react";
 
 interface HospitalData {
   name: string;
@@ -219,10 +218,10 @@ function HospitalMainPage() {
   }
 
   return (
-    <div className="h-dvh flex flex-col">
+    <div className="h-dvh flex flex-col relative">
       <Header label="병원 관리 페이지" showBackButton={false} />
 
-      <main className="pb-5 flex flex-col flex-1 overflow-auto gap-4">
+      <main className="pb-5 md:pb-0 flex flex-col flex-1 overflow-auto">
         <section className="p-4 border-y border-y-gray-3">
           <h2 className="hidden">내 병원 정보</h2>
           <Header
@@ -232,111 +231,121 @@ function HospitalMainPage() {
           />
         </section>
 
-        <section
-          className="flex flex-col gap-2 border-b border-gray-4 mx-6 pb-6 cursor-pointer"
-          onClick={handleGoReservation}
-        >
-          <div className="flex w-full justify-between">
-            <h2 className="font-bold">예약내역</h2>
-            <Button variant="icon" icon={ChevronLast} className="w-4 h-4" />
+        <div className="flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-6 md:py-4 md:flex-1 md:overflow-hidden">
+          <div className="flex flex-col gap-4 md:col-span-1 md:overflow-auto scrollbar-hide">
+            <section
+              className="flex flex-col gap-2 border-b border-gray-4 mx-6 md:mx-0 pb-6 cursor-pointer"
+              onClick={handleGoReservation}
+            >
+              <div className="flex w-full justify-between md:pl-6 mt-4 md:mt-0">
+                <h2 className="font-bold">예약내역</h2>
+                <Button variant="icon" icon={ChevronLast} className="w-4 h-4" />
+              </div>
+
+              <div className="flex md:pl-6 gap-2 overflow-x-auto scrollbar-hide px-6 md:px-0 -mx-6 md:mx-0">
+                {pendingList.length > 0 ? (
+                  pendingList.map((res) => (
+                    <Card
+                      key={res.reservationId}
+                      size="sm"
+                      image={hospitalData.imageUrl || ""}
+                      name={res.reserverName}
+                      content={`${res.animalType} / ${res.breed}`}
+                    />
+                  ))
+                ) : (
+                  <p className="text-sm w-full text-gray-5 text-center py-10">
+                    진행 중인 예약이 없습니다.
+                  </p>
+                )}
+              </div>
+            </section>
+
+            <section
+              className="flex flex-col gap-2 border-b border-gray-4 mx-6 md:mx-0 pb-6 cursor-pointer mb-4"
+              onClick={handleGoReview}
+            >
+              <div className="flex w-full justify-between md:pl-6">
+                <h2 className="font-bold">병원 리뷰 ({reviews.length})</h2>
+                <Button variant="icon" icon={ChevronLast} className="w-4 h-4" />
+              </div>
+
+              <div className="flex md:pl-6 gap-2 pb-6 overflow-x-auto scrollbar-hide px-6 md:px-0 -mx-6 md:mx-0">
+                {reviews.length > 0 ? (
+                  reviews
+                    .slice(0, 3)
+                    .map((review) => (
+                      <Card
+                        key={review.reviewId}
+                        size="sm"
+                        image={hospitalData.imageUrl || ""}
+                        alt="병원 이미지"
+                        name={review.username}
+                        animalType={review.department}
+                        content={review.content}
+                      />
+                    ))
+                ) : (
+                  <p className="text-sm w-full text-gray-5 text-center py-10">
+                    아직 리뷰가 없습니다.
+                  </p>
+                )}
+              </div>
+            </section>
           </div>
 
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-            {pendingList.length > 0 ? (
-              pendingList.map((res) => (
-                <Card
-                  key={res.reservationId}
-                  size="sm"
-                  image={hospitalData.imageUrl || ""}
-                  name={res.reserverName}
-                  content={`${res.animalType} / ${res.breed}`}
-                />
-              ))
-            ) : (
-              <p className="text-sm w-full text-gray-5 text-center py-10">
-                진행 중인 예약이 없습니다.
-              </p>
-            )}
-          </div>
-        </section>
-
-        <section
-          className="flex flex-col gap-2 border-b border-gray-4 mx-6 pb-6 cursor-pointer mb-4"
-          onClick={handleGoReview}
-        >
-          <div className="flex w-full justify-between">
-            <h2 className="font-bold">병원 리뷰 ({reviews.length})</h2>
-            <Button variant="icon" icon={ChevronLast} className="w-4 h-4" />
-          </div>
-
-          <div className="flex gap-2 pb-6 overflow-x-auto scrollbar-hide">
-            {reviews.length > 0 ? (
-              reviews
-                .slice(0, 3)
-                .map((review) => (
-                  <Card
-                    key={review.reviewId}
-                    size="sm"
-                    image={hospitalData.imageUrl || ""}
-                    alt="병원 이미지"
-                    name={review.username}
-                    animalType={review.department}
-                    content={review.content}
+          <section className="px-6 md:px-0 flex flex-col gap-2 md:col-span-2 md:overflow-auto scrollbar-hide mr-6">
+            <div className="flex justify-between items-center">
+              <h3 className="font-bold">병원 정보 수정</h3>
+              <div className="flex gap-2">
+                {!editMode && (
+                  <Button
+                    icon={PencilLine}
+                    variant="icon"
+                    iconSize="w-5 h-5"
+                    onClick={handleEdit}
                   />
-                ))
-            ) : (
-              <p className="text-sm w-full text-gray-5 text-center py-10">
-                아직 리뷰가 없습니다.
-              </p>
-            )}
-          </div>
-        </section>
-
-        <section className="px-6 flex flex-col gap-2">
-          <div className="flex justify-between items-center">
-            <h3 className="font-bold">병원 정보 수정</h3>
-            <div className="flex gap-2">
-              {!editMode && (
-                <Button
-                  icon={PencilLine}
-                  variant="icon"
-                  iconSize="w-5 h-5"
-                  onClick={handleEdit}
-                />
-              )}
-              {editMode && (
-                <Button
-                  icon={CheckLine}
-                  variant="icon"
-                  iconSize="w-5 h-5"
-                  onClick={handleSave}
-                />
-              )}
+                )}
+                {editMode && (
+                  <Button
+                    icon={Check}
+                    variant="icon"
+                    iconSize="w-5 h-5"
+                    onClick={handleSave}
+                  />
+                )}
+              </div>
             </div>
-          </div>
 
-          <Field placeholder={hospitalData?.representativeName} />
-          <Field placeholder={hospitalData?.name} />
-          <Field placeholder={hospitalData?.address} />
-
-          <HospitalInfo
-            editMode={editMode}
-            initialData={hospitalData}
-            onDataChange={setFormData}
-          />
-        </section>
+            <HospitalInfo
+              editMode={editMode}
+              initialData={hospitalData}
+              onDataChange={setFormData}
+              showBasicFields={true}
+              basicFieldsData={{
+                representativeName: hospitalData?.representativeName,
+                name: hospitalData?.name,
+                address: hospitalData?.address,
+              }}
+            />
+          </section>
+        </div>
       </main>
 
-      <div className="flex w-full py-2 px-6 gap-1">
+      <div className="flex w-full md:absolute md:top-2.5 md:right-6 md:w-auto md:p-0 py-2 px-6 gap-1">
         <Button
-          className="w-full bg-main-2"
+          className="w-full md:w-22 bg-main-2"
           label="회원탈퇴"
           onClick={() => {
             setShowPopup(true);
             setPasswordError(false);
           }}
         />
-        <Button className="w-full" label="로그아웃" onClick={handleLogout} />
+        <Button
+          className="w-full md:w-22"
+          label="로그아웃"
+          onClick={handleLogout}
+        />
       </div>
 
       {showPopup && (

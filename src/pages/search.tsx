@@ -150,8 +150,8 @@ function Search() {
   };
 
   return (
-    <div className="bg-white flex flex-col h-dvh">
-      <header>
+    <div className="bg-white max-w-200 m-auto flex flex-col h-dvh">
+      <header className="w-full max-w-220 mx-auto">
         <Input
           leftIcon={ChevronLeft}
           placeholder="검색어를 입력해주세요."
@@ -167,7 +167,7 @@ function Search() {
         />
       </header>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 w-full max-w-120 mx-auto overflow-y-auto">
         {!hasSearched ? (
           <div className="p-6 flex flex-col gap-6">
             <div className="flex items-center justify-between pb-5 border-b border-gray-3">

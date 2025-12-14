@@ -159,7 +159,7 @@ function MainPage() {
         />
       </header>
 
-      <main className="pt-6 flex flex-col gap-8 flex-1 overflow-auto lg:grid lg:grid-cols-[30rem_1fr] lg:px-6 lg:gap-8 lg:content-start justify-center">
+      <main className="pt-6 flex flex-col gap-8 flex-1 overflow-auto lg:grid lg:grid-cols-[30rem_1fr] lg:px-6 lg:gap-8 lg:content-start">
         <div className="px-6 max-w-120 relative lg:col-start-1 lg:row-start-1 lg:px-0 w-full mx-auto lg:mx-0">
           <div
             ref={scrollRef}

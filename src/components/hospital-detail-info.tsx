@@ -5,6 +5,7 @@ import { Radio } from "./ui/radio";
 import { MultiSelectBox } from "./ui/multi-selectbox";
 import { SelectBox } from "./ui/selectbox";
 import Input from "./ui/input";
+import Field from "./ui/field";
 import Calendar from "./ui/calendar";
 import { Upload, X } from "lucide-react";
 
@@ -23,6 +24,12 @@ interface HospitalInfoProps {
     operatingStartTime: string | null;
     operatingEndTime: string | null;
     breakTimes: string[];
+  };
+  showBasicFields?: boolean;
+  basicFieldsData?: {
+    representativeName?: string;
+    name?: string;
+    address?: string;
   };
 }
 
@@ -47,6 +54,8 @@ function HospitalInfo({
   onDataChange,
   editMode = true,
   initialData,
+  showBasicFields = false,
+  basicFieldsData,
 }: HospitalInfoProps) {
   const [Parking, setParking] = useState("yes");
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
@@ -262,178 +271,190 @@ function HospitalInfo({
 
   return (
     <div className="w-full flex flex-col gap-4">
-      <div className="flex flex-col gap-2">
-        <div className="flex justify-between items-center">
-          <div className="">
-            <Label
-              children={editMode ? "병원이미지 업로드" : "병원이미지"}
-              className="required"
-            />
-          </div>
-          {editMode && (
-            <label
-              htmlFor="image-upload"
-              className="cursor-pointer inline-flex items-center justify-center p-2 rounded-lg transition-colors"
-            >
-              <Upload className="w-5 h-5" />
-            </label>
+      <div className="w-full flex flex-col lg:flex-row lg:gap-6">
+        <div className="flex flex-col gap-4 lg:flex-1">
+          {showBasicFields && basicFieldsData && (
+            <div className="flex flex-col gap-2">
+              <Field placeholder={basicFieldsData.representativeName} />
+              <Field placeholder={basicFieldsData.name} />
+              <Field placeholder={basicFieldsData.address} />
+            </div>
           )}
-          <input
-            id="image-upload"
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="hidden"
-            disabled={!editMode}
-          />
-        </div>
-
-        {uploadedImage && (
-          <div className="relative w-full aspect-video">
-            <img
-              src={uploadedImage}
-              alt="병원 이미지"
-              className="w-full h-full object-cover rounded-lg"
-            />
-            {editMode && (
-              <X
-                onClick={removeImage}
-                className="absolute top-2 w-5 h-5 right-2 cursor-pointer text-black rounded-full flex items-center justify-center hover:bg-gray-2"
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between items-center">
+              <div className="">
+                <Label
+                  children={editMode ? "병원이미지 업로드" : "병원이미지"}
+                  className="required"
+                />
+              </div>
+              {editMode && (
+                <label
+                  htmlFor="image-upload"
+                  className="cursor-pointer inline-flex items-center justify-center p-2 rounded-lg transition-colors"
+                >
+                  <Upload className="w-5 h-5" />
+                </label>
+              )}
+              <input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+                disabled={!editMode}
               />
+            </div>
+
+            {uploadedImage && (
+              <div className="relative w-full aspect-video">
+                <img
+                  src={uploadedImage}
+                  alt="병원 이미지"
+                  className="w-full h-full object-cover rounded-lg"
+                />
+                {editMode && (
+                  <X
+                    onClick={removeImage}
+                    className="absolute top-2 w-5 h-5 right-2 cursor-pointer text-black rounded-full flex items-center justify-center hover:bg-gray-2"
+                  />
+                )}
+              </div>
             )}
           </div>
-        )}
-      </div>
 
-      <div className="flex flex-col gap-1">
-        <Label children="주차장 여부" />
-        <Radio
-          value={Parking}
-          onChange={editMode ? setParking : () => {}}
-          options={[
-            { value: "yes", label: "있음" },
-            { value: "no", label: "없음" },
-          ]}
-        />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <Label children="진료항목" className="required" />
-        <div className="grid grid-cols-2 gap-2">
-          {departments.map((dept) => (
-            <Checkbox
-              key={dept.code}
-              variant="secondary"
-              label={dept.description}
-              checked={selectedDepartments.includes(dept.code)}
-              onCheckedChange={() => toggleDepartment(dept.code)}
-              disabled={!editMode}
+          <div className="flex flex-col gap-1">
+            <Label children="주차장 여부" />
+            <Radio
+              value={Parking}
+              onChange={editMode ? setParking : () => {}}
+              options={[
+                { value: "yes", label: "있음" },
+                { value: "no", label: "없음" },
+              ]}
             />
-          ))}
-        </div>
-      </div>
+          </div>
 
-      <div className="w-full flex flex-col gap-2">
-        <Label children="진료동물" className="required" />
-        <div className="flex gap-2">
-          <MultiSelectBox
-            placeholder="종류"
-            options={animalTypes.map((type) => ({
-              value: type.code,
-              label: type.description,
-            }))}
-            onChange={handleAnimalTypeChange}
-            selectedValues={selectedAnimalTypes}
-            disabled={!editMode}
-          />
-          <MultiSelectBox
-            placeholder="품종"
-            options={breeds.map((breed) => ({
-              value: breed.code,
-              label: breed.description,
-            }))}
-            onChange={handleBreedChange}
-            selectedValues={selectedBreeds}
-            disabled={
-              !editMode ||
-              selectedAnimalTypes.length === 0 ||
-              breeds.length === 0
-            }
-          />
+          <div className="flex flex-col gap-1">
+            <Label children="진료항목" className="required" />
+            <div className="grid grid-cols-2 gap-2">
+              {departments.map((dept) => (
+                <Checkbox
+                  key={dept.code}
+                  variant="secondary"
+                  label={dept.description}
+                  checked={selectedDepartments.includes(dept.code)}
+                  onCheckedChange={() => toggleDepartment(dept.code)}
+                  disabled={!editMode}
+                />
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-1">
-          <Input
-            className="text-sm p-0 text-gray-5 border-none"
-            value={getAnimalTypesHashtags()}
-            readOnly
-          />
-          <textarea
-            className="text-sm p-0 text-gray-5 border-none resize-none outline-none bg-transparent w-full min-h-5"
-            value={getBreedsHashtags()}
-            readOnly
-            rows={1}
-            style={{
-              overflow: "hidden",
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
-            }}
-            ref={(el) => {
-              if (el) {
-                el.style.height = "auto";
-                el.style.height = el.scrollHeight + "px";
-              }
-            }}
-          />
-        </div>
-      </div>
 
-      <div className="flex flex-col gap-1">
-        <Label children="운영시간" className="required" />
-        <div className="flex gap-2">
-          <SelectBox
-            placeholder="시작시간"
-            options={times.map((t) => ({ value: t, label: t }))}
-            value={startTime ?? undefined}
-            onChange={(value) => {
-              if (!editMode) return;
-              setStartTime(value);
-              if (endTime && value && value >= endTime) setEndTime(null);
-              setBreakTimes([]);
-            }}
-            disabled={!editMode}
-          />
-          <SelectBox
-            placeholder="종료시간"
-            options={endTimes.map((t) => ({ value: t, label: t }))}
-            value={endTime ?? undefined}
-            onChange={(value) => {
-              if (!editMode) return;
-              setEndTime(value);
-              setBreakTimes([]);
-            }}
-            disabled={!editMode}
-          />
-          <MultiSelectBox
-            placeholder="휴계시간"
-            options={breakTimeOptions.map((t) => ({ value: t, label: t }))}
-            selectedValues={breakTimes}
-            onChange={(value) => {
-              if (!editMode) return;
-              setBreakTimes((prev) =>
-                prev.includes(value)
-                  ? prev.filter((v) => v !== value)
-                  : [...prev, value]
-              );
-            }}
-            disabled={!editMode}
-          />
-        </div>
-      </div>
+        <div className="flex flex-col gap-4 lg:flex-1">
+          <div className="w-full flex flex-col gap-2">
+            <Label children="진료동물" className="required" />
+            <div className="flex gap-2">
+              <MultiSelectBox
+                placeholder="종류"
+                options={animalTypes.map((type) => ({
+                  value: type.code,
+                  label: type.description,
+                }))}
+                onChange={handleAnimalTypeChange}
+                selectedValues={selectedAnimalTypes}
+                disabled={!editMode}
+              />
+              <MultiSelectBox
+                placeholder="품종"
+                options={breeds.map((breed) => ({
+                  value: breed.code,
+                  label: breed.description,
+                }))}
+                onChange={handleBreedChange}
+                selectedValues={selectedBreeds}
+                disabled={
+                  !editMode ||
+                  selectedAnimalTypes.length === 0 ||
+                  breeds.length === 0
+                }
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Input
+                className="text-sm p-0 text-gray-5 border-none"
+                value={getAnimalTypesHashtags()}
+                readOnly
+              />
+              <textarea
+                className="text-sm p-0 text-gray-5 border-none resize-none outline-none bg-transparent w-full min-h-5"
+                value={getBreedsHashtags()}
+                readOnly
+                rows={1}
+                style={{
+                  overflow: "hidden",
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                }}
+                ref={(el) => {
+                  if (el) {
+                    el.style.height = "auto";
+                    el.style.height = el.scrollHeight + "px";
+                  }
+                }}
+              />
+            </div>
+          </div>
 
-      {/* 휴무일 */}
-      <div className="flex flex-col gap-1">
-        <Label children="휴무일 등록" />
-        <Calendar selectedDates={selectedDates} onSelectDate={toggleDate} />
+          <div className="flex flex-col gap-1">
+            <Label children="운영시간" className="required" />
+            <div className="flex gap-2">
+              <SelectBox
+                placeholder="시작시간"
+                options={times.map((t) => ({ value: t, label: t }))}
+                value={startTime ?? undefined}
+                onChange={(value) => {
+                  if (!editMode) return;
+                  setStartTime(value);
+                  if (endTime && value && value >= endTime) setEndTime(null);
+                  setBreakTimes([]);
+                }}
+                disabled={!editMode}
+              />
+              <SelectBox
+                placeholder="종료시간"
+                options={endTimes.map((t) => ({ value: t, label: t }))}
+                value={endTime ?? undefined}
+                onChange={(value) => {
+                  if (!editMode) return;
+                  setEndTime(value);
+                  setBreakTimes([]);
+                }}
+                disabled={!editMode}
+              />
+              <MultiSelectBox
+                placeholder="휴계시간"
+                options={breakTimeOptions.map((t) => ({ value: t, label: t }))}
+                selectedValues={breakTimes}
+                onChange={(value) => {
+                  if (!editMode) return;
+                  setBreakTimes((prev) =>
+                    prev.includes(value)
+                      ? prev.filter((v) => v !== value)
+                      : [...prev, value]
+                  );
+                }}
+                disabled={!editMode}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <Label children="휴무일 등록" />
+            <Calendar selectedDates={selectedDates} onSelectDate={toggleDate} />
+          </div>
+        </div>
       </div>
     </div>
   );
