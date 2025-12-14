@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router";
 
 import LoadingPage from "@/components/loading";
 import Header from "@/components/header";
+import Popup from "@/components/popup";
 
 import { SelectBox } from "@/components/ui/selectbox";
 import Button from "@/components/ui/button";
@@ -20,6 +21,13 @@ interface ReviewFormData {
   department: string;
 }
 
+interface AlertState {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  shouldGoBack: boolean;
+}
+
 function Review() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -31,9 +39,35 @@ function Review() {
   const [visitIntent, setVisitIntent] = useState("yes");
   const [content, setContent] = useState("");
 
-  const BASE_URL = import.meta.env.VITE_API_URL || "";
+  const [alertState, setAlertState] = useState<AlertState>({
+    isOpen: false,
+    title: "",
+    message: "",
+    shouldGoBack: false,
+  });
 
+  const BASE_URL = import.meta.env.VITE_API_URL || "";
   const isValid = content.length >= 10;
+
+  const openAlert = (
+    title: string,
+    message: string,
+    shouldGoBack: boolean = false
+  ) => {
+    setAlertState({
+      isOpen: true,
+      title,
+      message,
+      shouldGoBack,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertState((prev) => ({ ...prev, isOpen: false }));
+    if (alertState.shouldGoBack) {
+      navigate(-1);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -50,8 +84,11 @@ function Review() {
 
         if (!res.ok) {
           const errData = await res.json();
-          alert(errData.message || "정보를 불러올 수 없습니다.");
-          navigate(-1);
+          openAlert(
+            "알림",
+            errData.message || "정보를 불러올 수 없습니다.",
+            true
+          );
           return;
         }
 
@@ -66,7 +103,7 @@ function Review() {
     };
 
     fetchReviewForm();
-  }, [id, BASE_URL, navigate]);
+  }, [id, BASE_URL]);
 
   const departmentOptions = [
     { value: "VACCINATION", label: "예방접종" },
@@ -99,15 +136,18 @@ function Review() {
       });
 
       if (res.ok) {
-        alert("리뷰가 등록되었습니다!");
-        navigate(-1);
+        openAlert(
+          "리뷰 등록에 성공했습니다.",
+          "병원 페이지에서 등록한 리뷰를 확인하세요!",
+          true
+        );
       } else {
         const errData = await res.json();
-        alert(errData.message || "리뷰 등록 실패");
+        openAlert("등록 실패", errData.message || "리뷰 등록에 실패했습니다.");
       }
     } catch (err) {
       console.error("리뷰 등록 에러:", err);
-      alert("오류가 발생했습니다.");
+      openAlert("오류", "예기치 못한 오류가 발생했습니다.");
     }
   };
 
@@ -168,6 +208,15 @@ function Review() {
           disabled={!isValid}
         />
       </footer>
+
+      <Popup
+        type="alert"
+        open={alertState.isOpen}
+        onClose={closeAlert}
+        title={alertState.title}
+      >
+        {alertState.message}
+      </Popup>
     </div>
   );
 }
