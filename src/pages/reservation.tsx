@@ -126,47 +126,23 @@ function Reservation() {
   }, [hospitalInfo.id]);
 
   useEffect(() => {
-    const fetchAnimalTypes = async () => {
-      try {
-        const API_URL = import.meta.env.VITE_API_URL;
-        const res = await fetch(`${API_URL}/api/v1/animal-types`);
-        if (!res.ok) throw new Error("");
-        const data = await res.json();
-        const arrayData: AnimalType[] = Array.isArray(data)
-          ? data
-          : data.types || [];
-        const filtered = arrayData.filter((type: AnimalType) =>
-          hospitalInfo.animalTypes.includes(type.description)
-        );
-        setAnimalTypes(filtered);
-      } catch {
-        setAnimalTypes([]);
-      }
-    };
-
-    fetchAnimalTypes();
+    if (hospitalInfo.animalTypes) {
+      const types = hospitalInfo.animalTypes.map((type) => ({
+        code: type,
+        description: type,
+      }));
+      setAnimalTypes(types);
+    }
   }, [hospitalInfo.animalTypes]);
 
   useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        const API_URL = import.meta.env.VITE_API_URL;
-        const res = await fetch(`${API_URL}/api/v1/departments`);
-        if (!res.ok) throw new Error("");
-        const data = await res.json();
-        const arrayData: Department[] = Array.isArray(data)
-          ? data
-          : data.departments || [];
-        const filtered = arrayData.filter((dept: Department) =>
-          hospitalInfo.departments.includes(dept.description)
-        );
-        setFilteredDepartments(filtered);
-      } catch {
-        setFilteredDepartments([]);
-      }
-    };
-
-    fetchDepartments();
+    if (hospitalInfo.departments) {
+      const depts = hospitalInfo.departments.map((dept) => ({
+        code: dept,
+        description: dept,
+      }));
+      setFilteredDepartments(depts);
+    }
   }, [hospitalInfo.departments]);
 
   useEffect(() => {
@@ -188,13 +164,20 @@ function Reservation() {
         const arrayData: Breed[] = Array.isArray(data.breeds)
           ? data.breeds
           : data.breeds || [];
+
         const filtered = arrayData.filter((breed: Breed) =>
-          hospitalInfo.breeds.includes(breed.description)
+          hospitalInfo.breeds.includes(breed.code)
         );
-        setFilteredBreeds(filtered);
+
+        const displayBreeds = filtered.map((b) => ({
+          code: b.code,
+          description: b.code,
+        }));
+
+        setFilteredBreeds(displayBreeds);
 
         if (selectedBreedCode) {
-          const found = filtered.find((b) => b.code === selectedBreedCode);
+          const found = displayBreeds.find((b) => b.code === selectedBreedCode);
           if (found) {
             setSelectedBreed(found.description);
           } else {
