@@ -158,8 +158,15 @@ function MainPage() {
           className="m-4"
         />
       </header>
-      <main className="pt-6 flex flex-col gap-8 flex-1 overflow-auto">
-        <div className="px-6 relative">
+
+      {/* [레이아웃 수정]
+          - lg breakpoint 사용 (화면이 충분히 넓을 때만 가로 배치)
+          - grid-cols-[30rem_1fr]: 슬라이드 영역(30rem=480px) 고정, 나머지는 카드 영역이 차지
+          - items-start: 높이가 달라도 상단 정렬
+      */}
+      <main className="pt-6 flex flex-col gap-8 flex-1 overflow-auto lg:grid lg:grid-cols-[30rem_1fr] lg:px-6 lg:gap-8 lg:content-start justify-center">
+        {/* 광고 슬라이드 (1열) */}
+        <div className="px-6 max-w-120 relative lg:col-start-1 lg:row-start-1 lg:px-0 w-full mx-auto lg:mx-0">
           <div
             ref={scrollRef}
             onScroll={handleScroll}
@@ -194,15 +201,18 @@ function MainPage() {
           </div>
         </div>
 
+        {/* 최근 검색한 병원 (하단 전체 행) */}
         {!loadingRecent && (
-          <section className="flex flex-col gap-2">
-            <h2 className="text-base px-6 font-bold">최근 검색한 병원</h2>
+          <section className="flex flex-col gap-2 lg:col-span-2 lg:row-start-2">
+            <h2 className="text-base px-6 font-bold lg:px-0">
+              최근 검색한 병원
+            </h2>
             {recentHospitals.length === 0 ? (
               <p className="text-center text-gray-5 py-20">
                 최근 본 병원이 없습니다
               </p>
             ) : (
-              <div className="flex px-6 gap-2 overflow-x-auto scrollbar-hide">
+              <div className="flex px-6 gap-2 overflow-x-auto scrollbar-hide lg:px-0">
                 {recentHospitals.map((hospital) => (
                   <Card
                     key={hospital.id}
@@ -221,7 +231,10 @@ function MainPage() {
           </section>
         )}
 
-        <div className="grid px-6 mb-5 gap-3 grid-cols-2">
+        {/* 추천 병원 & 리뷰왕 (2열) 
+            - grid-cols-2 유지: 넓은 화면에서도 옆으로(가로로) 나열됨
+        */}
+        <div className="grid px-6 mb-5 gap-3 grid-cols-2 lg:col-start-2 lg:row-start-1 lg:px-0 lg:mb-0 lg:gap-4">
           <section className="flex flex-col gap-2">
             <h2 className="text-base font-bold">추천 병원</h2>
             <Card
@@ -233,7 +246,7 @@ function MainPage() {
               businessStatus={closestHospital.businessStatus}
               distance={closestHospital.distance}
               onClick={() => navigate(`/hospital/${closestHospital.id}`)}
-              className="cursor-pointer"
+              className="cursor-pointer w-full"
             />
           </section>
           <section className="flex flex-col gap-2">
@@ -251,7 +264,7 @@ function MainPage() {
                 address={reviewKingHospital.address}
                 businessStatus={reviewKingHospital.businessStatus}
                 onClick={() => navigate(`/hospital/${reviewKingHospital.id}`)}
-                className="cursor-pointer"
+                className="cursor-pointer w-full"
               />
             ) : (
               <div className="flex mt-17 justify-center h-full">
