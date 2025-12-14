@@ -65,6 +65,7 @@ function Reservation() {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedAge, setSelectedAge] = useState("");
   const [selectedWeight, setSelectedWeight] = useState("");
+  const [reviewCount, setReviewCount] = useState<number>(0);
 
   useEffect(() => {
     const token =
@@ -107,6 +108,24 @@ function Reservation() {
 
     fetchUserInfo();
   }, []);
+
+  useEffect(() => {
+    const fetchHospitalDetail = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(
+          `${API_URL}/api/v1/hospital/${hospitalInfo.id}`
+        );
+        if (!res.ok) throw new Error("");
+        const data = await res.json();
+        setReviewCount(data.reviewCount || 0);
+      } catch {
+        setReviewCount(0);
+      }
+    };
+
+    fetchHospitalDetail();
+  }, [hospitalInfo.id]);
 
   useEffect(() => {
     const fetchAnimalTypes = async () => {
@@ -354,7 +373,9 @@ function Reservation() {
                   {hospitalInfo.breeds.join(", ")}
                 </p>
               </div>
-              <p className="ml-auto text-right">총 리뷰 10,000</p>
+              <p className="ml-auto text-right">
+                총 리뷰 {reviewCount.toLocaleString()}
+              </p>
             </div>
           </div>
 

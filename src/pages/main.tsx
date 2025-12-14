@@ -30,6 +30,9 @@ function MainPage() {
   const navigate = useNavigate();
   const [recentHospitals, setRecentHospitals] = useState<HospitalType[]>([]);
   const [loadingRecent, setLoadingRecent] = useState(true);
+  const [reviewKingHospital, setReviewKingHospital] =
+    useState<HospitalType | null>(null);
+  const [loadingReviewKing, setLoadingReviewKing] = useState(true);
 
   const ads = [
     { id: 1, image: Ad1, alt: "petcare 홍보물" },
@@ -45,16 +48,6 @@ function MainPage() {
     image: "",
     alt: "가까운 병원",
     name: "C hospital",
-    address: "제주시 이도동",
-    businessStatus: "영업종료",
-    distance: "30km",
-  };
-
-  const reviewKingHospital = {
-    id: 6,
-    image: "",
-    alt: "이달의 추천",
-    name: "D hospital",
     address: "제주시 이도동",
     businessStatus: "영업종료",
     distance: "30km",
@@ -85,6 +78,37 @@ function MainPage() {
     };
 
     loadRecentHospitals();
+  }, []);
+
+  useEffect(() => {
+    const loadReviewKingHospital = async () => {
+      setLoadingReviewKing(true);
+      try {
+        const response = await fetch("/api/v1/hospitals/top?limit=1");
+        if (!response.ok) throw new Error("Failed to fetch");
+
+        const data = await response.json();
+        const topHospital = data[0];
+
+        if (topHospital) {
+          setReviewKingHospital({
+            id: topHospital.id,
+            image: topHospital.imageUrl || "",
+            alt: topHospital.name,
+            name: topHospital.name,
+            address: topHospital.address.split(" ").slice(0, 2).join(" "),
+            businessStatus: topHospital.operatingStatus,
+          });
+        }
+      } catch (e) {
+        console.error("리뷰왕 병원 조회 실패:", e);
+        setReviewKingHospital(null);
+      } finally {
+        setLoadingReviewKing(false);
+      }
+    };
+
+    loadReviewKingHospital();
   }, []);
 
   const scrollToIndex = (index: number) => {
@@ -214,17 +238,26 @@ function MainPage() {
           </section>
           <section className="flex flex-col gap-2">
             <h2 className="text-base font-bold">이달의 리뷰왕</h2>
-            <Card
-              size="lg"
-              image={reviewKingHospital.image}
-              alt={reviewKingHospital.alt}
-              name={reviewKingHospital.name}
-              address={reviewKingHospital.address}
-              businessStatus={reviewKingHospital.businessStatus}
-              distance={reviewKingHospital.distance}
-              onClick={() => navigate(`/hospital/${reviewKingHospital.id}`)}
-              className="cursor-pointer"
-            />
+            {loadingReviewKing ? (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-5">로딩중...</p>
+              </div>
+            ) : reviewKingHospital ? (
+              <Card
+                size="lg"
+                image={reviewKingHospital.image}
+                alt={reviewKingHospital.alt}
+                name={reviewKingHospital.name}
+                address={reviewKingHospital.address}
+                businessStatus={reviewKingHospital.businessStatus}
+                onClick={() => navigate(`/hospital/${reviewKingHospital.id}`)}
+                className="cursor-pointer"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-5 text-sm">리뷰가 없습니다</p>
+              </div>
+            )}
           </section>
         </div>
       </main>
