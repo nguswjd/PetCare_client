@@ -30,6 +30,8 @@ interface ReviewApiResponse {
   reviewId: number;
   hospitalName: string;
   username: string;
+  animalType: string;
+  breed: string;
   department: string;
   content: string;
   visitDate: string;
@@ -146,7 +148,9 @@ function Hospital() {
           const mappedReviews: ReviewType[] = reviewData.map((review) => ({
             id: review.reviewId,
             date: review.visitDate,
-            animalType: review.username,
+            username: review.username,
+            animalType: review.animalType,
+            breed: review.breed,
             department: review.department,
             revisit: review.revisitIntention ? "있음" : "없음",
             content: review.content,

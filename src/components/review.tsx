@@ -4,7 +4,9 @@ import { PencilLine, Trash2 } from "lucide-react";
 export interface ReviewType {
   id: number;
   date: string;
+  username: string;
   animalType: string;
+  breed: string;
   department: string;
   revisit: string;
   content: string;
@@ -18,7 +20,7 @@ interface ReviewProps {
 
 const Review = ({ reviews, onDelete }: ReviewProps) => {
   return (
-    <div className="flex flex-col justify-center items-center w-full">
+    <div className="flex flex-col justify-center items-center w-full ">
       {reviews.length > 0 ? (
         reviews.map((review) => (
           <div
@@ -27,23 +29,27 @@ const Review = ({ reviews, onDelete }: ReviewProps) => {
           >
             <div className="flex justify-between items-center text-gray-6 text-xs mb-1">
               <p>{review.date}</p>
-              {review.isMyReview && (
-                <Button
-                  variant="icon"
-                  icon={Trash2}
-                  iconSize="w-5 h-5"
-                  className="hover:text-black"
-                  onClick={() => onDelete(review.id)}
-                />
-              )}
+              <p>작성자 : {review.username}</p>
             </div>
 
-            <p>진료대상 : {review.animalType}</p>
+            <p>
+              진료동물 : {review.animalType} / {review.breed}
+            </p>
             <p>진료항목 : {review.department}</p>
             <p>재방문 의사 : {review.revisit}</p>
             <p className="mt-2 whitespace-pre-wrap leading-relaxed">
               {review.content}
             </p>
+
+            {review.isMyReview && (
+              <Button
+                variant="icon"
+                icon={Trash2}
+                iconSize="w-5 h-5"
+                className="hover:text-black absolute text-gray-6 right-5 top-[50%]"
+                onClick={() => onDelete(review.id)}
+              />
+            )}
           </div>
         ))
       ) : (
