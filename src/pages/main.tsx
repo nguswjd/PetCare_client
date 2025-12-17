@@ -36,9 +36,9 @@ function MainPage() {
 
   const ads = [
     { id: 1, image: Ad1, alt: "petcare 홍보물 1" },
-    { id: 2, image: Ad2, alt: "petcare 홍보물 2" },
-    { id: 3, image: Ad3, alt: "DS 손해보험 홍보물" },
-    { id: 4, image: Ad4, alt: "간식 구매 쿠폰 홍보물" },
+    { id: 2, image: Ad3, alt: "DS 손해보험 홍보물" },
+    { id: 3, image: Ad4, alt: "간식 구매 쿠폰 홍보물" },
+    { id: 4, image: Ad2, alt: "petcare 홍보물 2" },
     { id: 5, image: Ad5, alt: "사이테스 관련 홍보물" },
     { id: 6, image: Ad6, alt: "동물사료 홍보물" },
   ];
