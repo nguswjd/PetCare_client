@@ -6,12 +6,12 @@ import Footer from "../components/footer";
 import { getRecentHospitalsUnified } from "@/utils/recentHospitals";
 import { MapPin } from "lucide-react";
 
-import Ad1 from "@/assets/ads/ad1_petcare.png";
-import Ad2 from "@/assets/ads/ad2_cites.png";
-import Ad3 from "@/assets/ads/ad3_animalfood.jpg";
-import Ad4 from "@/assets/ads/ad1_petcare.png";
-import Ad5 from "@/assets/ads/ad2_cites.png";
-import Ad6 from "@/assets/ads/ad3_animalfood.jpg";
+import Ad1 from "@/assets/ads/ad1_petcare_1.png";
+import Ad2 from "@/assets/ads/ad2_petcare_2.png";
+import Ad3 from "@/assets/ads/ad3_DS_non-life_insurance.png";
+import Ad4 from "@/assets/ads/ad4_shop_ purchase.png";
+import Ad5 from "@/assets/ads/ad5_cites.png";
+import Ad6 from "@/assets/ads/ad6_animalfood.jpg";
 
 interface HospitalType {
   id: number;
@@ -35,12 +35,12 @@ function MainPage() {
   const [loadingReviewKing, setLoadingReviewKing] = useState(true);
 
   const ads = [
-    { id: 1, image: Ad1, alt: "petcare 홍보물" },
-    { id: 2, image: Ad2, alt: "사이테스 관련 안내문" },
-    { id: 3, image: Ad3, alt: "동물 사료 홍보물" },
-    { id: 4, image: Ad4, alt: "광고4" },
-    { id: 5, image: Ad5, alt: "광고5" },
-    { id: 6, image: Ad6, alt: "광고6" },
+    { id: 1, image: Ad1, alt: "petcare 홍보물 1" },
+    { id: 2, image: Ad2, alt: "petcare 홍보물 2" },
+    { id: 3, image: Ad3, alt: "DS 손해보험 홍보물" },
+    { id: 4, image: Ad4, alt: "간식 구매 쿠폰 홍보물" },
+    { id: 5, image: Ad5, alt: "사이테스 관련 홍보물" },
+    { id: 6, image: Ad6, alt: "동물사료 홍보물" },
   ];
 
   const closestHospital = {
