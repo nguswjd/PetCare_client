@@ -186,9 +186,9 @@ function HospitalReview() {
               {hospitalData.address.split(" ").slice(1, 3).join(" ")}
             </p>
           </div>
-          <div className="mx-6 text-xs flex flex-col gap-2 border-b border-gray-4 :pb-4 mb-2">
+          <div className="mx-6 text-xs flex flex-col gap-2 border-b border-gray-4 :pb-4 mb-2 pb-3">
             <p className="font-bold text-sm">병원 정보</p>
-            <div className="ml-2">
+            <div className="ml-2 flex flex-col gap-1">
               <p>진료 과목: {hospitalData.departments.join(", ")}</p>
               <p>진료동물: {hospitalData.breeds.join(", ")}</p>
               <p>
