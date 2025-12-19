@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import Card from "../components/ui/card";
 import Input from "../components/ui/input";
+import Button from "../components/ui/button";
 import Footer from "../components/footer";
 import { getRecentHospitalsUnified } from "@/utils/recentHospitals";
 import { MapPin } from "lucide-react";
@@ -33,6 +34,10 @@ function MainPage() {
   const [reviewKingHospital, setReviewKingHospital] =
     useState<HospitalType | null>(null);
   const [loadingReviewKing, setLoadingReviewKing] = useState(true);
+  const [recommendedHospital, setRecommendedHospital] =
+    useState<HospitalType | null>(null);
+  const [loadingRecommended, setLoadingRecommended] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const ads = [
     { id: 1, image: Ad1, alt: "petcare 홍보물 1" },
@@ -43,15 +48,10 @@ function MainPage() {
     { id: 6, image: Ad6, alt: "동물사료 홍보물" },
   ];
 
-  const closestHospital = {
-    id: 5,
-    image: "",
-    alt: "가까운 병원",
-    name: "C hospital",
-    address: "제주시 이도동",
-    businessStatus: "영업종료",
-    distance: "30km",
-  };
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
 
   useEffect(() => {
     const loadRecentHospitals = async () => {
@@ -109,6 +109,53 @@ function MainPage() {
     };
 
     loadReviewKingHospital();
+  }, []);
+
+  useEffect(() => {
+    const loadRecommendedHospital = async () => {
+      setLoadingRecommended(true);
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          setRecommendedHospital(null);
+          setLoadingRecommended(false);
+          return;
+        }
+
+        const response = await fetch("/api/v1/hospitals/recommended", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          setRecommendedHospital(null);
+          setLoadingRecommended(false);
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data) {
+          setRecommendedHospital({
+            id: data.id,
+            image: data.imageUrl || "",
+            alt: data.name,
+            name: data.name,
+            address: data.address,
+            businessStatus: data.operatingStatus,
+          });
+        }
+      } catch (e) {
+        console.error("추천 병원 조회 실패:", e);
+        setRecommendedHospital(null);
+      } finally {
+        setLoadingRecommended(false);
+      }
+    };
+
+    loadRecommendedHospital();
   }, []);
 
   const scrollToIndex = (index: number) => {
@@ -227,17 +274,34 @@ function MainPage() {
         <div className="grid px-6 mb-5 gap-3 grid-cols-2 lg:col-start-2 lg:row-start-1 lg:px-0 lg:mb-0 lg:gap-4">
           <section className="flex flex-col gap-2">
             <h2 className="text-base font-bold">추천 병원</h2>
-            <Card
-              size="lg"
-              image={closestHospital.image}
-              alt={closestHospital.alt}
-              name={closestHospital.name}
-              address={closestHospital.address}
-              businessStatus={closestHospital.businessStatus}
-              distance={closestHospital.distance}
-              onClick={() => navigate(`/hospital/${closestHospital.id}`)}
-              className="cursor-pointer w-full"
-            />
+            {loadingRecommended ? (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-gray-5">로딩중...</p>
+              </div>
+            ) : !isLoggedIn || !recommendedHospital ? (
+              <div className="flex flex-col items-center justify-center h-full gap-2 bg-gray-1 rounded-lg p-4">
+                <p className="text-gray-5 text-sm text-center">
+                  로그인 후<br />
+                  추천 병원을 확인하세요
+                </p>
+                <Button
+                  onClick={() => navigate("/login")}
+                  label="로그인 하러가기"
+                  className="text-sm bg-main-2 hover:bg-main-1 font-normal"
+                />
+              </div>
+            ) : (
+              <Card
+                size="lg"
+                image={recommendedHospital.image}
+                alt={recommendedHospital.alt}
+                name={recommendedHospital.name}
+                address={recommendedHospital.address}
+                businessStatus={recommendedHospital.businessStatus}
+                onClick={() => navigate(`/hospital/${recommendedHospital.id}`)}
+                className="cursor-pointer w-full"
+              />
+            )}
           </section>
           <section className="flex flex-col gap-2">
             <h2 className="text-base font-bold">이달의 리뷰왕</h2>
