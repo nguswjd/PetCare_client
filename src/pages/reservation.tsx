@@ -65,7 +65,6 @@ function Reservation() {
 
   const [name, setName] = useState("");
   const [animalTypes, setAnimalTypes] = useState<AnimalType[]>([]);
-  const [selectedAnimalType, setSelectedAnimalType] = useState("");
   const [selectedAnimalTypeCode, setSelectedAnimalTypeCode] = useState("");
   const [filteredBreeds, setFilteredBreeds] = useState<Breed[]>([]);
   const [selectedBreed, setSelectedBreed] = useState("");
@@ -84,8 +83,6 @@ function Reservation() {
   const [selectedWeight, setSelectedWeight] = useState("");
   const [reviewCount, setReviewCount] = useState<number>(0);
   const [breakTimes, setBreakTimes] = useState<string[]>([]);
-  const [operatingStartTime, setOperatingStartTime] = useState<string>("");
-  const [operatingEndTime, setOperatingEndTime] = useState<string>("");
 
   useEffect(() => {
     const token =
@@ -140,13 +137,9 @@ function Reservation() {
         const data = await res.json();
         setReviewCount(data.reviewCount || 0);
         setBreakTimes(data.breakTimes || []);
-        setOperatingStartTime(data.operatingStartTime || "");
-        setOperatingEndTime(data.operatingEndTime || "");
       } catch {
         setReviewCount(0);
         setBreakTimes([]);
-        setOperatingStartTime("");
-        setOperatingEndTime("");
       }
     };
 
@@ -154,22 +147,54 @@ function Reservation() {
   }, [hospitalInfo.id]);
 
   useEffect(() => {
-    if (hospitalInfo.animalTypes) {
-      const types = hospitalInfo.animalTypes.map((type) => ({
-        code: type,
-        description: type,
-      }));
-      setAnimalTypes(types);
+    const fetchAnimalTypes = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/v1/animal-types`);
+        if (!res.ok) throw new Error("");
+        const data = await res.json();
+
+        const allTypes: AnimalType[] = Array.isArray(data.types)
+          ? data.types
+          : [];
+        const filtered = allTypes.filter((type) =>
+          hospitalInfo.animalTypes.includes(type.description)
+        );
+
+        setAnimalTypes(filtered);
+      } catch {
+        setAnimalTypes([]);
+      }
+    };
+
+    if (hospitalInfo.animalTypes && hospitalInfo.animalTypes.length > 0) {
+      fetchAnimalTypes();
     }
   }, [hospitalInfo.animalTypes]);
 
   useEffect(() => {
-    if (hospitalInfo.departments) {
-      const depts = hospitalInfo.departments.map((dept) => ({
-        code: dept,
-        description: dept,
-      }));
-      setFilteredDepartments(depts);
+    const fetchDepartments = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/v1/departments`);
+
+        if (!res.ok) throw new Error("진료과 목록 불러오기 실패");
+
+        const data = await res.json();
+
+        const matchedDepartments = data.departments.filter((dept: Department) =>
+          hospitalInfo.departments.includes(dept.description)
+        );
+
+        setFilteredDepartments(matchedDepartments);
+      } catch (error) {
+        console.error(error);
+        setFilteredDepartments([]);
+      }
+    };
+
+    if (hospitalInfo.departments && hospitalInfo.departments.length > 0) {
+      fetchDepartments();
     }
   }, [hospitalInfo.departments]);
 
@@ -193,19 +218,10 @@ function Reservation() {
           ? data.breeds
           : data.breeds || [];
 
-        const filtered = arrayData.filter((breed: Breed) =>
-          hospitalInfo.breeds.includes(breed.code)
-        );
-
-        const displayBreeds = filtered.map((b) => ({
-          code: b.code,
-          description: b.code,
-        }));
-
-        setFilteredBreeds(displayBreeds);
+        setFilteredBreeds(arrayData);
 
         if (selectedBreedCode) {
-          const found = displayBreeds.find((b) => b.code === selectedBreedCode);
+          const found = arrayData.find((b) => b.code === selectedBreedCode);
           if (found) {
             setSelectedBreed(found.description);
           } else {
@@ -227,8 +243,6 @@ function Reservation() {
 
   useEffect(() => {
     if (!animalTypes.length || !selectedAnimalTypeCode) return;
-    const found = animalTypes.find((a) => a.code === selectedAnimalTypeCode);
-    if (found) setSelectedAnimalType(found.description);
   }, [animalTypes, selectedAnimalTypeCode]);
 
   useEffect(() => {
@@ -258,15 +272,19 @@ function Reservation() {
           department: selectedDepartmentCode,
         }).toString();
 
-        const res = await fetch(
-          `${API_URL}/api/v1/reservations/${hospitalInfo.id}/available-times?${queryParams}`
-        );
+        const fullUrl = `${API_URL}/api/v1/reservations/${hospitalInfo.id}/available-times?${queryParams}`;
 
-        if (!res.ok) throw new Error("");
+        const res = await fetch(fullUrl);
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(`서버 에러 (${res.status}): ${errorText}`);
+        }
 
         const data = await res.json();
+
         setAvailableServerTimes(data.availableTimes || []);
-      } catch {
+      } catch (e) {
         setAvailableServerTimes([]);
       }
     };
@@ -402,27 +420,24 @@ function Reservation() {
 
         <main className="flex-1 px-6 md:px-0 flex flex-col gap-6 mt-4 pb-24 md:pb-10 overflow-y-auto">
           <h2 className="hidden">병원 예약 폼</h2>
-
           <Input
             placeholder="예약자 명"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-
           <div className="flex gap-2">
             <SelectBox
               placeholder="종류"
               options={animalTypes.map((item) => ({
                 label: item.description,
-                value: item.description,
+                value: item.code,
               }))}
-              value={selectedAnimalType || ""}
+              value={selectedAnimalTypeCode || ""}
               onChange={(value) => {
                 const selected = animalTypes.find(
-                  (item) => item.description === value
+                  (item) => item.code === value
                 );
                 if (selected) {
-                  setSelectedAnimalType(selected.description);
                   setSelectedAnimalTypeCode(selected.code);
                   setSelectedBreed("");
                   setSelectedBreedCode("");
@@ -434,12 +449,12 @@ function Reservation() {
               placeholder="품종"
               options={filteredBreeds.map((item) => ({
                 label: item.description,
-                value: item.description,
+                value: item.code,
               }))}
-              value={selectedBreed || ""}
+              value={selectedBreedCode || ""}
               onChange={(value) => {
                 const selected = filteredBreeds.find(
-                  (item) => item.description === value
+                  (item) => item.code === value
                 );
                 if (selected) {
                   setSelectedBreed(selected.description);
@@ -449,7 +464,6 @@ function Reservation() {
               disabled={!selectedAnimalTypeCode || filteredBreeds.length === 0}
             />
           </div>
-
           <div className="flex gap-2">
             <SelectBox
               placeholder="나이"
@@ -465,17 +479,16 @@ function Reservation() {
               onChange={(value) => setSelectedWeight(value)}
             />
           </div>
-
           <SelectBox
             placeholder="진료 항목을 선택해주세요."
             options={filteredDepartments.map((item) => ({
               label: item.description,
-              value: item.description,
+              value: item.code,
             }))}
-            value={selectedDepartment}
+            value={selectedDepartmentCode || ""}
             onChange={(value) => {
               const selected = filteredDepartments.find(
-                (item) => item.description === value
+                (item) => item.code === value
               );
               if (selected) {
                 setSelectedDepartment(selected.description);
@@ -502,21 +515,11 @@ function Reservation() {
                   bt.startsWith(time)
                 );
 
-                const isBeforeOpen =
-                  !!operatingStartTime &&
-                  time < operatingStartTime.substring(0, 5);
-
-                const isAfterClose =
-                  !!operatingEndTime &&
-                  time >= operatingEndTime.substring(0, 5);
-
                 const isDisabled =
                   !selectedDate ||
                   !selectedDepartmentCode ||
-                  !isAvailable ||
                   isBreakTime ||
-                  isBeforeOpen ||
-                  isAfterClose;
+                  !isAvailable;
 
                 return (
                   <Button
