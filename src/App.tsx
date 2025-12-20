@@ -6,10 +6,10 @@ import Hospital from "./pages/hospital";
 import Review from "./pages/review";
 import Mypage from "./pages/mypage/mypage";
 import Reservation from "./pages/reservation";
-import HospitalMain from "./pages/hospital-mainpage";
+import HospitalMain from "./pages/hospital-page/hospital-main/hospital-mainpage";
 import Search from "./pages/search";
-import HospitalReview from "./pages/hospital-review";
-import HospitalReservation from "./pages/hospital-reservation";
+import HospitalReview from "./pages/hospital-page/hospital-review/hospital-review";
+import HospitalReservation from "./pages/hospital-page/hospital-reservation/hospital-reservation";
 
 function App() {
   return (

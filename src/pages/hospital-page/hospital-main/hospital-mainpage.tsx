@@ -1,57 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
+import { PencilLine, Check, ChevronLast } from "lucide-react";
 
 import Header from "@/components/header";
 import Popup from "@/components/popup";
 import Button from "@/components/ui/button";
 import Card from "@/components/ui/card";
-
 import HospitalInfo from "@/components/hospital-detail-info";
 
-import { PencilLine, Check, ChevronLast } from "lucide-react";
-
-interface HospitalData {
-  name: string;
-  address: string;
-  representativeName: string;
-  hospitalNumber: string;
-  businessRegistrationNumber: string;
-  imageUrl: string | null;
-  hasParking: boolean;
-  departments: string[];
-  animalTypes: string[];
-  breeds: string[];
-  holidays: string[];
-  operatingStartTime: string | null;
-  operatingEndTime: string | null;
-  is24Hours: boolean;
-  breakTimes: string[];
-}
-
-interface ReservationData {
-  reservationId: number;
-  reserverName: string;
-  animalType: string;
-  breed: string;
-  date: string;
-  time: string;
-  status: string;
-}
-
-interface ReviewData {
-  reviewId: number;
-  hospitalName: string;
-  username: string;
-  department: string;
-  content: string;
-  visitDate: string;
-  createdDate: string;
-  revisitIntention: boolean;
-}
+import { useHospitalAuth } from "./hooks/useHospitalAuth";
+import { useHospitalInfo } from "./hooks/useHospitalInfo";
+import { useHospitalReservations } from "./hooks/useHospitalReservations";
+import { useHospitalReviews } from "./hooks/useHospitalReviews";
 
 function HospitalMainPage() {
   const navigate = useNavigate();
-  const [showPopup, setShowPopup] = useState(false);
   const [alertPopup, setAlertPopup] = useState<{
     open: boolean;
     message: string;
@@ -59,137 +22,38 @@ function HospitalMainPage() {
     open: false,
     message: "",
   });
-  const [passwordError, setPasswordError] = useState(false);
-  const [editMode, setEditMode] = useState(false);
 
-  const [hospitalData, setHospitalData] = useState<HospitalData | null>(null);
-  const [reservations, setReservations] = useState<ReservationData[]>([]);
-  const [reviews, setReviews] = useState<ReviewData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState<any>(null);
+  const {
+    showWithdrawPopup,
+    setShowWithdrawPopup,
+    passwordError,
+    setPasswordError,
+    logout,
+    withdraw,
+  } = useHospitalAuth();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          navigate("/");
-          return;
-        }
+  const {
+    hospitalData,
+    loading,
+    editMode,
+    formData,
+    setFormData,
+    handleEdit,
+    handleSave,
+  } = useHospitalInfo();
 
-        const headers = { Authorization: `Bearer ${token}` };
-
-        const hospitalRes = await fetch("/api/v1/hospital/auth/me", {
-          headers,
-        });
-        if (!hospitalRes.ok) throw new Error("병원 정보를 불러올 수 없습니다.");
-        const hospitalData = await hospitalRes.json();
-        setHospitalData(hospitalData);
-
-        const reservationRes = await fetch(
-          "/api/v1/reservations/hospital/management",
-          { headers }
-        );
-        if (reservationRes.ok) {
-          const reservationData = await reservationRes.json();
-          setReservations(reservationData);
-        } else {
-          console.error("예약 정보를 불러오는데 실패했습니다.");
-        }
-
-        const reviewRes = await fetch("/api/v1/reviews/hospital/my", {
-          headers,
-        });
-        if (reviewRes.ok) {
-          const reviewData = await reviewRes.json();
-          setReviews(reviewData);
-        } else {
-          console.error("리뷰 정보를 불러오는데 실패했습니다.");
-        }
-      } catch (err: any) {
-        console.error(err);
-        setAlertPopup({
-          open: true,
-          message: err.message || "정보를 불러올 수 없습니다.",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [navigate]);
-
-  const pendingList = reservations
-    .filter((r) => r.status === "PENDING" || r.status === "CONFIRMED")
-    .sort((a, b) => {
-      const dateA = new Date(`${a.date}T${a.time}`).getTime();
-      const dateB = new Date(`${b.date}T${b.time}`).getTime();
-      return dateA - dateB;
-    });
+  const { pendingList } = useHospitalReservations();
+  const { reviews } = useHospitalReviews();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    setAlertPopup({ open: true, message: "로그아웃 되었습니다." });
+    const result = logout();
+    setAlertPopup({ open: true, message: result.message });
   };
 
-  const handleEdit = () => {
-    setEditMode(true);
-  };
-
-  const handleSave = async () => {
-    if (!formData) {
-      setAlertPopup({ open: true, message: "변경된 내용이 없습니다." });
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-      const form = new FormData();
-
-      if (hospitalData) {
-        form.append("representativeName", hospitalData.representativeName);
-        form.append("name", hospitalData.name);
-        form.append("hospitalNumber", hospitalData.hospitalNumber);
-        form.append("address", hospitalData.address);
-      }
-
-      form.append("hasParking", JSON.stringify(formData.hasParking));
-      form.append("departments", JSON.stringify(formData.departments));
-      form.append("animalTypes", JSON.stringify(formData.animalTypes));
-      form.append("breeds", JSON.stringify(formData.breeds));
-      form.append("holidays", JSON.stringify(formData.holidays));
-
-      if (formData.operatingStartTime)
-        form.append("operatingStartTime", formData.operatingStartTime);
-      if (formData.operatingEndTime)
-        form.append("operatingEndTime", formData.operatingEndTime);
-
-      form.append("breakTimes", JSON.stringify(formData.breakTimes));
-
-      if (formData.imageFile) {
-        form.append("imageFile", formData.imageFile);
-      }
-
-      const res = await fetch("/api/v1/hospital/auth/update-details", {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-        body: form,
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "수정 실패");
-      }
-
-      const updatedData = await res.json();
-      setHospitalData(updatedData);
-      setEditMode(false);
-    } catch (err: any) {
-      setAlertPopup({
-        open: true,
-        message: err.message || "정보 수정에 실패했습니다.",
-      });
+  const handleSaveInfo = async () => {
+    const result = await handleSave();
+    if (!result.success && result.message) {
+      setAlertPopup({ open: true, message: result.message });
     }
   };
 
@@ -311,7 +175,7 @@ function HospitalMainPage() {
                     icon={Check}
                     variant="icon"
                     iconSize="w-5 h-5"
-                    onClick={handleSave}
+                    onClick={handleSaveInfo}
                   />
                 )}
               </div>
@@ -337,7 +201,7 @@ function HospitalMainPage() {
           className="w-full md:w-22 bg-main-2"
           label="회원탈퇴"
           onClick={() => {
-            setShowPopup(true);
+            setShowWithdrawPopup(true);
             setPasswordError(false);
           }}
         />
@@ -348,52 +212,30 @@ function HospitalMainPage() {
         />
       </div>
 
-      {showPopup && (
+      {showWithdrawPopup && (
         <Popup
-          open={showPopup}
+          open={showWithdrawPopup}
           type="form"
           title="탈퇴를 진행하시겠습니까?"
           placeholder="비밀번호를 입력해주세요."
           confirmLabel="탈퇴"
           cancelLabel="취소"
           onConfirm={async (password) => {
-            if (!password) {
-              setPasswordError(true);
+            const result = await withdraw(password);
+            if (result.invalidPassword) {
               return;
             }
-            try {
-              const token = localStorage.getItem("token");
-              const res = await fetch("/api/v1/hospital/auth/withdraw", {
-                method: "DELETE",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ password }),
-              });
 
-              if (!res.ok) {
-                const errorData = await res.json();
-                if (res.status === 401 || res.status === 400) {
-                  setPasswordError(true);
-                  return;
-                }
-                throw new Error(errorData.message || "회원탈퇴 실패");
-              }
-
-              localStorage.removeItem("token");
-              setShowPopup(false);
+            if (result.success) {
+              setShowWithdrawPopup(false);
               navigate("/");
-            } catch (err: any) {
-              setShowPopup(false);
-              setAlertPopup({
-                open: true,
-                message: err.message || "회원탈퇴 실패",
-              });
+            } else if (result.message) {
+              setShowWithdrawPopup(false);
+              setAlertPopup({ open: true, message: result.message });
             }
           }}
-          onCancel={() => setShowPopup(false)}
-          onClose={() => setShowPopup(false)}
+          onCancel={() => setShowWithdrawPopup(false)}
+          onClose={() => setShowWithdrawPopup(false)}
           error={passwordError}
           errorMessage="비밀번호가 일치하지 않습니다."
         />
