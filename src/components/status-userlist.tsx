@@ -6,7 +6,9 @@ interface ReservationData {
   reserverName: string;
   userPhoneNumber: string;
   animalType: string;
+  animalTypeDescription: string;
   breed: string;
+  breedDescription: string;
   age: number;
   weight: number;
   department: string;
@@ -48,7 +50,6 @@ const StatusUserList = ({
 }: StatusUserListProps) => {
   const formattedDate = data.date.replace(/-/g, ".");
   const formattedTime = data.time.substring(0, 5);
-
   const statusLabel = statusMap[data.status] || data.status;
   const statusColor = statusColorMap[data.status] || "text-black";
 
@@ -62,12 +63,10 @@ const StatusUserList = ({
           onClick={() => onToggle(data.reservationId)}
         />
       )}
-
       <div className="text-sm flex w-full flex-col gap-1">
         <div className="flex justify-between items-center mb-1">
           <span className={`text-xs ${statusColor}`}>{statusLabel}</span>
         </div>
-
         <p>
           <span className="font-semibold">이름 :</span> {data.reserverName}
         </p>
@@ -75,12 +74,12 @@ const StatusUserList = ({
           <span className="font-semibold">번호 :</span> {data.userPhoneNumber}
         </p>
         <p>
-          <span className="font-semibold">진료대상 :</span> {data.animalType} (
-          {data.breed})
+          <span className="font-semibold">진료대상 :</span>{" "}
+          {data.animalTypeDescription} ({data.breedDescription})
         </p>
         <p>
-          <span className="font-semibold">나이 / 무게 :</span>
-          {data.age}살 / {data.weight}kg
+          <span className="font-semibold">나이 / 무게 :</span> {data.age}살 /{" "}
+          {data.weight}kg
         </p>
         <p>
           <span className="font-semibold">진료항목 :</span> {data.department}

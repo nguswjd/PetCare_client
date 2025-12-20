@@ -14,7 +14,9 @@ interface ReservationData {
   reserverName: string;
   userPhoneNumber: string;
   animalType: string;
+  animalTypeDescription: string;
   breed: string;
+  breedDescription: string;
   age: number;
   weight: number;
   department: string;
