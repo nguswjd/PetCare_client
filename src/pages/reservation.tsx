@@ -250,8 +250,6 @@ function Reservation() {
 
   useEffect(() => {
     if (!animalTypes.length || !selectedAnimalTypeCode) return;
-    const found = animalTypes.find((a) => a.code === selectedAnimalTypeCode);
-    if (found) setSelectedAnimalType(found.description);
   }, [animalTypes, selectedAnimalTypeCode]);
 
   useEffect(() => {
@@ -447,7 +445,6 @@ function Reservation() {
                   (item) => item.code === value
                 );
                 if (selected) {
-                  setSelectedAnimalType(selected.description);
                   setSelectedAnimalTypeCode(selected.code);
                   setSelectedBreed("");
                   setSelectedBreedCode("");
