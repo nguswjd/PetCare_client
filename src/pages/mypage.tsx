@@ -44,6 +44,7 @@ interface ReviewResponse {
   reviewId: number;
   hospitalId: number;
   hospitalName: string;
+  hospitalImageUrl: string;
   username?: string;
   department: string;
   content: string;
@@ -250,23 +251,6 @@ function Mypage() {
 
         const data: ReviewResponse[] = await res.json();
         setMyReviews(data);
-
-        const reviewHospitalIds = Array.from(
-          new Set(data.map((r) => r.hospitalId))
-        ) as number[];
-
-        const existingIds = Object.keys(hospitalsInfo).map(Number);
-        const newHospitalIds = reviewHospitalIds.filter(
-          (id) => !existingIds.includes(id)
-        );
-
-        if (newHospitalIds.length > 0) {
-          const newHospitalsMap = await fetchHospitalInfo(
-            newHospitalIds,
-            hospitalsInfo
-          );
-          setHospitalsInfo((prev) => ({ ...prev, ...newHospitalsMap }));
-        }
       } catch (err) {
         console.error(err);
         setMyReviews([]);
@@ -596,30 +580,20 @@ function Mypage() {
                 <p className="text-gray-5 mx-6">등록된 리뷰가 없습니다.</p>
               </div>
             ) : (
-              <div className="flex px-6  overflow-auto scrollbar-hide gap-2">
-                {myReviews.map((review) => {
-                  const matchedHospital = hospitalsInfo[review.hospitalId];
-
-                  const handleCardClick = () => {
-                    if (matchedHospital) {
-                      navigate(`/hospital/${matchedHospital.id}`);
-                    }
-                  };
-
-                  return (
-                    <Card
-                      key={review.reviewId}
-                      size="sm"
-                      image={matchedHospital ? matchedHospital.imageUrl : ""}
-                      alt={review.hospitalName}
-                      name={review.hospitalName}
-                      address={matchedHospital ? matchedHospital.address : ""}
-                      content={review.content}
-                      onClick={handleCardClick}
-                      className="cursor-pointer"
-                    />
-                  );
-                })}
+              <div className="flex px-6 overflow-auto scrollbar-hide gap-2">
+                {myReviews.map((review) => (
+                  <Card
+                    key={review.reviewId}
+                    size="sm"
+                    image={review.hospitalImageUrl}
+                    alt={review.hospitalName}
+                    name={review.hospitalName}
+                    address=""
+                    content={review.content}
+                    onClick={() => navigate(`/hospital/${review.hospitalId}`)}
+                    className="cursor-pointer"
+                  />
+                ))}
               </div>
             )}
           </section>
