@@ -65,7 +65,6 @@ function Reservation() {
 
   const [name, setName] = useState("");
   const [animalTypes, setAnimalTypes] = useState<AnimalType[]>([]);
-  const [setSelectedAnimalType] = useState("");
   const [selectedAnimalTypeCode, setSelectedAnimalTypeCode] = useState("");
   const [filteredBreeds, setFilteredBreeds] = useState<Breed[]>([]);
   const [selectedBreed, setSelectedBreed] = useState("");
@@ -84,8 +83,6 @@ function Reservation() {
   const [selectedWeight, setSelectedWeight] = useState("");
   const [reviewCount, setReviewCount] = useState<number>(0);
   const [breakTimes, setBreakTimes] = useState<string[]>([]);
-  const [operatingStartTime, setOperatingStartTime] = useState<string>("");
-  const [operatingEndTime, setOperatingEndTime] = useState<string>("");
 
   useEffect(() => {
     const token =
@@ -140,13 +137,9 @@ function Reservation() {
         const data = await res.json();
         setReviewCount(data.reviewCount || 0);
         setBreakTimes(data.breakTimes || []);
-        setOperatingStartTime(data.operatingStartTime || "");
-        setOperatingEndTime(data.operatingEndTime || "");
       } catch {
         setReviewCount(0);
         setBreakTimes([]);
-        setOperatingStartTime("");
-        setOperatingEndTime("");
       }
     };
 
