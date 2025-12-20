@@ -4,7 +4,7 @@ import SignUp from "./pages/sign-up/sign-up";
 import MainPage from "./pages/main";
 import Hospital from "./pages/hospital";
 import Review from "./pages/review";
-import Mypage from "./pages/mypage";
+import Mypage from "./pages/mypage/mypage";
 import Reservation from "./pages/reservation";
 import HospitalMain from "./pages/hospital-mainpage";
 import Search from "./pages/search";
