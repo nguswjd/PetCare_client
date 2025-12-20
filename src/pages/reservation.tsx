@@ -65,7 +65,7 @@ function Reservation() {
 
   const [name, setName] = useState("");
   const [animalTypes, setAnimalTypes] = useState<AnimalType[]>([]);
-  const [selectedAnimalType, setSelectedAnimalType] = useState("");
+  const [setSelectedAnimalType] = useState("");
   const [selectedAnimalTypeCode, setSelectedAnimalTypeCode] = useState("");
   const [filteredBreeds, setFilteredBreeds] = useState<Breed[]>([]);
   const [selectedBreed, setSelectedBreed] = useState("");
@@ -524,14 +524,6 @@ function Reservation() {
                 const isBreakTime = breakTimes.some((bt) =>
                   bt.startsWith(time)
                 );
-
-                const isBeforeOpen =
-                  !!operatingStartTime &&
-                  time < operatingStartTime.substring(0, 5);
-
-                const isAfterClose =
-                  !!operatingEndTime &&
-                  time >= operatingEndTime.substring(0, 5);
 
                 const isDisabled =
                   !selectedDate ||
