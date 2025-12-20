@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-
 import { Checkbox } from "./ui/checkbox";
 import { Radio } from "./ui/radio";
 import { MultiSelectBox } from "./ui/multi-selectbox";
@@ -17,9 +16,9 @@ interface HospitalInfoProps {
   initialData?: {
     imageUrl: string | null;
     hasParking: boolean;
-    departments: string[];
-    animalTypes: string[];
-    breeds: string[];
+    departments: any[];
+    animalTypes: any[];
+    breeds: any[];
     holidays: string[];
     operatingStartTime: string | null;
     operatingEndTime: string | null;
@@ -89,9 +88,13 @@ function HospitalInfo({
   useEffect(() => {
     if (initialData) {
       setParking(initialData.hasParking ? "yes" : "no");
-      setSelectedDepartments(initialData.departments || []);
-      setSelectedAnimalTypes(initialData.animalTypes || []);
-      setSelectedBreeds(initialData.breeds || []);
+
+      const extractCode = (item: any) => (item.code ? item.code : item);
+
+      setSelectedDepartments((initialData.departments || []).map(extractCode));
+      setSelectedAnimalTypes((initialData.animalTypes || []).map(extractCode));
+      setSelectedBreeds((initialData.breeds || []).map(extractCode));
+
       setSelectedDates((initialData.holidays || []).map((h) => new Date(h)));
       setStartTime(formatTime(initialData.operatingStartTime));
       setEndTime(formatTime(initialData.operatingEndTime));
