@@ -30,9 +30,7 @@ export const useReservations = () => {
   const [hospitalsInfo, setHospitalsInfo] = useState<{
     [key: number]: HospitalInfo;
   }>({});
-  const [animalTypeMap, setAnimalTypeMap] = useState<{ [key: string]: string }>(
-    {}
-  );
+  const [animalTypeMap] = useState<{ [key: string]: string }>({});
   const [breedMap, setBreedMap] = useState<{ [key: string]: string }>({});
   const [selectedReservation, setSelectedReservation] =
     useState<Reservation | null>(null);

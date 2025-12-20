@@ -36,7 +36,6 @@ function HospitalMainPage() {
     hospitalData,
     loading,
     editMode,
-    formData,
     setFormData,
     handleEdit,
     handleSave,
