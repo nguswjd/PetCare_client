@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useLocation } from "react-router";
 import { ArrowDownWideNarrow, ArrowUpNarrowWide } from "lucide-react";
 
@@ -7,266 +6,49 @@ import Footer from "@/components/footer";
 import Popup from "@/components/popup";
 import StatusUserList from "@/components/status-userlist";
 import Button from "@/components/ui/button";
-import { SelectBox, type SelectOption } from "@/components/ui/selectbox";
+import { SelectBox } from "@/components/ui/selectbox";
 
-interface ReservationData {
-  reservationId: number;
-  reserverName: string;
-  userPhoneNumber: string;
-  animalType: string;
-  animalTypeDescription: string;
-  breed: string;
-  breedDescription: string;
-  age: number;
-  weight: number;
-  department: string;
-  date: string;
-  time: string;
-  status: string;
-}
+import { useReservationList } from "./hooks/useReservationList";
+import { useReservationFilter } from "./hooks/useReservationFilter";
+import { useReservationActions } from "./hooks/useReservationActions";
 
 function HospitalReservation() {
   const location = useLocation();
   const { hospitalData } = location.state || {};
 
-  const [reservations, setReservations] = useState<ReservationData[]>([]);
-  const [pendingSortOrder, setPendingSortOrder] = useState<"asc" | "desc">(
-    "desc"
+  const {
+    reservations,
+    selectedIds,
+    handleToggleSelect,
+    executeCompleteReservations,
+    executeCancelReservations,
+  } = useReservationList();
+
+  const {
+    pendingSortOrder,
+    selectedYear,
+    selectedMonth,
+    yearOptions,
+    monthOptions,
+    pendingList,
+    cancelledList,
+    visitedList,
+    handleYearChange,
+    setSelectedMonth,
+    toggleSortOrder,
+    resetFilters,
+  } = useReservationFilter(reservations);
+
+  const {
+    popupState,
+    closePopup,
+    handleCompleteReservations,
+    handleCancelReservations,
+  } = useReservationActions(
+    selectedIds,
+    executeCompleteReservations,
+    executeCancelReservations
   );
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [selectedYear, setSelectedYear] = useState<string>("all");
-  const [selectedMonth, setSelectedMonth] = useState<string>("all");
-
-  const [popupState, setPopupState] = useState({
-    open: false,
-    type: "alert" as "alert" | "confirm",
-    title: "",
-    content: "",
-    onConfirm: () => {},
-  });
-
-  const closePopup = () => {
-    setPopupState((prev) => ({ ...prev, open: false }));
-  };
-
-  const fetchReservations = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("/api/v1/reservations/hospital/management", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setReservations(data);
-      } else {
-        console.error("Failed to fetch reservations");
-      }
-    } catch (error) {
-      console.error("Error fetching reservations:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchReservations();
-  }, []);
-
-  const executeCompleteReservations = async () => {
-    try {
-      const token = localStorage.getItem("token");
-
-      await Promise.all(
-        selectedIds.map((id) =>
-          fetch(`/api/v1/reservations/${id}/complete`, {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          })
-        )
-      );
-
-      alert("진료 완료 처리되었습니다.");
-      setSelectedIds([]);
-      fetchReservations();
-    } catch (error) {
-      console.error("Error completing reservations:", error);
-      alert("처리 중 오류가 발생했습니다.");
-    }
-  };
-
-  const executeCancelReservations = async () => {
-    try {
-      const token = localStorage.getItem("token");
-
-      await Promise.all(
-        selectedIds.map((id) =>
-          fetch(`/api/v1/reservations/hospital/${id}/cancel`, {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          })
-        )
-      );
-
-      alert("예약이 취소되었습니다.");
-      setSelectedIds([]);
-      fetchReservations();
-    } catch (error) {
-      console.error("Error cancelling reservations:", error);
-      alert("처리 중 오류가 발생했습니다.");
-    }
-  };
-
-  const handleCompleteReservations = () => {
-    if (selectedIds.length === 0) {
-      setPopupState({
-        open: true,
-        type: "alert",
-        title: "진료완료할 예약을 선택해주세요.",
-        content: "",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
-    setPopupState({
-      open: true,
-      type: "confirm",
-      title: `${selectedIds.length}건을 진료 완료 처리하시겠습니까?`,
-      content: "",
-      onConfirm: executeCompleteReservations,
-    });
-  };
-
-  const handleCancelReservations = () => {
-    if (selectedIds.length === 0) {
-      setPopupState({
-        open: true,
-        type: "alert",
-        title: "취소할 예약을 선택해주세요.",
-        content: "",
-        onConfirm: () => {},
-      });
-      return;
-    }
-
-    setPopupState({
-      open: true,
-      type: "confirm",
-      title: `${selectedIds.length}건의 예약을 취소하시겠습니까?`,
-      content: "",
-      onConfirm: executeCancelReservations,
-    });
-  };
-
-  const getYearOptions = (): SelectOption[] => {
-    const years = reservations.map(
-      (reservation) => reservation.date.split("-")[0]
-    );
-    const uniqueYears = Array.from(new Set(years)).sort(
-      (a, b) => Number(b) - Number(a)
-    );
-
-    return [
-      { value: "all", label: "전체 년도" },
-      ...uniqueYears.map((year) => ({ value: year, label: `${year}년` })),
-    ];
-  };
-
-  const getMonthOptions = (): SelectOption[] => {
-    if (selectedYear === "all") {
-      return [{ value: "all", label: "전체 월" }];
-    }
-
-    const months = reservations
-      .filter((reservation) => reservation.date.startsWith(selectedYear))
-      .map((reservation) => reservation.date.split("-")[1]);
-
-    const uniqueMonths = Array.from(new Set(months)).sort(
-      (a, b) => Number(a) - Number(b)
-    );
-
-    return [
-      { value: "all", label: "전체 월" },
-      ...uniqueMonths.map((month) => ({ value: month, label: `${month}월` })),
-    ];
-  };
-
-  const filterReservationsByDate = (list: ReservationData[]) => {
-    let filtered = [...list];
-
-    if (selectedYear !== "all") {
-      filtered = filtered.filter((reservation) =>
-        reservation.date.startsWith(selectedYear)
-      );
-    }
-
-    if (selectedMonth !== "all") {
-      filtered = filtered.filter((reservation) => {
-        const [year, month] = reservation.date.split("-");
-        return year === selectedYear && month === selectedMonth;
-      });
-    }
-
-    return filtered;
-  };
-
-  const sortReservations = (list: ReservationData[], order: "asc" | "desc") => {
-    return [...list].sort((a, b) => {
-      const dateA = new Date(`${a.date}T${a.time}`).getTime();
-      const dateB = new Date(`${b.date}T${b.time}`).getTime();
-      return order === "desc" ? dateB - dateA : dateA - dateB;
-    });
-  };
-
-  const handleYearChange = (year: string) => {
-    setSelectedYear(year);
-    setSelectedMonth("all");
-  };
-
-  const filteredReservations = filterReservationsByDate(reservations);
-
-  const pendingList = sortReservations(
-    filteredReservations.filter(
-      (r) => r.status === "PENDING" || r.status === "CONFIRMED"
-    ),
-    pendingSortOrder
-  );
-
-  const cancelledList = sortReservations(
-    filteredReservations.filter(
-      (r) => r.status === "CANCELLED" || r.status === "NO_SHOW"
-    ),
-    "desc"
-  );
-
-  const visitedList = sortReservations(
-    filteredReservations.filter(
-      (r) => r.status === "VISITED" || r.status === "COMPLETED"
-    ),
-    "desc"
-  );
-
-  const handleToggleSelect = (id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-
-  const toggleSortOrder = () => {
-    setPendingSortOrder((prev) => (prev === "desc" ? "asc" : "desc"));
-  };
-
-  const yearOptions = getYearOptions();
-  const monthOptions = getMonthOptions();
 
   return (
     <div className="h-dvh flex flex-col">
@@ -303,10 +85,7 @@ function HospitalReservation() {
 
         {(selectedYear !== "all" || selectedMonth !== "all") && (
           <button
-            onClick={() => {
-              setSelectedYear("all");
-              setSelectedMonth("all");
-            }}
+            onClick={resetFilters}
             className="text-xs text-gray-6 hover:text-black underline"
           >
             초기화
