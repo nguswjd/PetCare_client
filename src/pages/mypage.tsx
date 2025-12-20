@@ -589,14 +589,14 @@ function Mypage() {
             )}
           </section>
 
-          <section className="flex flex-col gap-3 mx-6 lg:mx-0 flex-1">
-            <h3 className="font-bold">나의 리뷰</h3>
+          <section className="flex flex-col gap-3 lg:mx-0 flex-1">
+            <h3 className="font-bold mx-6">나의 리뷰</h3>
             {myReviews.length === 0 ? (
               <div className="w-full h-31 flex items-center justify-center">
-                <p className="text-gray-5">등록된 리뷰가 없습니다.</p>
+                <p className="text-gray-5 mx-6">등록된 리뷰가 없습니다.</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex px-6  overflow-auto scrollbar-hide gap-2">
                 {myReviews.map((review) => {
                   const matchedHospital = hospitalsInfo[review.hospitalId];
 
