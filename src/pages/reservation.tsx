@@ -154,12 +154,28 @@ function Reservation() {
   }, [hospitalInfo.id]);
 
   useEffect(() => {
-    if (hospitalInfo.animalTypes) {
-      const types = hospitalInfo.animalTypes.map((type) => ({
-        code: type,
-        description: type,
-      }));
-      setAnimalTypes(types);
+    const fetchAnimalTypes = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/v1/animal-types`);
+        if (!res.ok) throw new Error("");
+        const data = await res.json();
+
+        const allTypes: AnimalType[] = Array.isArray(data.types)
+          ? data.types
+          : [];
+        const filtered = allTypes.filter((type) =>
+          hospitalInfo.animalTypes.includes(type.description)
+        );
+
+        setAnimalTypes(filtered);
+      } catch {
+        setAnimalTypes([]);
+      }
+    };
+
+    if (hospitalInfo.animalTypes && hospitalInfo.animalTypes.length > 0) {
+      fetchAnimalTypes();
     }
   }, [hospitalInfo.animalTypes]);
 
@@ -193,19 +209,10 @@ function Reservation() {
           ? data.breeds
           : data.breeds || [];
 
-        const filtered = arrayData.filter((breed: Breed) =>
-          hospitalInfo.breeds.includes(breed.code)
-        );
-
-        const displayBreeds = filtered.map((b) => ({
-          code: b.code,
-          description: b.code,
-        }));
-
-        setFilteredBreeds(displayBreeds);
+        setFilteredBreeds(arrayData);
 
         if (selectedBreedCode) {
-          const found = displayBreeds.find((b) => b.code === selectedBreedCode);
+          const found = arrayData.find((b) => b.code === selectedBreedCode);
           if (found) {
             setSelectedBreed(found.description);
           } else {
@@ -414,12 +421,12 @@ function Reservation() {
               placeholder="종류"
               options={animalTypes.map((item) => ({
                 label: item.description,
-                value: item.description,
+                value: item.code,
               }))}
-              value={selectedAnimalType || ""}
+              value={selectedAnimalTypeCode || ""}
               onChange={(value) => {
                 const selected = animalTypes.find(
-                  (item) => item.description === value
+                  (item) => item.code === value
                 );
                 if (selected) {
                   setSelectedAnimalType(selected.description);
@@ -434,12 +441,12 @@ function Reservation() {
               placeholder="품종"
               options={filteredBreeds.map((item) => ({
                 label: item.description,
-                value: item.description,
+                value: item.code,
               }))}
-              value={selectedBreed || ""}
+              value={selectedBreedCode || ""}
               onChange={(value) => {
                 const selected = filteredBreeds.find(
-                  (item) => item.description === value
+                  (item) => item.code === value
                 );
                 if (selected) {
                   setSelectedBreed(selected.description);
