@@ -180,12 +180,28 @@ function Reservation() {
   }, [hospitalInfo.animalTypes]);
 
   useEffect(() => {
-    if (hospitalInfo.departments) {
-      const depts = hospitalInfo.departments.map((dept) => ({
-        code: dept,
-        description: dept,
-      }));
-      setFilteredDepartments(depts);
+    const fetchDepartments = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/v1/departments`);
+
+        if (!res.ok) throw new Error("진료과 목록 불러오기 실패");
+
+        const data = await res.json();
+
+        const matchedDepartments = data.departments.filter((dept: Department) =>
+          hospitalInfo.departments.includes(dept.description)
+        );
+
+        setFilteredDepartments(matchedDepartments);
+      } catch (error) {
+        console.error(error);
+        setFilteredDepartments([]);
+      }
+    };
+
+    if (hospitalInfo.departments && hospitalInfo.departments.length > 0) {
+      fetchDepartments();
     }
   }, [hospitalInfo.departments]);
 
@@ -265,15 +281,19 @@ function Reservation() {
           department: selectedDepartmentCode,
         }).toString();
 
-        const res = await fetch(
-          `${API_URL}/api/v1/reservations/${hospitalInfo.id}/available-times?${queryParams}`
-        );
+        const fullUrl = `${API_URL}/api/v1/reservations/${hospitalInfo.id}/available-times?${queryParams}`;
 
-        if (!res.ok) throw new Error("");
+        const res = await fetch(fullUrl);
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(`서버 에러 (${res.status}): ${errorText}`);
+        }
 
         const data = await res.json();
+
         setAvailableServerTimes(data.availableTimes || []);
-      } catch {
+      } catch (e) {
         setAvailableServerTimes([]);
       }
     };
@@ -409,13 +429,11 @@ function Reservation() {
 
         <main className="flex-1 px-6 md:px-0 flex flex-col gap-6 mt-4 pb-24 md:pb-10 overflow-y-auto">
           <h2 className="hidden">병원 예약 폼</h2>
-
           <Input
             placeholder="예약자 명"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-
           <div className="flex gap-2">
             <SelectBox
               placeholder="종류"
@@ -456,7 +474,6 @@ function Reservation() {
               disabled={!selectedAnimalTypeCode || filteredBreeds.length === 0}
             />
           </div>
-
           <div className="flex gap-2">
             <SelectBox
               placeholder="나이"
@@ -472,17 +489,16 @@ function Reservation() {
               onChange={(value) => setSelectedWeight(value)}
             />
           </div>
-
           <SelectBox
             placeholder="진료 항목을 선택해주세요."
             options={filteredDepartments.map((item) => ({
               label: item.description,
-              value: item.description,
+              value: item.code,
             }))}
-            value={selectedDepartment}
+            value={selectedDepartmentCode || ""}
             onChange={(value) => {
               const selected = filteredDepartments.find(
-                (item) => item.description === value
+                (item) => item.code === value
               );
               if (selected) {
                 setSelectedDepartment(selected.description);
@@ -520,10 +536,8 @@ function Reservation() {
                 const isDisabled =
                   !selectedDate ||
                   !selectedDepartmentCode ||
-                  !isAvailable ||
                   isBreakTime ||
-                  isBeforeOpen ||
-                  isAfterClose;
+                  !isAvailable;
 
                 return (
                   <Button
