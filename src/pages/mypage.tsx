@@ -13,6 +13,7 @@ import { SelectBox } from "@/components/ui/selectbox";
 import type { SelectOption } from "@/components/ui/selectbox";
 
 import { PencilLine, CheckLine } from "lucide-react";
+import Footer from "@/components/footer";
 
 interface Reservation {
   id: number;
@@ -807,15 +808,7 @@ function Mypage() {
         />
       )}
 
-      <footer className="flex mb-4 justify-between px-6 py-2 border-y border-gray-3">
-        <div className="flex flex-col">
-          <p className="font-semibold text-base">PET CARE 문의하기</p>
-          <a href="mailto:nguswjd02@ajou.ac.kr" className="text-gray-6 text-xs">
-            nguswjd02@ajou.ac.kr
-          </a>
-        </div>
-        <img src="/PetCare_logo.svg" className="w-10 h-10" alt="petcare 로고" />
-      </footer>
+      <Footer variant="hospital" className="mb-6" />
     </div>
   );
 }

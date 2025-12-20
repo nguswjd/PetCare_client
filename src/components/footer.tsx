@@ -28,7 +28,7 @@ function Footer({ className, variant = "default" }: FooterProps) {
     return (
       <footer
         className={cn(
-          "flex mb-4 justify-between px-6 py-2 border-y border-gray-3 [display-mode:standalone]:pb-4",
+          "flex mb-4 justify-between px-6 py-2 border-y border-gray-3",
           className
         )}
       >
@@ -46,7 +46,7 @@ function Footer({ className, variant = "default" }: FooterProps) {
   return (
     <footer
       className={cn(
-        "bg-main-1 px-8 py-4 flex w-full items-center justify-between [display-mode:standalone]:pb-4",
+        "bg-main-1 px-8 py-4 flex w-full items-center justify-between pb-6",
         className
       )}
     >
