@@ -1,0 +1,18 @@
+{
+  "name": "PetCare - 동물병원 플랫폼",
+  "short_name": "PetCare",
+  "description": "반려동물을 위한 동물병원 웹 앱 플랫폼",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#203f63",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/PetCare_logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
