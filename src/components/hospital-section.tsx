@@ -90,15 +90,12 @@ function HospitalInfoSection({
           {isOpen && (
             <div className="mt-4 text-xs flex flex-col gap-3 text-black">
               {hospitalNumber && (
-                <p>
-                  📞 :{" "}
-                  <a
-                    href={`tel:${hospitalNumber}`}
-                    className="text-blue-600 underline hover:text-blue-800"
-                  >
-                    {hospitalNumber}
-                  </a>
-                </p>
+                <a
+                  href={`tel:${hospitalNumber}`}
+                  className="hover:text-main-1 hover:font-bold cursor-pointer"
+                >
+                  📞 : {hospitalNumber}
+                </a>
               )}
               <p>진료과목 : {departments.join(", ")}</p>
               <p>진료동물 : {breeds.join(", ")}</p>
