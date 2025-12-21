@@ -274,7 +274,7 @@ function HospitalInfo({
 
   return (
     <div className="w-full flex flex-col gap-4">
-      <div className="w-full flex flex-col lg:flex-row lg:gap-6">
+      <div className="w-full flex flex-col lg:flex-row lg:gap-6 gap-4">
         <div className="flex flex-col gap-4 lg:flex-1">
           {showBasicFields && basicFieldsData && (
             <div className="flex flex-col gap-2">
@@ -326,7 +326,7 @@ function HospitalInfo({
             )}
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <Label children="주차장 여부" />
             <Radio
               value={Parking}
@@ -410,7 +410,7 @@ function HospitalInfo({
             </div>
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <Label children="운영시간" className="required" />
             <div className="flex gap-2">
               <SelectBox
@@ -453,7 +453,7 @@ function HospitalInfo({
             </div>
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <Label children="휴무일 등록" />
             <Calendar selectedDates={selectedDates} onSelectDate={toggleDate} />
           </div>

@@ -193,6 +193,16 @@ function SignUp() {
 
   const isWideLayout = !signupForm.isUser && step === 3;
 
+  const isHospitalInfoValid =
+    !signupForm.isUser &&
+    signupForm.imageFile !== null &&
+    signupForm.form.departments &&
+    signupForm.form.departments !== "[]" &&
+    signupForm.form.animalTypes &&
+    signupForm.form.animalTypes !== "[]" &&
+    signupForm.form.operatingStartTime &&
+    signupForm.form.operatingEndTime;
+
   return (
     <div
       className={`bg-white mx-auto flex flex-col h-dvh transition-all duration-300 ${
@@ -238,6 +248,7 @@ function SignUp() {
             <Button
               className="w-full"
               label="병원 등록 요청하기"
+              disabled={!isHospitalInfoValid}
               onClick={handleSignup}
             />
           )}
