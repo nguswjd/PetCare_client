@@ -52,6 +52,7 @@ function Mypage() {
 
   const [showCancelPopup, setShowCancelPopup] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showWithdrawComplete, setShowWithdrawComplete] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [alertPopup, setAlertPopup] = useState<{
     open: boolean;
@@ -306,7 +307,7 @@ function Mypage() {
 
             if (result.success) {
               setShowPopup(false);
-              navigate("/");
+              setShowWithdrawComplete(true);
             } else if (result.message) {
               setShowPopup(false);
               setAlertPopup({ open: true, message: result.message });
@@ -317,6 +318,20 @@ function Mypage() {
           error={passwordError}
           errorMessage="비밀번호가 일치하지 않습니다."
         />
+      )}
+
+      {showWithdrawComplete && (
+        <Popup
+          type="alert"
+          open={showWithdrawComplete}
+          title="회원탈퇴가 완료되었습니다."
+          onClose={() => {
+            setShowWithdrawComplete(false);
+            navigate("/");
+          }}
+        >
+          감사합니다.
+        </Popup>
       )}
 
       <Popup
