@@ -84,8 +84,17 @@ function Search() {
         query.append(key, value);
     });
 
+    // 토큰 가져오기 (로그인된 사용자만 검색 기록 서버에 저장)
+    const token = localStorage.getItem("token");
+
+    const headers: HeadersInit = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     const res = await fetch(
-      `${BASE_URL}/api/v1/hospitals/search?${query.toString()}`
+      `${BASE_URL}/api/v1/hospitals/search?${query.toString()}`,
+      { headers }
     );
     if (!res.ok) throw new Error("검색 실패");
     return res.json();

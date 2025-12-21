@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router";
 import LoadingPage from "../components/loading";
 import ErrorPage from "@/components/error";
@@ -61,6 +61,7 @@ interface ActiveReservation {
 function Hospital() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const viewHistoryRef = useRef<number | null>(null);
 
   const [hospitalInfo, setHospitalInfo] = useState<HospitalInfo | null>(null);
   const [reviews, setReviews] = useState<ReviewType[]>([]);
@@ -119,13 +120,17 @@ function Hospital() {
 
         setHospitalInfo(hospital);
         setReviewCount(hospitalData.reviewCount || 0);
-        addRecentHospitalUnified({
-          id: hospital.id,
-          name: hospital.name,
-          address: hospital.address,
-          imageUrl: hospital.image,
-          operatingStatus: hospital.operatingStatus,
-        }).catch(() => {});
+
+        if (viewHistoryRef.current !== hospital.id) {
+          viewHistoryRef.current = hospital.id;
+          addRecentHospitalUnified({
+            id: hospital.id,
+            name: hospital.name,
+            address: hospital.address,
+            imageUrl: hospital.image,
+            operatingStatus: hospital.operatingStatus,
+          }).catch(() => {});
+        }
       } catch (err) {
         console.error("Hospital info error:", err);
         setError(true);
