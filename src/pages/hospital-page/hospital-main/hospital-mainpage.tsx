@@ -23,6 +23,8 @@ function HospitalMainPage() {
     message: "",
   });
 
+  const [showWithdrawComplete, setShowWithdrawComplete] = useState(false);
+
   const {
     showWithdrawPopup,
     setShowWithdrawPopup,
@@ -227,7 +229,7 @@ function HospitalMainPage() {
 
             if (result.success) {
               setShowWithdrawPopup(false);
-              navigate("/");
+              setShowWithdrawComplete(true);
             } else if (result.message) {
               setShowWithdrawPopup(false);
               setAlertPopup({ open: true, message: result.message });
@@ -238,6 +240,20 @@ function HospitalMainPage() {
           error={passwordError}
           errorMessage="비밀번호가 일치하지 않습니다."
         />
+      )}
+
+      {showWithdrawComplete && (
+        <Popup
+          type="alert"
+          open={showWithdrawComplete}
+          title="회원탈퇴가 완료되었습니다."
+          onClose={() => {
+            setShowWithdrawComplete(false);
+            navigate("/");
+          }}
+        >
+          감사합니다.
+        </Popup>
       )}
 
       {alertPopup.open && (
