@@ -69,15 +69,29 @@ const Card = ({
         content ||
         businessStatus ||
         distance) && (
-        <div className="flex flex-col gap-0.5 w-42">
+        <div
+          className={cn(
+            "flex flex-col gap-0.5",
+            size === "lg" ? "w-full" : "w-42"
+          )}
+        >
           <div
             className={cn(
               "grid items-center",
-              animalType ? "grid-cols-[1fr_auto]" : "grid-cols-2"
+              animalType
+                ? "grid-cols-[1fr_auto]"
+                : size === "lg"
+                ? "grid-cols-[auto_1fr]"
+                : "grid-cols-2"
             )}
           >
             {name && (
-              <p className="text-md w-20 truncate font-semibold text-black">
+              <p
+                className={cn(
+                  "text-md font-semibold text-black mr-2",
+                  size === "lg" ? "w-auto" : "w-20 truncate"
+                )}
+              >
                 {name}
               </p>
             )}
