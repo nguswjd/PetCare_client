@@ -20,6 +20,7 @@ interface HospitalInfo {
   alt: string;
   distance?: string;
   hasParking: boolean;
+  hospitalNumber?: string;
   animalTypes: string[];
   departments: string[];
   breeds: string[];
@@ -109,6 +110,7 @@ function Hospital() {
           image: hospitalData.imageUrl,
           alt: hospitalData.description,
           hasParking: hospitalData.hasParking,
+          hospitalNumber: hospitalData.hospitalNumber,
           animalTypes: hospitalData.animalTypes || [],
           departments: hospitalData.departments || [],
           breeds: hospitalData.breeds || [],
@@ -342,6 +344,7 @@ function Hospital() {
               breeds={hospitalInfo.breeds}
               reviewCount={reviewCount}
               departments={hospitalInfo.departments}
+              hospitalNumber={hospitalInfo.hospitalNumber}
               showButton={true}
               buttonLabel={activeReservation ? "예약취소" : "예약하기"}
               onButtonClick={

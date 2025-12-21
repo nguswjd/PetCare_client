@@ -18,6 +18,7 @@ interface HospitalInfo {
   alt: string;
   distance?: string;
   hasParking: boolean;
+  hospitalNumber?: string;
   animalTypes: string[];
   departments: string[];
   breeds: string[];
@@ -414,6 +415,7 @@ function Reservation() {
               breeds={hospitalInfo.breeds}
               reviewCount={reviewCount}
               departments={hospitalInfo.departments}
+              hospitalNumber={hospitalInfo.hospitalNumber}
             />
           </div>
         </section>
